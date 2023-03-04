@@ -8,7 +8,7 @@ def main(argv):
     parser = MyGrammarParser(stream)
     syntaxTree = parser.prog()
     ast = AST(syntaxTree)
-    ast.print_dot()
+    ast.printInDot()
  
 if __name__ == '__main__':
     main("test.txt")
