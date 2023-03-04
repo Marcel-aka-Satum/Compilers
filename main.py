@@ -1,16 +1,14 @@
-import sys
-from antlr4 import *
 from MyGrammarLexer import MyGrammarLexer
-from MyGrammarParser import MyGrammarParser
-import AST
+from AST import *
  
 def main(argv):
-    input_stream = FileStream("test.txt")
+    input_stream = FileStream(argv)
     lexer = MyGrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = MyGrammarParser(stream)
-    tree = parser.prog()
-    ast = AST(tree)
+    syntaxTree = parser.prog()
+    ast = AST(syntaxTree)
+    ast.print_dot()
  
 if __name__ == '__main__':
-    main(sys.argv)
+    main("test.txt")
