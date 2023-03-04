@@ -4,12 +4,12 @@ prog: expr;
 
 expr: opAnd ';' | opAnd ';' expr;
 
-opAnd: opAnd '&&' opOr | opOr;
+opAnd: opAnd '&&' r=opOr | opOr;
 
-opOr: opOr '||' opCompare | opCompare;
+opOr: opOr '||' r=opCompare | opCompare;
 
 opCompare: opCompare '==' opAddOrSub | opCompare '<=' opAddOrSub | opCompare '>=' opAddOrSub
-	 | opCompare '!=' opAddOrSub | opCompare '<' opAddOrSub | opCompare '>' | opAddOrSub;
+	 | opCompare '!=' opAddOrSub | opCompare '<' opAddOrSub | opCompare '>' | opAddOrSub | opAddOrSub;
 
 opAddOrSub: opAddOrSub '+' opMultOrDiv | opAddOrSub '-' opMultOrDiv | opMultOrDiv;
 
@@ -20,6 +20,7 @@ opUnary: '+' brackets | '-' brackets | '!' brackets | brackets;
 brackets: '(' opAnd ')' | int;
 
 int: INT;
+
 
 
 INT: [0-9]+;

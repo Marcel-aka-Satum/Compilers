@@ -1,6 +1,7 @@
 from MyGrammarLexer import MyGrammarLexer
 from AST import *
- 
+
+
 def main(argv):
     input_stream = FileStream(argv)
     lexer = MyGrammarLexer(input_stream)
@@ -9,6 +10,7 @@ def main(argv):
     syntaxTree = parser.prog()
     ast = AST(syntaxTree)
     ast.printInDot()
- 
+
+
 if __name__ == '__main__':
     main("test.txt")

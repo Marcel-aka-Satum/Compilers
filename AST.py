@@ -41,4 +41,3 @@ class AST:
         graph = "graph ast { \n" + self.addNodes() + self.addConnections() + "}"
         file = open("ast.dot", "w")
         file.write(graph)
-
