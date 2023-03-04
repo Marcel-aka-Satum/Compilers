@@ -4,10 +4,10 @@ from MyGrammarParser import MyGrammarParser
 class Node:
     def __init__(self, syntaxTree):
         if syntaxTree.getChildCount() > 0:
-            self.ruleNames = MyGrammarParser.ruleNames[syntaxTree.getRuleIndex()]
-        else: self.ruleNames = syntaxTree.getText()
+            self.ruleName = MyGrammarParser.ruleNames[syntaxTree.getRuleIndex()]
+        else: self.ruleName = syntaxTree.getText()
 
-    def getRuleNames(self): return str(self.ruleNames)
+    def getRuleName(self): return str(self.ruleName)
 
 class AST:
     def __init__(self, syntaxTree):
@@ -25,7 +25,7 @@ class AST:
 
     def addNodes(self):
         string = str(self)
-        string += '[label="{}"] \n'.format(self.node.getRuleNames())
+        string += '[label="{}"] \n'.format(self.node.getRuleName())
         for child in self.children:
             string += child.addNodes()
         return string
