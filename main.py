@@ -9,6 +9,8 @@ def main(argv):
     parser = MyGrammarParser(stream)
     syntaxTree = parser.prog()
     ast = AST(syntaxTree)
+    ast.optimize()
+    ast.constantFolding()
     ast.printInDot()
 
 

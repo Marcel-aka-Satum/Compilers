@@ -98,5 +98,14 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#float.
+    def enterFloat(self, ctx:MyGrammarParser.FloatContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#float.
+    def exitFloat(self, ctx:MyGrammarParser.FloatContext):
+        pass
+
+
 
 del MyGrammarParser
