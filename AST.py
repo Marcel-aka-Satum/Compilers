@@ -46,33 +46,24 @@ class AST:
         if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr":
             for i in self.children:
                 i.optimize()
-        elif self.node.getRuleName() == "opUnary" and len(self.children) == 2:
-            self.children[1].optimize()
-
         elif len(self.children) == 1:
             found = False
             temp = self
             while not found:
                 temp = temp.children[0]
-                if len(temp.children) == 3:
+                if len(temp.children) >= 2:
                     temp.parent = self.parent
                     index = self.parent.children.index(self)
                     self.parent.children[index] = temp
                     for i in temp.children:
                         i.optimize()
                     found = True
-                elif temp.node.getRuleName() == "opUnary" and len(temp.children) == 2:
-                    temp.parent = self.parent
+                elif len(temp.children) == 0:
+                    temp.parent.parent = self.parent
                     index = self.parent.children.index(self)
-                    self.parent.children[index] = temp
-                    temp.children[1].optimize()
+                    self.parent.children[index] = temp.parent
                     found = True
-                elif temp.node.getRuleName() == "int" or temp.node.getRuleName() == "float":
-                    temp.parent = self.parent
-                    index = self.parent.children.index(self)
-                    self.parent.children[index] = temp
-                    found = True
-        elif len(self.children) == 3:
+        elif len(self.children) >= 2:
             for i in self.children:
                 i.optimize()
 
@@ -81,103 +72,100 @@ class AST:
 
 
     def constantFolding(self):
-        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr":
-            for i in self.children:
-                i.constantFolding()
-        elif self.node.getRuleName() == "opAddOrSub":
-            if self.children[0].node.getRuleName() == "int" or self.children[0].node.getRuleName() == "float":
-                try:
-                    leftValue = int(self.children[0].children[0].node.getRuleName())
-                except ValueError:
-                    leftValue = float(self.children[0].children[0].node.getRuleName())
+        if self.node.getRuleName() == "opAddOrSub" or self.node.getRuleName() == "opMultOrDiv":
+            leftValue = self.children[0]
+            rightValue = self.children[2]
+            possible = True
+            if leftValue.node.getRuleName() == "int":
+                leftValue = int(leftValue.children[0].node.getRuleName())
+            elif leftValue.node.getRuleName() == "float":
+                leftValue = float(leftValue.children[0].node.getRuleName())
+            elif leftValue.node.getRuleName() == "char" or leftValue.node.getRuleName() == "nameIdentifier":
+                possible = False
             else:
-                self.children[0].constantFolding()
-                try:
-                    leftValue = int(self.children[0].children[0].node.getRuleName())
-                except ValueError:
-                    leftValue = float(self.children[0].children[0].node.getRuleName())
+                leftValue.constantFolding()
+                if len(leftValue.children) == 1:
+                    try:
+                        leftValue = int(leftValue.children[0].node.getRuleName())
+                    except ValueError:
+                        leftValue = float(leftValue.children[0].node.getRuleName())
+                else:
+                    possible = False
 
-            if self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float":
-                try:
-                    rightValue = int(self.children[2].children[0].node.getRuleName())
-                except ValueError:
-                    rightValue = float(self.children[2].children[0].node.getRuleName())
+            if rightValue.node.getRuleName() == "int":
+                rightValue = int(rightValue.children[0].node.getRuleName())
+            elif rightValue.node.getRuleName() == "float":
+                rightValue = float(rightValue.children[0].node.getRuleName())
+            elif rightValue.node.getRuleName() == "char" or rightValue.node.getRuleName() == "nameIdentifier":
+                possible = False
             else:
-                self.children[2].constantFolding()
-                try:
-                    rightValue = int(self.children[2].children[0].node.getRuleName())
-                except ValueError:
-                    rightValue = float(self.children[2].children[0].node.getRuleName())
+                rightValue.constantFolding()
+                if len(rightValue.children) == 1:
+                    try:
+                        rightValue = int(rightValue.children[0].node.getRuleName())
+                    except ValueError:
+                        rightValue = float(rightValue.children[0].node.getRuleName())
+                else:
+                    possible = False
 
-            if self.children[1].node.getRuleName() == "+":
-                value = leftValue + rightValue
-            else:
-                value = leftValue - rightValue
-            self.children[0].node.ruleName = value
-            self.children[0].children.clear()
-            self.children.pop()
-            self.children.pop()
-
-        elif self.node.getRuleName() == "opMultOrDiv":
-            if self.children[0].node.getRuleName() == "int" or self.children[0].node.getRuleName() == "float":
-                try:
-                    leftValue = int(self.children[0].children[0].node.getRuleName())
-                except ValueError:
-                    leftValue = float(self.children[0].children[0].node.getRuleName())
-            else:
-                self.children[0].constantFolding()
-                try:
-                    leftValue = int(self.children[0].children[0].node.getRuleName())
-                except ValueError:
-                    leftValue = float(self.children[0].children[0].node.getRuleName())
-
-            if self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float":
-                try:
-                    rightValue = int(self.children[2].children[0].node.getRuleName())
-                except ValueError:
-                    rightValue = float(self.children[2].children[0].node.getRuleName())
-            else:
-                self.children[2].constantFolding()
-                try:
-                    rightValue = int(self.children[2].children[0].node.getRuleName())
-                except ValueError:
-                    rightValue = float(self.children[2].children[0].node.getRuleName())
-
-            if self.children[1].node.getRuleName() == "*":
-                value = leftValue * rightValue
-            elif self.children[1].node.getRuleName() == "/":
-                value = leftValue / rightValue
-            else:
-                value = leftValue % rightValue
-            self.children[0].node.ruleName = value
-            self.children[0].children.clear()
-            self.children.pop()
-            self.children.pop()
+            if possible:
+                if self.children[1].node.getRuleName() == "+":
+                    self.children[0].node.ruleName = leftValue + rightValue
+                    self.children.pop()
+                    self.children.pop()
+                    self.children[0].children.clear()
+                elif self.children[1].node.getRuleName() == "-":
+                    self.children[0].node.ruleName = leftValue - rightValue
+                    self.children.pop()
+                    self.children.pop()
+                    self.children[0].children.clear()
+                elif self.children[1].node.getRuleName() == "*":
+                    self.children[0].node.ruleName = leftValue * rightValue
+                    self.children.pop()
+                    self.children.pop()
+                    self.children[0].children.clear()
+                elif self.children[1].node.getRuleName() == "/":
+                    self.children[0].node.ruleName = leftValue / rightValue
+                    self.children.pop()
+                    self.children.pop()
+                    self.children[0].children.clear()
 
         elif self.node.getRuleName() == "opUnary":
-            leftValue = self.children[0].node.getRuleName()
-            if leftValue == "!":
-                self.children[1].constantFolding()
+            value = self.children[1]
+            possible = True
+            if value.node.getRuleName() == "int":
+                value = int(value.children[0].node.getRuleName())
+            elif value.node.getRuleName() == "float":
+                value = float(value.children[0].node.getRuleName())
+            elif value.node.getRuleName() == "char":
+                possible = False
             else:
-                if self.children[1].node.getRuleName() == "int" or self.children[1].node.getRuleName() == "float":
+                value.constantFolding()
+                if len(value.children) == 1:
                     try:
-                        rightValue = int(self.children[1].children[0].node.getRuleName())
+                        value = int(value.children[0].node.getRuleName())
                     except ValueError:
-                        rightValue = float(self.children[1].children[0].node.getRuleName())
+                        value = float(value.children[0].node.getRuleName())
                 else:
-                    self.children[1].constantFolding()
-                    try:
-                        rightValue = int(self.children[1].children[0].node.getRuleName())
-                    except ValueError:
-                        rightValue = float(self.children[1].children[0].node.getRuleName())
+                    possible = False
+            if possible:
+                if self.children[0].node.getRuleName() == "-":
+                    self.children[0].node.ruleName = -value
+                    self.children.pop()
+                    self.children[0].children.clear()
+                elif self.children[0].node.getRuleName() == "+":
+                    self.children[0].node.ruleName = +value
+                    self.children.pop()
+                    self.children[0].children.clear()
+        else:
+            for i in self.children:
+                i.constantFolding()
 
-                if leftValue == "-":
-                    value = -rightValue
-                elif leftValue == "+":
-                    value = +rightValue
-                self.children[0].node.ruleName = value
-                self.children[0].children.clear()
-                self.children.pop()
+
+
+
+
+
 
 
 

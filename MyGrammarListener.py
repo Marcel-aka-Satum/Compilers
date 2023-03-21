@@ -89,6 +89,69 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#variableDefinition.
+    def enterVariableDefinition(self, ctx:MyGrammarParser.VariableDefinitionContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#variableDefinition.
+    def exitVariableDefinition(self, ctx:MyGrammarParser.VariableDefinitionContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#variableDeclaration.
+    def enterVariableDeclaration(self, ctx:MyGrammarParser.VariableDeclarationContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#variableDeclaration.
+    def exitVariableDeclaration(self, ctx:MyGrammarParser.VariableDeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#assignmentStatement.
+    def enterAssignmentStatement(self, ctx:MyGrammarParser.AssignmentStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#assignmentStatement.
+    def exitAssignmentStatement(self, ctx:MyGrammarParser.AssignmentStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#constWord.
+    def enterConstWord(self, ctx:MyGrammarParser.ConstWordContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#constWord.
+    def exitConstWord(self, ctx:MyGrammarParser.ConstWordContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#pointerWord.
+    def enterPointerWord(self, ctx:MyGrammarParser.PointerWordContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#pointerWord.
+    def exitPointerWord(self, ctx:MyGrammarParser.PointerWordContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#reservedWord.
+    def enterReservedWord(self, ctx:MyGrammarParser.ReservedWordContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#reservedWord.
+    def exitReservedWord(self, ctx:MyGrammarParser.ReservedWordContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#dataTypes.
+    def enterDataTypes(self, ctx:MyGrammarParser.DataTypesContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#dataTypes.
+    def exitDataTypes(self, ctx:MyGrammarParser.DataTypesContext):
+        pass
+
+
     # Enter a parse tree produced by MyGrammarParser#int.
     def enterInt(self, ctx:MyGrammarParser.IntContext):
         pass
@@ -104,6 +167,33 @@ class MyGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by MyGrammarParser#float.
     def exitFloat(self, ctx:MyGrammarParser.FloatContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#char.
+    def enterChar(self, ctx:MyGrammarParser.CharContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#char.
+    def exitChar(self, ctx:MyGrammarParser.CharContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#referenceID.
+    def enterReferenceID(self, ctx:MyGrammarParser.ReferenceIDContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#referenceID.
+    def exitReferenceID(self, ctx:MyGrammarParser.ReferenceIDContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#nameIdentifier.
+    def enterNameIdentifier(self, ctx:MyGrammarParser.NameIdentifierContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#nameIdentifier.
+    def exitNameIdentifier(self, ctx:MyGrammarParser.NameIdentifierContext):
         pass
 
 
