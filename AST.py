@@ -68,24 +68,42 @@ class AST:
             for i in self.children:
                 i.optimize()
 
-    def constantPropagation(self, dict):
-        if self.node.getRuleName() == "variableDefinition":
+    def constantPropagation(self, dict, dict2):
+        if self.node.getRuleName() == "expr":
+            for i in dict2:
+                dict2[i] = dict2[i] - 1
+            for i in self.children:
+                i.constantPropagation(dict, dict2)
+        elif self.node.getRuleName() == "variableDefinition":
             rightSide = self.children[2]
             if self.children[0].children[0].node.getRuleName() == "constWord":
                 name = self.children[0].children[1].children[0].node.getRuleName()
                 dict[name] = self.children[2]
-            rightSide.constantPropagation(dict)
+            else:
+                name = self.children[0].children[1].children[0].node.getRuleName()
+                dict[name] = self.children[2]
+                dict2[name] = 2
+            rightSide.constantPropagation(dict, dict2)
         elif self.node.getRuleName() == "nameIdentifier":
             tempName = self.children[0].node.getRuleName()
-            if tempName in dict:
-                self.children[0] = copy.deepcopy(dict[tempName])
-                index = self.parent.children.index(self)
-                self.children[0].parent = self.parent
-                self.parent.children[index] = self.children[0]
-
+            if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "variableDeclaration" and self.parent.node.getRuleName() != "assignmentStatement":
+                if tempName in dict2:
+                    if dict2[tempName] <= 0:
+                        del dict2[tempName]
+                        del dict[tempName]
+                    else:
+                        self.children[0] = copy.deepcopy(dict[tempName])
+                        index = self.parent.children.index(self)
+                        self.children[0].parent = self.parent
+                        self.parent.children[index] = self.children[0]
+                else:
+                    self.children[0] = copy.deepcopy(dict[tempName])
+                    index = self.parent.children.index(self)
+                    self.children[0].parent = self.parent
+                    self.parent.children[index] = self.children[0]
         else:
             for i in self.children:
-                i.constantPropagation(dict)
+                i.constantPropagation(dict, dict2)
 
 
 

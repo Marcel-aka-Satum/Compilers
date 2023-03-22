@@ -10,10 +10,9 @@ def main(argv):
     syntaxTree = parser.prog()
     ast = AST(syntaxTree)
     ast.optimize()
-    ast.constantPropagation(dict())
+    ast.constantPropagation(dict(), dict())
     ast.constantFolding()
     ast.printInDot()
-
 
 if __name__ == '__main__':
     main("test.txt")
