@@ -87,12 +87,6 @@ class AST:
             for i in self.children:
                 i.constantPropagation(dict)
 
-
-
-
-
-
-
     def constantFolding(self):
         if self.node.getRuleName() == "opAddOrSub" or self.node.getRuleName() == "opMultOrDiv":
             leftValue = self.children[0]
@@ -182,15 +176,5 @@ class AST:
         else:
             for i in self.children:
                 i.constantFolding()
-
-
-
-
-
-
-
-
-
-
 
 
