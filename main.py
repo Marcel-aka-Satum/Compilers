@@ -10,6 +10,7 @@ def main(argv):
     syntaxTree = parser.prog()
     ast = AST(syntaxTree)
     ast.optimize()
+    ast.constantPropagation(dict())
     ast.constantFolding()
     ast.printInDot()
 

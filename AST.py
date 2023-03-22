@@ -1,5 +1,6 @@
 from antlr4 import *
 from MyGrammarParser import MyGrammarParser
+import copy
 
 class Node:
     def __init__(self, syntaxTree):
@@ -66,6 +67,27 @@ class AST:
         elif len(self.children) >= 2:
             for i in self.children:
                 i.optimize()
+
+    def constantPropagation(self, dict):
+        if self.node.getRuleName() == "variableDefinition":
+            rightSide = self.children[2]
+            if self.children[0].children[0].node.getRuleName() == "constWord":
+                name = self.children[0].children[1].children[0].node.getRuleName()
+                dict[name] = self.children[2]
+            rightSide.constantPropagation(dict)
+        elif self.node.getRuleName() == "nameIdentifier":
+            tempName = self.children[0].node.getRuleName()
+            if tempName in dict:
+                self.children[0] = copy.deepcopy(dict[tempName])
+                index = self.parent.children.index(self)
+                self.children[0].parent = self.parent
+                self.parent.children[index] = self.children[0]
+
+        else:
+            for i in self.children:
+                i.constantPropagation(dict)
+
+
 
 
 
