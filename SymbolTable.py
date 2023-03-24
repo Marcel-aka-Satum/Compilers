@@ -4,6 +4,8 @@ class SymbolTable:
 
     def insert_symbol(self, symbol_name, symbol_node):
         self.symbol_tables[-1][symbol_name] = symbol_node
+    def insert_value(self, symbol_name, value):
+        self.symbol_tables[-1][symbol_name][2] = value
 
     def get_symbol(self, symbol_name):
         for symbol_table in reversed(self.symbol_tables):

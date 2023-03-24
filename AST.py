@@ -68,6 +68,35 @@ class AST:
             for i in self.children:
                 i.optimize()
 
+    def initialiseSymbolTable(self, symbolTable):
+        if self.node.getRuleName() == "variableDefinition":
+            if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
+                varName = self.children[0].children[1].children[0].node.getRuleName()
+                if len(self.children[2].children) == 1:
+                    if symbolTable.get_symbol(varName)[0] == "int":
+                        value = int(self.children[2].children[0].node.getRuleName())
+                    elif symbolTable.get_symbol(varName)[0] == "float":
+                        value = float(self.children[2].children[0].node.getRuleName())
+                    symbolTable.insert_value(varName, value)
+                else:
+                    symbolTable.insert_symbol(varName, self.children[2])
+        elif self.node.getRuleName() == "assignmentStatement":
+            if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
+                varName = self.children[0].children[0].node.getRuleName()
+                if len(self.children[2].children) == 1:
+                    if symbolTable.get_symbol(varName)[0] == "int":
+                        value = int(self.children[2].children[0].node.getRuleName())
+                    elif symbolTable.get_symbol(varName)[0] == "float":
+                        value = float(self.children[2].children[0].node.getRuleName())
+                    symbolTable.insert_value(varName, value)
+                else:
+                    symbolTable.insert_symbol(varName, self.children[2])
+        else:
+            for i in self.children:
+                i.initialiseSymbolTable(symbolTable)
+
+
+
     def constantPropagation(self, dict, dict2):
         if self.node.getRuleName() == "expr":
             for i in dict2:
