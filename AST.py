@@ -86,7 +86,7 @@ class AST:
             rightSide.constantPropagation(dict, dict2)
         elif self.node.getRuleName() == "nameIdentifier":
             tempName = self.children[0].node.getRuleName()
-            if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "variableDeclaration" and self.parent.node.getRuleName() != "assignmentStatement":
+            if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "assignmentStatement" and self.parent.node.getRuleName() != "variableDeclaration":
                 if tempName in dict2:
                     if dict2[tempName] <= 0:
                         del dict2[tempName]
@@ -101,6 +101,24 @@ class AST:
                     index = self.parent.children.index(self)
                     self.children[0].parent = self.parent
                     self.parent.children[index] = self.children[0]
+            elif self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition":
+                index = self.parent.children.index(self)
+                if index == 2:
+                    if tempName in dict2:
+                        if dict2[tempName] <= 0:
+                            del dict2[tempName]
+                            del dict[tempName]
+                        else:
+                            self.children[0] = copy.deepcopy(dict[tempName])
+                            index = self.parent.children.index(self)
+                            self.children[0].parent = self.parent
+                            self.parent.children[index] = self.children[0]
+                    else:
+                        self.children[0] = copy.deepcopy(dict[tempName])
+                        index = self.parent.children.index(self)
+                        self.children[0].parent = self.parent
+                        self.parent.children[index] = self.children[0]
+
         else:
             for i in self.children:
                 i.constantPropagation(dict, dict2)
