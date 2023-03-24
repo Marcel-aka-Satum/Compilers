@@ -39,7 +39,7 @@ float: FLOAT;
 
 char: CHAR;
 
-referenceID: '&'nameIdentifier | nameIdentifier;
+referenceID: '&'nameIdentifier | '*'nameIdentifier | nameIdentifier;
 
 nameIdentifier: ID;
 

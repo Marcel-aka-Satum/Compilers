@@ -14,16 +14,15 @@ def main(argv):
     ast = AST(syntaxTree)
     # Optimize the AST
     ast.optimize()
-    # Constant propagation and constant folding
-    ast.constantPropagation(dict(), dict())
-    ast.constantFolding()
-    # Print the AST in dot
-    ast.printInDot()
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
     symbolTable.visit(ast)
-
+    # Constant propagation and constant folding
+    ast.constantPropagation(dict(), dict())
+    ast.constantFolding(symbolTable.symbol_table)
+    # Print the AST in dot
+    ast.printInDot()
     print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':
