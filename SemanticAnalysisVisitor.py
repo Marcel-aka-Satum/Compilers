@@ -120,7 +120,7 @@ class SemanticAnalysisVisitor:
                     extra = "const pointer"
                 if node.children[0].children[0].node.getRuleName() == "pointerWord":
                     extra = "pointer"
-            if extra == "pointer":
+            if extra == "pointer" or extra == "const pointer":
                 if node.children[2].node.getRuleName() != "referenceID":
                     print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
                     exit()
@@ -160,6 +160,7 @@ class SemanticAnalysisVisitor:
         var_node = self.symbol_table.get_symbol(var_name)
         if var_node is None:
             print(f"[ Error ] at line {self.line}: Variable {var_name} has not been initialized or declared")
+            exit()
         
         # Visit its children
         for child in node.children:

@@ -130,7 +130,7 @@ class AST:
                     index = self.parent.children.index(self)
                     self.children[0].parent = self.parent
                     self.parent.children[index] = self.children[0]
-            elif self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition":
+            elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
                 index = self.parent.children.index(self)
                 if index == 2:
                     if tempName in dict2:
