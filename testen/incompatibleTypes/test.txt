@@ -1,0 +1,22 @@
+##test1
+string a = "hello";
+int b = 5;
+int c = a + b;
+Expected error message: "TypeError: can only concatenate str (not "int") to str"
+
+##test2
+string a = "hello";
+int b = 0; 
+int c = a / b;
+Expected error message: "TypeError: unsupported operand type(s) for /: 'str' and 'int'"
+
+##test3
+string a = "hello";
+int b = 5;
+int c = a % b;
+Expected error message: "TypeError: not all arguments converted during string formatting"
+
+##test4
+string a = "hello";
+int a = 5;
+Expected error message: "TypeError: incompatible types: str() and int()"
