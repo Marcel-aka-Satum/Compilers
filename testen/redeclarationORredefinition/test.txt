@@ -5,7 +5,7 @@ Expected error message: "SyntaxError: redeclaration of a"
 
 ##test2
 int a = 5;
-string a = "hello";
+char a = 'a';
 Expected error message: "SyntaxError: a was previously declared"
 
 ##test3

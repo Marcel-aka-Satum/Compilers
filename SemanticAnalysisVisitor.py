@@ -100,47 +100,45 @@ class SemanticAnalysisVisitor:
         var_name = node.children[0].children[1].children[0].node.getRuleName()
         if self.symbol_table.get_symbol(var_name) is not None:
             print(f"[ Error ] at line {self.line}: Variable {var_name} has already been defined in the current scope")
-            exit()
-
-
-        # Add the variable to the symbol table
-        extra = None
-        if node.children[0].children[0].node.getRuleName() == "constWord":
-            extra = "const"
-        if node.children[0].children[0].node.getRuleName() != "reservedWord":
-            if node.children[0].children[0].children[1].node.getRuleName() == "pointerWord":
-                extra = "const pointer"
-            if node.children[0].children[0].node.getRuleName() == "pointerWord":
-                extra = "pointer"
-        if extra == "pointer":
-            if node.children[2].node.getRuleName() != "referenceID":
-                print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
-                exit()
-        if extra == "const":
-            type = node.children[0].children[0].children[1].children[0].node.getRuleName()
-        elif extra == "pointer":
-            type = node.children[0].children[0].children[0].children[0].node.getRuleName()
-        elif extra == "const pointer":
-            type = node.children[0].children[0].children[1].children[0].children[0].node.getRuleName()
         else:
-            type = node.children[0].children[0].children[0].node.getRuleName()
-        if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
-            if (node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float") and type == "char":
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char ")
-                exit()
-            elif node.children[2].node.getRuleName() == "char" and (type == "int" or type ==  "float"):
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float ")
-                exit()
-            if type == "int":
-                rightSide = int(node.children[2].children[0].node.getRuleName())
-            elif type == "float":
-                rightSide = float(node.children[2].children[0].node.getRuleName())
+            # Add the variable to the symbol table
+            extra = None
+            if node.children[0].children[0].node.getRuleName() == "constWord":
+                extra = "const"
+            if node.children[0].children[0].node.getRuleName() != "reservedWord":
+                if node.children[0].children[0].children[1].node.getRuleName() == "pointerWord":
+                    extra = "const pointer"
+                if node.children[0].children[0].node.getRuleName() == "pointerWord":
+                    extra = "pointer"
+            if extra == "pointer":
+                if node.children[2].node.getRuleName() != "referenceID":
+                    print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
+                    exit()
+            if extra == "const":
+                type = node.children[0].children[0].children[1].children[0].node.getRuleName()
+            elif extra == "pointer":
+                type = node.children[0].children[0].children[0].children[0].node.getRuleName()
+            elif extra == "const pointer":
+                type = node.children[0].children[0].children[1].children[0].children[0].node.getRuleName()
             else:
-                rightSide = node.children[2].children[0].node.getRuleName()[1]
-        else:
-            rightSide = node.children[2]
-        tempArray = [type, extra, rightSide]
-        self.symbol_table.insert_symbol(var_name, tempArray)
+                type = node.children[0].children[0].children[0].node.getRuleName()
+            if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
+                if (node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float") and type == "char":
+                    print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char ")
+                    exit()
+                elif node.children[2].node.getRuleName() == "char" and (type == "int" or type ==  "float"):
+                    print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float ")
+                    exit()
+                if type == "int":
+                    rightSide = int(node.children[2].children[0].node.getRuleName())
+                elif type == "float":
+                    rightSide = float(node.children[2].children[0].node.getRuleName())
+                else:
+                    rightSide = node.children[2].children[0].node.getRuleName()[1]
+            else:
+                rightSide = node.children[2]
+            tempArray = [type, extra, rightSide]
+            self.symbol_table.insert_symbol(var_name, tempArray)
 
         # Visit its children
         for child in node.children:
@@ -152,7 +150,7 @@ class SemanticAnalysisVisitor:
         var_node = self.symbol_table.get_symbol(var_name)
         if var_node is None:
             print(f"[ Error ] at line {self.line}: Variable {var_name} has not been initialized or declared")
-            
+        
         # Visit its children
         for child in node.children:
             self.visit(child)

@@ -8,9 +8,9 @@ b = a + 1;
 Expected error message: "TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'
 
 ##test3
-a = b + c;
-d = e * f;
-g = h / i;
+int a = b + c;
+int d = e * f;
+int g = h / i;
 Expected error messages: "NameError: name 'b' is not defined", "NameError: name 'c' is not defined",
 "NameError: name 'e' is not defined", 
 "NameError: name 'f' is not defined", 
