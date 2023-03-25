@@ -44,20 +44,30 @@ class SemanticAnalysisVisitor:
             if node.children[2].node.getRuleName() != "referenceID":
                 print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
                 exit()
+        type = self.symbol_table.get_symbol(var_name)[0]
         if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
-            type = self.symbol_table.get_symbol(var_name)[0]
             if (node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float") and type == "char":
                 print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char ")
                 exit()
             elif node.children[2].node.getRuleName() == "char" and (type == "int" or type ==  "float"):
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float ")
+                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float")
                 exit()
+
             if type == "int":
                 rightSide = int(node.children[2].children[0].node.getRuleName())
             elif type == "float":
                 rightSide = float(node.children[2].children[0].node.getRuleName())
             else:
                 rightSide = node.children[2].children[0].node.getRuleName()[1]
+        elif node.children[2].node.getRuleName() == "nameIdentifier":
+            type2 = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[0]
+            if (type == "int" or type == "float") and type2 == "char":
+                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float")
+                exit()
+            elif type == "char" and (type2 == "int" or type2 == "float"):
+                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char")
+                exit()
+            rightSide = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[2]
         else:
             rightSide = node.children[2]
         self.symbol_table.insert_value(var_name, rightSide)

@@ -162,7 +162,9 @@ class AST:
                 leftValue = int(leftValue.children[0].node.getRuleName())
             elif leftValue.node.getRuleName() == "float":
                 leftValue = float(leftValue.children[0].node.getRuleName())
-            elif leftValue.node.getRuleName() == "char" or leftValue.node.getRuleName() == "nameIdentifier":
+            elif leftValue.node.getRuleName() == "char":
+                leftValue = ord(leftValue.children[0].node.getRuleName()[1])
+            elif leftValue.node.getRuleName() == "nameIdentifier":
                 possible = False
             else:
                 leftValue.constantFolding(symbolTable)
@@ -178,7 +180,9 @@ class AST:
                 rightValue = int(rightValue.children[0].node.getRuleName())
             elif rightValue.node.getRuleName() == "float":
                 rightValue = float(rightValue.children[0].node.getRuleName())
-            elif rightValue.node.getRuleName() == "char" or rightValue.node.getRuleName() == "nameIdentifier":
+            elif rightValue.node.getRuleName() == "char":
+                 rightValue = ord(rightValue.children[0].node.getRuleName()[1])
+            elif rightValue.node.getRuleName() == "nameIdentifier":
                 possible = False
             else:
                 rightValue.constantFolding(symbolTable)
@@ -235,6 +239,7 @@ class AST:
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
+
 
         elif self.node.getRuleName() == "opUnary":
             value = self.children[1]
