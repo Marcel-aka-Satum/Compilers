@@ -239,6 +239,14 @@ class AST:
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
+                elif self.children[1].node.getRuleName() == "%":
+                    if symbolTable.get_symbol(varName)[0] == "int":
+                        self.children[0].node.ruleName = int(leftValue % rightValue)
+                    elif symbolTable.get_symbol(varName)[0] == "float":
+                        self.children[0].node.ruleName = float(leftValue % rightValue)
+                    self.children.pop()
+                    self.children.pop()
+                    self.children[0].children.clear()
 
 
         elif self.node.getRuleName() == "opUnary":
