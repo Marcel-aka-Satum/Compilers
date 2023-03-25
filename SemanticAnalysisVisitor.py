@@ -152,8 +152,7 @@ class SemanticAnalysisVisitor:
         var_node = self.symbol_table.get_symbol(var_name)
         if var_node is None:
             print(f"[ Error ] at line {self.line}: Variable {var_name} has not been initialized or declared")
-            exit()
-
+            
         # Visit its children
         for child in node.children:
             self.visit(child)
