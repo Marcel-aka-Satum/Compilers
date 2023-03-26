@@ -1,9 +1,0 @@
-##test1
-const int a = 5;
-a = 7;
-Expected error message: "TypeError: Assignment to constant variable"
-
-##test2
-const int PI = 3.14;
-PI = "3.1415";
-Expected error message: "TypeError: Assignment to constant variable"

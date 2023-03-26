@@ -1,0 +1,3 @@
+##test5
+int a = 5.5;
+##Expected output: [ Error ] at line 1: a got assigned an incompatible type: expected int

@@ -1,0 +1,8 @@
+##test4
+int a = 1;
+float a = 2.0;
+char c = 'c';
+c = 'd';
+int c = 4;
+#Expected error message:  [ Error ] at line 2: Variable a has already been defined in the current scope
+                         [ Error ] at line 5: Variable c has already been defined in the current scope

@@ -1,0 +1,4 @@
+##test3
+int a = 500;
+float a = 355.3;
+#Expected error message: [ Error ] at line 2: Variable a has already been defined in the current scope
