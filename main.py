@@ -15,6 +15,8 @@ def main(argv):
     # Optimize the AST
     ast.optimize()
     # Create the symbol table
+    ast.printInDot()
+
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
     symbolTable.visit(ast)
@@ -24,7 +26,6 @@ def main(argv):
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
-    ast.printInDot()
     print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':
