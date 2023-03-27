@@ -29,4 +29,5 @@ def main(argv):
     print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':
-    main("test.txt")
+    main("/home/hatepainsad/Desktop/compilers/Compilers/test.txt")
+    # main("test.txt")

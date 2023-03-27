@@ -185,8 +185,8 @@ class SemanticAnalysisVisitor:
                     try:
                         rightSide = int(node.children[2].children[0].node.getRuleName())
                     except:
-                        print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int")
-                        exit()
+                        rightSide = float(node.children[2].children[0].node.getRuleName())
+                        rightSide = int(rightSide)
                 elif type == "float":
                     rightSide = float(node.children[2].children[0].node.getRuleName())
                 else:
