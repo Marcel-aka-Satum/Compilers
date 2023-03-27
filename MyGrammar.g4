@@ -23,11 +23,11 @@ variableDefinition: variableDeclaration '=' opAddOrSub;
 
 variableDeclaration: constWord referenceID;
 
-assignmentStatement: referenceID '=' opAddOrSub;
+assignmentStatement: referenceID '=' opAddOrSub | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAddOrSub;
 
 constWord: 'const' pointerWord | pointerWord;
 
-pointerWord: reservedWord'*' | reservedWord;
+pointerWord: reservedWord POINTER | reservedWord POINTERS | reservedWord;
 
 reservedWord: 'int' | 'float' | 'char';
 
@@ -39,12 +39,15 @@ float: FLOAT;
 
 char: CHAR;
 
-referenceID: '&'nameIdentifier | '*'nameIdentifier | nameIdentifier;
+referenceID: '&'nameIdentifier | POINTER nameIdentifier | POINTERS nameIdentifier | nameIdentifier;
 
 nameIdentifier: ID;
-
+POINTER: '*';
+POINTERS: ('*')+;
 ID: [a-zA-Z]([a-zA-Z0-9_])*;
 CHAR: '\'' [a-zA-Z] '\'';
 INT: [0-9]+;
 FLOAT: [0-9]*'.'[0-9]+ | [0-9]+'.'[0-9]*;
 WS: [ \t\r\n]+ -> skip;
+COMMENT: '//' .*? '\r'? '\n' -> skip;
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;

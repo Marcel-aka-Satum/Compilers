@@ -15,18 +15,25 @@ def main(argv):
     # Optimize the AST
     ast.optimize()
     # Create the symbol table
-    ast.printInDot()
-
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
-    symbolTable.visit(ast)
+    try:
+        symbolTable.visit(ast)
+    except IndexError:
+        if symbolTable.error == True:
+            exit()
+        else:
+            print("IndexError")
+    if symbolTable.error:
+        exit()
     # Constant propagation and constant folding
     ast.constantPropagation(dict(), dict())
     ast.constantFolding(symbolTable.symbol_table)
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
+    ast.printInDot()
     print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':
-    main("test.txt")
+    main("test.c")

@@ -80,6 +80,16 @@ class AST:
                     symbolTable.insert_value(varName, value)
                 else:
                     symbolTable.insert_symbol(varName, self.children[2])
+            elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or self.children[2].node.getRuleName() == "char":
+                varName = self.children[0].children[1].children[0].node.getRuleName()
+                if self.children[2].node.getRuleName() != "char":
+                    try:
+                        value = int(self.children[2].children[0].node.getRuleName())
+                    except ValueError:
+                        value = float(self.children[2].children[0].node.getRuleName())
+                else:
+                    value = self.children[2].children[0].node.getRuleName()[1]
+                symbolTable.insert_value(varName, value)
         elif self.node.getRuleName() == "assignmentStatement":
             if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
                 varName = self.children[0].children[0].node.getRuleName()

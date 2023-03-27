@@ -4,3 +4,8 @@ y = x + y;
 int z;
 float* flt_ptr = &y;
 char ch = 'x';
+// hallo
+/*
+ok
+ok
+*/
