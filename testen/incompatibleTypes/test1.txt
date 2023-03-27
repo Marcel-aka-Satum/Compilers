@@ -1,0 +1,5 @@
+##test1
+char a = 'h';
+int b = 5;
+int c = a + b;
+#Expected no error message
