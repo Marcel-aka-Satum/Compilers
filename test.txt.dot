@@ -1,0 +1,15 @@
+graph ast { 
+<AST.AST object at 0x7f247b92efd0>[label="prog"] 
+<AST.AST object at 0x7f247b93c5e0>[label="expr"] 
+<AST.AST object at 0x7f247b93c1f0>[label="int"] 
+<AST.AST object at 0x7f247b93cf40>[label="*"] 
+<AST.AST object at 0x7f247b93c4c0>[label="x"] 
+<AST.AST object at 0x7f247b93cb80>[label="="] 
+<AST.AST object at 0x7f247b93c3d0>[label="5"] 
+<AST.AST object at 0x7f247b92efd0> -- <AST.AST object at 0x7f247b93c5e0>
+<AST.AST object at 0x7f247b93c5e0> -- <AST.AST object at 0x7f247b93c1f0>
+<AST.AST object at 0x7f247b93c5e0> -- <AST.AST object at 0x7f247b93cf40>
+<AST.AST object at 0x7f247b93c5e0> -- <AST.AST object at 0x7f247b93c4c0>
+<AST.AST object at 0x7f247b93c5e0> -- <AST.AST object at 0x7f247b93cb80>
+<AST.AST object at 0x7f247b93c5e0> -- <AST.AST object at 0x7f247b93c3d0>
+}
