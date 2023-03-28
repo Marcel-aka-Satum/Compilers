@@ -27,12 +27,13 @@ def main(argv):
     if symbolTable.error:
         exit()
     # Constant propagation and constant folding
-    ast.constantPropagation(dict(), dict())
+    ast.constantPropagation(dict(), dict(), symbolTable.symbol_table)
     ast.constantFolding(symbolTable.symbol_table)
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
     ast.printInDot()
+
     print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':

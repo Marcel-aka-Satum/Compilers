@@ -197,5 +197,14 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#printFunction.
+    def enterPrintFunction(self, ctx:MyGrammarParser.PrintFunctionContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#printFunction.
+    def exitPrintFunction(self, ctx:MyGrammarParser.PrintFunctionContext):
+        pass
+
+
 
 del MyGrammarParser

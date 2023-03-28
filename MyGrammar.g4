@@ -17,7 +17,7 @@ opMultOrDiv: opMultOrDiv '*' opUnary | opMultOrDiv '/' opUnary | opMultOrDiv '%'
 
 opUnary: '+' brackets | '-' brackets | '!' brackets | brackets;
 
-brackets: '(' opAnd ')' | variableDefinition | variableDeclaration | assignmentStatement | dataTypes;
+brackets: '(' opAnd ')' | variableDefinition | variableDeclaration | assignmentStatement | dataTypes | printFunction;
 
 variableDefinition: variableDeclaration '=' opAddOrSub;
 
@@ -42,6 +42,9 @@ char: CHAR;
 referenceID: '&'nameIdentifier | POINTER nameIdentifier | POINTERS nameIdentifier | nameIdentifier;
 
 nameIdentifier: ID;
+
+printFunction: 'printf' '(' opAnd ')';
+
 POINTER: '*';
 POINTERS: ('*')+;
 ID: [a-zA-Z]([a-zA-Z0-9_])*;

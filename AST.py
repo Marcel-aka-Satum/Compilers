@@ -107,12 +107,12 @@ class AST:
 
 
 
-    def constantPropagation(self, dict, dict2):
+    def constantPropagation(self, dict, dict2, symbolTable):
         if self.node.getRuleName() == "expr":
             for i in dict2:
                 dict2[i] = dict2[i] - 1
             for i in self.children:
-                i.constantPropagation(dict, dict2)
+                i.constantPropagation(dict, dict2, symbolTable)
         elif self.node.getRuleName() == "variableDefinition":
             rightSide = self.children[2]
             if self.children[0].children[0].node.getRuleName() == "constWord":
@@ -122,10 +122,13 @@ class AST:
                 name = self.children[0].children[1].children[0].node.getRuleName()
                 dict[name] = self.children[2]
                 dict2[name] = 2
-            rightSide.constantPropagation(dict, dict2)
+            rightSide.constantPropagation(dict, dict2, symbolTable)
         elif self.node.getRuleName() == "nameIdentifier":
             tempName = self.children[0].node.getRuleName()
             if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "assignmentStatement" and self.parent.node.getRuleName() != "variableDeclaration":
+                if self.parent.node.getRuleName() == "printFunction":
+                    varName = self.children[0].node.getRuleName()
+                    self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName)[0]
                 if tempName in dict2:
                     if dict2[tempName] <= 0:
                         del dict2[tempName]
@@ -160,7 +163,7 @@ class AST:
 
         else:
             for i in self.children:
-                i.constantPropagation(dict, dict2)
+                i.constantPropagation(dict, dict2, symbolTable)
 
 
     def constantFolding(self, symbolTable):
@@ -207,6 +210,7 @@ class AST:
             if possible:
                 varName = self.parent
                 found = False
+                type = None
                 while not found:
                     if varName.node.getRuleName() == "variableDefinition":
                         varName = varName.children[0].children[1].children[0].node.getRuleName()
@@ -214,37 +218,44 @@ class AST:
                     elif varName.node.getRuleName() == "assignmentStatement":
                         varName = varName.children[0].children[0].node.getRuleName()
                         found = True
+                    elif varName.node.getRuleName() == "printFunction":
+                        type = varName.children[0].node.getRuleName()
+                        varName = "print"
+                        found = True
                     else:
                         varName = varName.parent
-
+                        if varName == None:
+                            break
+                if varName != "print":
+                    type = symbolTable.get_symbol(varName)[0]
                 if self.children[1].node.getRuleName() == "+":
-                    if symbolTable.get_symbol(varName)[0] == "int":
+                    if type == "int":
                         self.children[0].node.ruleName = int(leftValue + rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif type == "float":
                         self.children[0].node.ruleName = float(leftValue + rightValue)
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
                 elif self.children[1].node.getRuleName() == "-":
-                    if symbolTable.get_symbol(varName)[0] == "int":
+                    if type == "int":
                         self.children[0].node.ruleName = int(leftValue - rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif type == "float":
                         self.children[0].node.ruleName = float(leftValue - rightValue)
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
                 elif self.children[1].node.getRuleName() == "*":
-                    if symbolTable.get_symbol(varName)[0] == "int":
+                    if type == "int":
                         self.children[0].node.ruleName = int(leftValue * rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif type == "float":
                         self.children[0].node.ruleName = float(leftValue * rightValue)
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
                 elif self.children[1].node.getRuleName() == "/":
-                    if symbolTable.get_symbol(varName)[0] == "int":
+                    if type == "int":
                         self.children[0].node.ruleName = int(leftValue / rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif type == "float":
                         self.children[0].node.ruleName = float(leftValue / rightValue)
                     self.children.pop()
                     self.children.pop()
