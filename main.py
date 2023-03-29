@@ -33,7 +33,7 @@ def main(argv):
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
     ast.printInDot()
-
+    # Print the symbol table
     print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':

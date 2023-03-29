@@ -18,6 +18,8 @@ class SemanticAnalysisVisitor:
             self.visit_name_identifier(node)
         elif node.node.getRuleName() == "assignmentStatement":
             self.visit_assignment_statement(node)
+        elif node.node.getRuleName() == "comment":
+            self.visit_comment(node)
         else:
             for child in node.children:
                 self.visit(child)
@@ -26,6 +28,11 @@ class SemanticAnalysisVisitor:
         self.line += 1
         for child in node.children:
             self.visit(child)
+
+    def visit_comment(self, node):
+        comment = node.children[0].node.getRuleName()
+        nlines = len(comment.splitlines())
+        self.line += nlines
 
     def visit_assignment_statement(self, node):
         if node.children[0].node.getRuleName() != "nameIdentifier" and node.children[0].node.getRuleName() != "referenceID":

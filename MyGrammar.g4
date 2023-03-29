@@ -1,6 +1,6 @@
 grammar MyGrammar;
 
-prog: expr;
+prog: (comment expr comment)+ | (comment expr)+ | (expr comment)+ | expr | comment;
 
 expr: opAnd ';' | opAnd ';' expr;
 
@@ -45,12 +45,14 @@ nameIdentifier: ID;
 
 printFunction: 'printf' '(' opAnd ')';
 
+comment: BLOCK_COMMENT+ | COMMENT+;
+
 POINTER: '*';
 POINTERS: ('*')+;
 ID: [a-zA-Z]([a-zA-Z0-9_])*;
 CHAR: '\'' [a-zA-Z] '\'';
 INT: [0-9]+;
 FLOAT: [0-9]*'.'[0-9]+ | [0-9]+'.'[0-9]*;
+COMMENT: '//' .*? '\r'? '\n';
+BLOCK_COMMENT: '/*' .*? '*/';
 WS: [ \t\r\n]+ -> skip;
-COMMENT: '//' .*? '\r'? '\n' -> skip;
-BLOCK_COMMENT: '/*' .*? '*/' -> skip;

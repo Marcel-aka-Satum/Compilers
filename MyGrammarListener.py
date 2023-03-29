@@ -206,5 +206,14 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#comment.
+    def enterComment(self, ctx:MyGrammarParser.CommentContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#comment.
+    def exitComment(self, ctx:MyGrammarParser.CommentContext):
+        pass
+
+
 
 del MyGrammarParser
