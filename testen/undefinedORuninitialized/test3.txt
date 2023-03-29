@@ -1,4 +1,0 @@
-##test3
-int a = 5;
-b = a + c - 3;
-#Expected output: [Error ] at line 2: Can not assign the undeclared variable b 

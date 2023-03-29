@@ -1,3 +1,0 @@
-##test3
-char a = 5;
-#Expected error message: "[ Error ] at line 1: a got assigned an incompatible type: expected char 
