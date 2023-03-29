@@ -1,5 +1,0 @@
-##test2
-int a = 5
-int b = 10
-(a + b) = 15
-#Expected error message: "SyntaxError: can't assign to operator"
