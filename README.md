@@ -20,6 +20,7 @@ Done by Marceli Wilczynski && Elias El Bouzidi <br>
 2. [Documentation](#Documentation)
 3. [Project 1](#Project1)
 4. [Project 2](#Project2)
+5. [Project 3](#Project3)
 
 ## Installation
 > git clone https://github.com/Marcel-aka-Satum/Compilers.git
