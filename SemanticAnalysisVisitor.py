@@ -83,29 +83,54 @@ class SemanticAnalysisVisitor:
                         self.error = True
 
         type = self.symbol_table.get_symbol(var_name)[0]
-        if (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "referenceID" and node.children[2].children[0].node.getRuleName() != "*":
+        if (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "referenceID" and node.children[2].children[0].node.getRuleName()[0] != '*':
             if check != "pointer" and check != "const pointer":
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type")
+                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expects a value but an adress was given")
+                self.error = True
+        elif (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "referenceID" and node.children[2].children[0].node.getRuleName()[0] == '*':
+            varName = node.children[2].children[1].children[0].node.getRuleName()
+            varType = self.symbol_table.get_symbol(varName)[1][0]
+            count = self.symbol_table.get_symbol(varName)[1][1]
+            if varType == "pointer" or varType == 'const pointer':
+                if count == len(node.children[2].children[0].node.getRuleName()):
+                    pass
+                else:
+                    print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects a {count} pointer")
+                    self.error = True
+            else:
+                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: {varName} is not a pointer")
                 self.error = True
 
         if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
-            if (node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float") and type == "char":
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char ")
-                self.error = True
-            elif node.children[2].node.getRuleName() == "char" and (type == "int" or type ==  "float"):
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float")
-                self.error = True
-
             if type == "int":
-                try:
-                    rightSide = int(node.children[2].children[0].node.getRuleName())
-                except ValueError:
-                    rightSide = float(node.children[2].children[0].node.getRuleName())
-                    rightSide = int(rightSide)
+                if node.children[2].node.getRuleName() == "char":
+                    rightSide = ord(node.children[2].children[0].node.getRuleName()[1])
+                else:
+                    try:
+                        rightSide = int(node.children[2].children[0].node.getRuleName())
+                    except ValueError:
+                        rightSide = float(node.children[2].children[0].node.getRuleName())
+                        rightSide = int(rightSide)
             elif type == "float":
-                rightSide = float(node.children[2].children[0].node.getRuleName())
+                if node.children[2].node.getRuleName() == "char":
+                    rightSide = ord(node.children[2].children[0].node.getRuleName()[1])
+                else:
+                    rightSide = float(node.children[2].children[0].node.getRuleName())
             else:
-                rightSide = node.children[2].children[0].node.getRuleName()[1]
+                if node.children[2].node.getRuleName() == "int":
+                    temp = self.symbol_table.get_symbol(var_name)
+                    newArr = ["int", temp[1], temp[2]]
+                    self.symbol_table.symbol_tables[-1][var_name] = newArr
+                    rightSide = int(node.children[2].children[0].node.getRuleName())
+                elif node.children[2].node.getRuleName() == "float":
+                    temp = self.symbol_table.get_symbol(var_name)
+                    newArr = ["int", temp[1], temp[2]]
+                    self.symbol_table.symbol_tables[-1][var_name] = newArr
+                    temp2 = float(node.children[2].children[0].node.getRuleName())
+                    temp2 = int(temp2)
+                    rightSide = temp2
+                else:
+                    rightSide = node.children[2].children[0].node.getRuleName()[1]
         elif node.children[2].node.getRuleName() == "nameIdentifier":
             type2 = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[0]
             if (type == "int" or type == "float") and type2 == "char":
@@ -113,6 +138,10 @@ class SemanticAnalysisVisitor:
                 self.error = True
             elif type == "char" and (type2 == "int" or type2 == "float"):
                 print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char")
+                self.error = True
+            varType = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[1][0]
+            if varType == "pointer" or varType == "const pointer":
+                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char but got assigned an pointer")
                 self.error = True
             rightSide = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[2]
         else:
@@ -197,29 +226,57 @@ class SemanticAnalysisVisitor:
 
             if (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "referenceID":
                 if extra != "pointer" and extra != "const pointer":
-                    print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type")
-                    self.error = True
+                    if node.children[2].children[0].node.getRuleName()[0] == '*':
+                        varName = node.children[2].children[1].children[0].node.getRuleName()
+                        varType = self.symbol_table.get_symbol(varName)[1][0]
+                        count = self.symbol_table.get_symbol(varName)[1][1]
+                        if varType == "pointer" or varType == 'const pointer':
+                            if count == len(node.children[2].children[0].node.getRuleName()):
+                                pass
+                            else:
+                                print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects a {count} pointer")
+                                self.error = True
+                        else:
+                            print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: {varName} is not a pointer")
+                            self.error = True
+                    else:
+                        print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expects a value but got an adress instead")
+                        self.error = True
                 else:
                     if node.children[2].children[0].node.getRuleName() != "&":
                         print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type")
                         self.error = True
+            elif (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "nameIdentifier":
+                type3 = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[1][0]
+                if type3 == "pointer" or type3 == "const pointer":
+                    print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected value but got assigned an pointer instead ")
+                    self.error = True
             if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
-                if (node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float") and type == "char":
-                    print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char ")
-                    self.error = True
-                elif node.children[2].node.getRuleName() == "char" and (type == "int" or type == "float"):
-                    print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float ")
-                    self.error = True
                 if type == "int":
-                    try:
-                        rightSide = int(node.children[2].children[0].node.getRuleName())
-                    except ValueError:
-                        rightSide = float(node.children[2].children[0].node.getRuleName())
-                        rightSide = int(rightSide)
+                    if node.children[2].node.getRuleName() == "char":
+                        rightSide = ord(node.children[2].children[0].node.getRuleName()[1])
+                    else:
+                        try:
+                            rightSide = int(node.children[2].children[0].node.getRuleName())
+                        except ValueError:
+                            rightSide = float(node.children[2].children[0].node.getRuleName())
+                            rightSide = int(rightSide)
                 elif type == "float":
-                    rightSide = float(node.children[2].children[0].node.getRuleName())
+                    if node.children[2].node.getRuleName() == "char":
+                        rightSide = ord(node.children[2].children[0].node.getRuleName()[1])
+                    else:
+                        rightSide = float(node.children[2].children[0].node.getRuleName())
                 else:
-                    rightSide = node.children[2].children[0].node.getRuleName()[1]
+                    if node.children[2].node.getRuleName() == "int":
+                        type = "int"
+                        rightSide = int(node.children[2].children[0].node.getRuleName())
+                    elif node.children[2].node.getRuleName() == "float":
+                        temp = float(node.children[2].children[0].node.getRuleName())
+                        temp = int(temp)
+                        rightSide = temp
+                        type = "int"
+                    else:
+                        rightSide = node.children[2].children[0].node.getRuleName()[1]
             else:
                 rightSide = node.children[2]
 

@@ -73,20 +73,36 @@ class AST:
             if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
                 if len(self.children[2].children) == 1:
+                    value = None
                     if symbolTable.get_symbol(varName)[0] == "int":
-                        value = int(self.children[2].children[0].node.getRuleName())
+                        try:
+                            value = int(self.children[2].children[0].node.getRuleName())
+                        except ValueError:
+                            value = float(self.children[2].children[0].node.getRuleName())
+                            value = int(value)
                     elif symbolTable.get_symbol(varName)[0] == "float":
                         value = float(self.children[2].children[0].node.getRuleName())
+                    else:
+                        if self.children[2].children[0].node.getRuleName() == "int":
+                            value = int(self.children[2].children[0].node.getRuleName())
+                        elif self.children[2].children[0].node.getRuleName() == "float":
+                            value = float(self.children[2].children[0].node.getRuleName())
                     symbolTable.insert_value(varName, value)
                 else:
                     symbolTable.insert_symbol(varName, self.children[2])
             elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or self.children[2].node.getRuleName() == "char":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
-                if self.children[2].node.getRuleName() != "char":
+                type = symbolTable.get_symbol(varName)[0]
+                if self.children[2].node.getRuleName() == "char" and (type == "int" or type == "float"):
+                    value = ord(self.children[2].children[0].node.getRuleName()[1])
+                elif type == "int":
                     try:
                         value = int(self.children[2].children[0].node.getRuleName())
                     except ValueError:
                         value = float(self.children[2].children[0].node.getRuleName())
+                        value = int(value)
+                elif type == "float":
+                    value = float(self.children[2].children[0].node.getRuleName())
                 else:
                     value = self.children[2].children[0].node.getRuleName()[1]
                 symbolTable.insert_value(varName, value)
@@ -95,75 +111,73 @@ class AST:
                 varName = self.children[0].children[0].node.getRuleName()
                 if len(self.children[2].children) == 1:
                     if symbolTable.get_symbol(varName)[0] == "int":
-                        value = int(self.children[2].children[0].node.getRuleName())
+                        try:
+                            value = int(self.children[2].children[0].node.getRuleName())
+                        except ValueError:
+                            value = float(self.children[2].children[0].node.getRuleName())
+                            value = int(value)
                     elif symbolTable.get_symbol(varName)[0] == "float":
                         value = float(self.children[2].children[0].node.getRuleName())
                     symbolTable.insert_value(varName, value)
                 else:
                     symbolTable.insert_symbol(varName, self.children[2])
+            elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or self.children[2].node.getRuleName() == "char":
+                varName = self.children[0].children[0].node.getRuleName()
+                type = symbolTable.get_symbol(varName)[0]
+                if self.children[2].node.getRuleName() == "char" and (type == "int" or type == "float"):
+                    value = ord(self.children[2].children[0].node.getRuleName()[1])
+                elif type == "int":
+                    try:
+                        value = int(self.children[2].children[0].node.getRuleName())
+                    except ValueError:
+                        value = float(self.children[2].children[0].node.getRuleName())
+                        value = int(value)
+                elif type == "float":
+                    value = float(self.children[2].children[0].node.getRuleName())
+                else:
+                    value = self.children[2].children[0].node.getRuleName()[1]
+                symbolTable.insert_value(varName, value)
         else:
             for i in self.children:
                 i.initialiseSymbolTable(symbolTable)
 
 
 
-    def constantPropagation(self, dict, dict2, symbolTable):
+    def constantPropagation(self, dict, symbolTable):
         if self.node.getRuleName() == "expr":
-            for i in dict2:
-                dict2[i] = dict2[i] - 1
             for i in self.children:
-                i.constantPropagation(dict, dict2, symbolTable)
+                i.constantPropagation(dict, symbolTable)
+        elif self.node.getRuleName() == "assignmentStatement":
+            if self.children[0].node.getRuleName() == "nameIdentifier":
+                varName = self.children[0].children[0].node.getRuleName()
+            else:
+                varName = self.children[0].children[1].children[0].node.getRuleName()
+            if varName in dict:
+                dict.pop(varName)
         elif self.node.getRuleName() == "variableDefinition":
             rightSide = self.children[2]
-            if self.children[0].children[0].node.getRuleName() == "constWord":
-                name = self.children[0].children[1].children[0].node.getRuleName()
-                dict[name] = self.children[2]
-            else:
-                name = self.children[0].children[1].children[0].node.getRuleName()
-                dict[name] = self.children[2]
-                dict2[name] = 2
-            rightSide.constantPropagation(dict, dict2, symbolTable)
+            name = self.children[0].children[1].children[0].node.getRuleName()
+            dict[name] = self.children[2]
+            rightSide.constantPropagation(dict, symbolTable)
         elif self.node.getRuleName() == "nameIdentifier":
             tempName = self.children[0].node.getRuleName()
             if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "assignmentStatement" and self.parent.node.getRuleName() != "variableDeclaration":
                 if self.parent.node.getRuleName() == "printFunction":
                     varName = self.children[0].node.getRuleName()
                     self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName)[0]
-                if tempName in dict2:
-                    if dict2[tempName] <= 0:
-                        del dict2[tempName]
-                        del dict[tempName]
-                    else:
-                        self.children[0] = copy.deepcopy(dict[tempName])
-                        index = self.parent.children.index(self)
-                        self.children[0].parent = self.parent
-                        self.parent.children[index] = self.children[0]
-                else:
-                    self.children[0] = copy.deepcopy(dict[tempName])
-                    index = self.parent.children.index(self)
-                    self.children[0].parent = self.parent
-                    self.parent.children[index] = self.children[0]
-            elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
+                self.children[0] = copy.deepcopy(dict[tempName])
                 index = self.parent.children.index(self)
-                if index == 2:
-                    if tempName in dict2:
-                        if dict2[tempName] <= 0:
-                            del dict2[tempName]
-                            del dict[tempName]
-                        else:
-                            self.children[0] = copy.deepcopy(dict[tempName])
-                            index = self.parent.children.index(self)
-                            self.children[0].parent = self.parent
-                            self.parent.children[index] = self.children[0]
-                    else:
-                        self.children[0] = copy.deepcopy(dict[tempName])
-                        index = self.parent.children.index(self)
-                        self.children[0].parent = self.parent
-                        self.parent.children[index] = self.children[0]
+                self.children[0].parent = self.parent
+                self.parent.children[index] = self.children[0]
+            elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
+                self.children[0] = copy.deepcopy(dict[tempName])
+                index = self.parent.children.index(self)
+                self.children[0].parent = self.parent
+                self.parent.children[index] = self.children[0]
 
         else:
             for i in self.children:
-                i.constantPropagation(dict, dict2, symbolTable)
+                i.constantPropagation(dict, symbolTable)
 
 
     def constantFolding(self, symbolTable):
@@ -233,6 +247,11 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue + rightValue)
                     elif type == "float":
                         self.children[0].node.ruleName = float(leftValue + rightValue)
+                    else:
+                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        temp = symbolTable.get_symbol(varName)
+                        newArr = ["int", temp[1], temp[2]]
+                        symbolTable.symbol_tables[-1][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -241,6 +260,11 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue - rightValue)
                     elif type == "float":
                         self.children[0].node.ruleName = float(leftValue - rightValue)
+                    else:
+                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        temp = symbolTable.get_symbol(varName)
+                        newArr = ["int", temp[1], temp[2]]
+                        symbolTable.symbol_tables[-1][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -249,6 +273,11 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue * rightValue)
                     elif type == "float":
                         self.children[0].node.ruleName = float(leftValue * rightValue)
+                    else:
+                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        temp = symbolTable.get_symbol(varName)
+                        newArr = ["int", temp[1], temp[2]]
+                        symbolTable.symbol_tables[-1][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -257,6 +286,11 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue / rightValue)
                     elif type == "float":
                         self.children[0].node.ruleName = float(leftValue / rightValue)
+                    else:
+                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        temp = symbolTable.get_symbol(varName)
+                        newArr = ["int", temp[1], temp[2]]
+                        symbolTable.symbol_tables[-1][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -265,6 +299,11 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue % rightValue)
                     elif symbolTable.get_symbol(varName)[0] == "float":
                         self.children[0].node.ruleName = float(leftValue % rightValue)
+                    else:
+                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        temp = symbolTable.get_symbol(varName)
+                        newArr = ["int", temp[1], temp[2]]
+                        symbolTable.symbol_tables[-1][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()

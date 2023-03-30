@@ -17,17 +17,10 @@ def main(argv):
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
-    try:
-        symbolTable.visit(ast)
-    except IndexError:
-        if symbolTable.error == True:
-            exit()
-        else:
-            print("IndexError")
-    if symbolTable.error:
-        exit()
+    symbolTable.visit(ast)
+
     # Constant propagation and constant folding
-    ast.constantPropagation(dict(), dict(), symbolTable.symbol_table)
+    ast.constantPropagation(dict(), symbolTable.symbol_table)
     ast.constantFolding(symbolTable.symbol_table)
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table)
