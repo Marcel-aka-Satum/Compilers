@@ -59,8 +59,27 @@ Node is a class used by our AST(Abstract Syntax Tree) to store data in a tree fo
 ## Tests
 ```
 > runTests.py
-This file will visit all the test folders and files in /testen folder and it will produce a .dot file and a .ll file if the tests contain no errors else it will print out an error. To see what error you should expect look in the /TestenExpectedOutput folder.
-So for example: if u want to see the expected output for /testen/toRvalue/test1.c u should look in /TestenExpectedOutput/toRvalue/test1.c
+This file has 3 functions. runCorrect(), runAll(), main_test()
+main_test() acts like main function
+runCorrect() runs all correct tests in /testen/correctTests folder and producses .ll and .dot files for the given test files in the same directory!
+runAll() runs all tests in /testen folder (CURRENTLY NOT WORKING BECAUSE WE DONT KNOW IF WE NEED TO HAVE AUTOMATED TESTS FOR ERRORS)
+
+To see if the tests are good look in /TestenExpectedOutput folder in the same folder name as in /testen there should be files with expected output.
+
+
+How to run correct tests?
+1. Go to runTests.py
+2. def main_test():
+    runCorrect()
+3. run runTests.py
+
+How to run single test? (Good for error tests)
+1. Go to main.py
+2. if __name__ == '__main__':
+    main("namefile.c")
+3. run main.py
+
+
 ```
 -------
 ## SymbolTable
