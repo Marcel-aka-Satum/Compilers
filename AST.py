@@ -70,6 +70,18 @@ class AST:
 
     def initialiseSymbolTable(self, symbolTable):
         if self.node.getRuleName() == "variableDefinition":
+            if self.children[0].children[0].node.getRuleName() == "pointerWord":
+                varType = self.children[0].children[0].children[0].children[0].node.getRuleName()
+                name = self.children[0].children[1].children[0].node.getRuleName()
+                tableType = symbolTable.get_symbol(name)[0]
+                if varType == "char" and tableType == "int":
+                    self.children[0].children[0].children[0].children[0].node.ruleName = "int"
+            else:
+                varType = self.children[0].children[0].children[0].node.getRuleName()
+                name = self.children[0].children[1].children[0].node.getRuleName()
+                tableType = symbolTable.get_symbol(name)[0]
+                if varType == "char" and tableType == "int":
+                    self.children[0].children[0].children[0].node.ruleName = "int"
             if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
                 if len(self.children[2].children) == 1:
@@ -290,7 +302,7 @@ class AST:
                     elif type == "float":
                         self.children[0].node.ruleName = float(leftValue - rightValue)
                     else:
-                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        self.children[0].node.ruleName = int(leftValue - rightValue)
                         temp = symbolTable.get_symbol(varName)
                         newArr = ["int", temp[1], temp[2]]
                         symbolTable.symbol_tables[-1][varName] = newArr
@@ -303,7 +315,7 @@ class AST:
                     elif type == "float":
                         self.children[0].node.ruleName = float(leftValue * rightValue)
                     else:
-                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        self.children[0].node.ruleName = int(leftValue * rightValue)
                         temp = symbolTable.get_symbol(varName)
                         newArr = ["int", temp[1], temp[2]]
                         symbolTable.symbol_tables[-1][varName] = newArr
@@ -316,7 +328,7 @@ class AST:
                     elif type == "float":
                         self.children[0].node.ruleName = float(leftValue / rightValue)
                     else:
-                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        self.children[0].node.ruleName = int(leftValue / rightValue)
                         temp = symbolTable.get_symbol(varName)
                         newArr = ["int", temp[1], temp[2]]
                         symbolTable.symbol_tables[-1][varName] = newArr
@@ -329,7 +341,7 @@ class AST:
                     elif symbolTable.get_symbol(varName)[0] == "float":
                         self.children[0].node.ruleName = float(leftValue % rightValue)
                     else:
-                        self.children[0].node.ruleName = int(leftValue + rightValue)
+                        self.children[0].node.ruleName = int(leftValue % rightValue)
                         temp = symbolTable.get_symbol(varName)
                         newArr = ["int", temp[1], temp[2]]
                         symbolTable.symbol_tables[-1][varName] = newArr
