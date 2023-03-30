@@ -27,9 +27,9 @@ def main(argv):
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
     ast.printInDot(argv)
-    
-    # llvm = LLVM()
-    # llvm.generate_LLVM(symbolTable.symbol_table.symbol_tables)
+    ##generate LLVM from C
+    llvm = LLVM(argv)
+    llvm.generate_LLVM(symbolTable.symbol_table.symbol_tables)
     # Print the symbol table
     # print(symbolTable.symbol_table.symbol_tables)
 
