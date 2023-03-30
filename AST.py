@@ -38,9 +38,10 @@ class AST:
             string += str(self) + " -- " + str(child) + "\n" + child.addConnections()
         return string
 
-    def printInDot(self):
+    def printInDot(self, argv):
         graph = "graph ast { \n" + self.addNodes() + self.addConnections() + "}"
-        file = open("ast.dot", "w")
+        argv += ".ast.dot"
+        file = open(argv, "w")
         file.write(graph)
 
     def optimize(self):

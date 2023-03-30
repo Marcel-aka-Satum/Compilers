@@ -1,6 +1,7 @@
 from MyGrammarLexer import MyGrammarLexer
 from AST import *
 from SemanticAnalysisVisitor import *
+from LLVM import *
 
 def main(argv):
     input_stream = FileStream(argv)
@@ -25,9 +26,12 @@ def main(argv):
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
-    ast.printInDot()
+    ast.printInDot(argv)
+    
+    # llvm = LLVM()
+    # llvm.generate_LLVM(symbolTable.symbol_table.symbol_tables)
     # Print the symbol table
-    print(symbolTable.symbol_table.symbol_tables)
+    # print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':
     main("test.c")
