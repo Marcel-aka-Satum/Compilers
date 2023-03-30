@@ -165,15 +165,9 @@ class AST:
                 if self.parent.node.getRuleName() == "printFunction":
                     varName = self.children[0].node.getRuleName()
                     self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName)[0]
-                self.children[0] = copy.deepcopy(dict[tempName])
-                index = self.parent.children.index(self)
-                self.children[0].parent = self.parent
-                self.parent.children[index] = self.children[0]
+                self.children.append(copy.deepcopy(dict[tempName]))
             elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
-                self.children[0] = copy.deepcopy(dict[tempName])
-                index = self.parent.children.index(self)
-                self.children[0].parent = self.parent
-                self.parent.children[index] = self.children[0]
+                self.children.append(copy.deepcopy(dict[tempName]))
 
         else:
             for i in self.children:
@@ -191,8 +185,19 @@ class AST:
                 leftValue = float(leftValue.children[0].node.getRuleName())
             elif leftValue.node.getRuleName() == "char":
                 leftValue = ord(leftValue.children[0].node.getRuleName()[1])
-            elif leftValue.node.getRuleName() == "nameIdentifier":
+            elif leftValue.node.getRuleName() == "nameIdentifier" and len(leftValue.children) == 1:
                 possible = False
+            elif leftValue.node.getRuleName() == "nameIdentifier" and len(leftValue.children) == 2:
+                leftValue = leftValue.children[1]
+                leftValue.constantFolding(symbolTable)
+                if len(leftValue.children) == 1:
+                    try:
+                        leftValue = int(leftValue.children[0].node.getRuleName())
+                    except ValueError:
+                        leftValue = float(leftValue.children[0].node.getRuleName())
+                else:
+                    possible = False
+
             else:
                 leftValue.constantFolding(symbolTable)
                 if len(leftValue.children) == 1:
@@ -209,8 +214,18 @@ class AST:
                 rightValue = float(rightValue.children[0].node.getRuleName())
             elif rightValue.node.getRuleName() == "char":
                  rightValue = ord(rightValue.children[0].node.getRuleName()[1])
-            elif rightValue.node.getRuleName() == "nameIdentifier":
+            elif rightValue.node.getRuleName() == "nameIdentifier" and len(rightValue.children) == 1:
                 possible = False
+            elif rightValue.node.getRuleName() == "nameIdentifier" and len(rightValue.children) == 2:
+                rightValue = rightValue.children[1]
+                rightValue.constantFolding(symbolTable)
+                if len(rightValue.children) == 1:
+                    try:
+                        rightValue = int(rightValue.children[0].node.getRuleName())
+                    except ValueError:
+                        rightValue = float(rightValue.children[0].node.getRuleName())
+                else:
+                    possible = False
             else:
                 rightValue.constantFolding(symbolTable)
                 if len(rightValue.children) == 1:
@@ -241,7 +256,21 @@ class AST:
                         if varName == None:
                             break
                 if varName != "print":
-                    type = symbolTable.get_symbol(varName)[0]
+                    find = False
+                    curr = self.parent
+                    name = None
+                    while not find:
+                        if curr.node.getRuleName() == "variableDefinition" or curr.node.getRuleName() == "assignmentStatement":
+                            break
+                        elif curr.node.getRuleName() == "nameIdentifier":
+                            name = curr.children[0].node.getRuleName()
+                            find = True
+                        else:
+                            curr = curr.parent
+                    if find:
+                        type = symbolTable.get_symbol(name)[0]
+                    else:
+                        type = symbolTable.get_symbol(varName)[0]
                 if self.children[1].node.getRuleName() == "+":
                     if type == "int":
                         self.children[0].node.ruleName = int(leftValue + rightValue)
