@@ -127,6 +127,14 @@ class AST:
                 else:
                     value = float(self.children[2].children[0].node.getRuleName())
                 symbolTable.insert_value(varName, value)
+            elif self.children[2].node.getRuleName() == "nameIdentifier" and len(self.children[2].children) == 2:
+                varName = self.children[2].children[0].node.getRuleName()
+                type = symbolTable.get_symbol(varName)[0]
+                if type == "int":
+                    value = int(self.children[2].children[1].children[0].node.getRuleName())
+                else:
+                    value = float(self.children[2].children[1].children[0].node.getRuleName())
+                symbolTable.insert_value(name, value)
 
 
         elif self.node.getRuleName() == "assignmentStatement":

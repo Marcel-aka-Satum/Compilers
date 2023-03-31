@@ -1,0 +1,125 @@
+graph ast { 
+<AST.AST object at 0x7f3e815492b0>[label="prog"] 
+<AST.AST object at 0x7f3e81549fa0>[label="expr"] 
+<AST.AST object at 0x7f3e816b4190>[label="variableDefinition"] 
+<AST.AST object at 0x7f3e816b4d60>[label="variableDeclaration"] 
+<AST.AST object at 0x7f3e816b4430>[label="reservedWord"] 
+<AST.AST object at 0x7f3e816b4e50>[label="int"] 
+<AST.AST object at 0x7f3e816b4ca0>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e816b4370>[label="a"] 
+<AST.AST object at 0x7f3e816b4e20>[label="="] 
+<AST.AST object at 0x7f3e8170e490>[label="int"] 
+<AST.AST object at 0x7f3e8170ecd0>[label="3"] 
+<AST.AST object at 0x7f3e8152fac0>[label="expr"] 
+<AST.AST object at 0x7f3e8162c220>[label="variableDefinition"] 
+<AST.AST object at 0x7f3e8162ce20>[label="variableDeclaration"] 
+<AST.AST object at 0x7f3e8162cf10>[label="reservedWord"] 
+<AST.AST object at 0x7f3e8162ca90>[label="int"] 
+<AST.AST object at 0x7f3e8162c640>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e8162c3a0>[label="c"] 
+<AST.AST object at 0x7f3e8162c250>[label="="] 
+<AST.AST object at 0x7f3e816c1dc0>[label="int"] 
+<AST.AST object at 0x7f3e816dc3d0>[label="10"] 
+<AST.AST object at 0x7f3e8162c370>[label="expr"] 
+<AST.AST object at 0x7f3e816dc040>[label="variableDefinition"] 
+<AST.AST object at 0x7f3e8167dd30>[label="variableDeclaration"] 
+<AST.AST object at 0x7f3e8167d0d0>[label="pointerWord"] 
+<AST.AST object at 0x7f3e8167d9a0>[label="reservedWord"] 
+<AST.AST object at 0x7f3e8167d880>[label="int"] 
+<AST.AST object at 0x7f3e8167d850>[label="***"] 
+<AST.AST object at 0x7f3e8167d490>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e8167da60>[label="b"] 
+<AST.AST object at 0x7f3e8167da30>[label="="] 
+<AST.AST object at 0x7f3e81686880>[label="referenceID"] 
+<AST.AST object at 0x7f3e81686910>[label="&"] 
+<AST.AST object at 0x7f3e81686790>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e816869d0>[label="c"] 
+<AST.AST object at 0x7f3e8170e7f0>[label="int"] 
+<AST.AST object at 0x7f3e81648220>[label="10"] 
+<AST.AST object at 0x7f3e816dcd30>[label="expr"] 
+<AST.AST object at 0x7f3e816d3a30>[label="assignmentStatement"] 
+<AST.AST object at 0x7f3e816ba2b0>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e816ba1c0>[label="a"] 
+<AST.AST object at 0x7f3e816ba9d0>[label="="] 
+<AST.AST object at 0x7f3e816ba070>[label="int"] 
+<AST.AST object at 0x7f3e8155f160>[label="6"] 
+<AST.AST object at 0x7f3e816d30d0>[label="expr"] 
+<AST.AST object at 0x7f3e8155f5b0>[label="assignmentStatement"] 
+<AST.AST object at 0x7f3e8155fa00>[label="referenceID"] 
+<AST.AST object at 0x7f3e8155f8b0>[label="***"] 
+<AST.AST object at 0x7f3e8155f610>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e8155f2e0>[label="b"] 
+<AST.AST object at 0x7f3e8155ffa0>[label="="] 
+<AST.AST object at 0x7f3e8162f940>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e8162f250>[label="a"] 
+<AST.AST object at 0x7f3e8155fa60>[label="expr"] 
+<AST.AST object at 0x7f3e81560520>[label="assignmentStatement"] 
+<AST.AST object at 0x7f3e81560d30>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e81560820>[label="a"] 
+<AST.AST object at 0x7f3e81560c70>[label="="] 
+<AST.AST object at 0x7f3e815606a0>[label="referenceID"] 
+<AST.AST object at 0x7f3e81560250>[label="***"] 
+<AST.AST object at 0x7f3e81560c40>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e81560760>[label="b"] 
+<AST.AST object at 0x7f3e815492b0> -- <AST.AST object at 0x7f3e81549fa0>
+<AST.AST object at 0x7f3e81549fa0> -- <AST.AST object at 0x7f3e816b4190>
+<AST.AST object at 0x7f3e816b4190> -- <AST.AST object at 0x7f3e816b4d60>
+<AST.AST object at 0x7f3e816b4d60> -- <AST.AST object at 0x7f3e816b4430>
+<AST.AST object at 0x7f3e816b4430> -- <AST.AST object at 0x7f3e816b4e50>
+<AST.AST object at 0x7f3e816b4d60> -- <AST.AST object at 0x7f3e816b4ca0>
+<AST.AST object at 0x7f3e816b4ca0> -- <AST.AST object at 0x7f3e816b4370>
+<AST.AST object at 0x7f3e816b4190> -- <AST.AST object at 0x7f3e816b4e20>
+<AST.AST object at 0x7f3e816b4190> -- <AST.AST object at 0x7f3e8170e490>
+<AST.AST object at 0x7f3e8170e490> -- <AST.AST object at 0x7f3e8170ecd0>
+<AST.AST object at 0x7f3e81549fa0> -- <AST.AST object at 0x7f3e8152fac0>
+<AST.AST object at 0x7f3e8152fac0> -- <AST.AST object at 0x7f3e8162c220>
+<AST.AST object at 0x7f3e8162c220> -- <AST.AST object at 0x7f3e8162ce20>
+<AST.AST object at 0x7f3e8162ce20> -- <AST.AST object at 0x7f3e8162cf10>
+<AST.AST object at 0x7f3e8162cf10> -- <AST.AST object at 0x7f3e8162ca90>
+<AST.AST object at 0x7f3e8162ce20> -- <AST.AST object at 0x7f3e8162c640>
+<AST.AST object at 0x7f3e8162c640> -- <AST.AST object at 0x7f3e8162c3a0>
+<AST.AST object at 0x7f3e8162c220> -- <AST.AST object at 0x7f3e8162c250>
+<AST.AST object at 0x7f3e8162c220> -- <AST.AST object at 0x7f3e816c1dc0>
+<AST.AST object at 0x7f3e816c1dc0> -- <AST.AST object at 0x7f3e816dc3d0>
+<AST.AST object at 0x7f3e8152fac0> -- <AST.AST object at 0x7f3e8162c370>
+<AST.AST object at 0x7f3e8162c370> -- <AST.AST object at 0x7f3e816dc040>
+<AST.AST object at 0x7f3e816dc040> -- <AST.AST object at 0x7f3e8167dd30>
+<AST.AST object at 0x7f3e8167dd30> -- <AST.AST object at 0x7f3e8167d0d0>
+<AST.AST object at 0x7f3e8167d0d0> -- <AST.AST object at 0x7f3e8167d9a0>
+<AST.AST object at 0x7f3e8167d9a0> -- <AST.AST object at 0x7f3e8167d880>
+<AST.AST object at 0x7f3e8167d0d0> -- <AST.AST object at 0x7f3e8167d850>
+<AST.AST object at 0x7f3e8167dd30> -- <AST.AST object at 0x7f3e8167d490>
+<AST.AST object at 0x7f3e8167d490> -- <AST.AST object at 0x7f3e8167da60>
+<AST.AST object at 0x7f3e816dc040> -- <AST.AST object at 0x7f3e8167da30>
+<AST.AST object at 0x7f3e816dc040> -- <AST.AST object at 0x7f3e81686880>
+<AST.AST object at 0x7f3e81686880> -- <AST.AST object at 0x7f3e81686910>
+<AST.AST object at 0x7f3e81686880> -- <AST.AST object at 0x7f3e81686790>
+<AST.AST object at 0x7f3e81686790> -- <AST.AST object at 0x7f3e816869d0>
+<AST.AST object at 0x7f3e81686790> -- <AST.AST object at 0x7f3e8170e7f0>
+<AST.AST object at 0x7f3e8170e7f0> -- <AST.AST object at 0x7f3e81648220>
+<AST.AST object at 0x7f3e8162c370> -- <AST.AST object at 0x7f3e816dcd30>
+<AST.AST object at 0x7f3e816dcd30> -- <AST.AST object at 0x7f3e816d3a30>
+<AST.AST object at 0x7f3e816d3a30> -- <AST.AST object at 0x7f3e816ba2b0>
+<AST.AST object at 0x7f3e816ba2b0> -- <AST.AST object at 0x7f3e816ba1c0>
+<AST.AST object at 0x7f3e816d3a30> -- <AST.AST object at 0x7f3e816ba9d0>
+<AST.AST object at 0x7f3e816d3a30> -- <AST.AST object at 0x7f3e816ba070>
+<AST.AST object at 0x7f3e816ba070> -- <AST.AST object at 0x7f3e8155f160>
+<AST.AST object at 0x7f3e816dcd30> -- <AST.AST object at 0x7f3e816d30d0>
+<AST.AST object at 0x7f3e816d30d0> -- <AST.AST object at 0x7f3e8155f5b0>
+<AST.AST object at 0x7f3e8155f5b0> -- <AST.AST object at 0x7f3e8155fa00>
+<AST.AST object at 0x7f3e8155fa00> -- <AST.AST object at 0x7f3e8155f8b0>
+<AST.AST object at 0x7f3e8155fa00> -- <AST.AST object at 0x7f3e8155f610>
+<AST.AST object at 0x7f3e8155f610> -- <AST.AST object at 0x7f3e8155f2e0>
+<AST.AST object at 0x7f3e8155f5b0> -- <AST.AST object at 0x7f3e8155ffa0>
+<AST.AST object at 0x7f3e8155f5b0> -- <AST.AST object at 0x7f3e8162f940>
+<AST.AST object at 0x7f3e8162f940> -- <AST.AST object at 0x7f3e8162f250>
+<AST.AST object at 0x7f3e816d30d0> -- <AST.AST object at 0x7f3e8155fa60>
+<AST.AST object at 0x7f3e8155fa60> -- <AST.AST object at 0x7f3e81560520>
+<AST.AST object at 0x7f3e81560520> -- <AST.AST object at 0x7f3e81560d30>
+<AST.AST object at 0x7f3e81560d30> -- <AST.AST object at 0x7f3e81560820>
+<AST.AST object at 0x7f3e81560520> -- <AST.AST object at 0x7f3e81560c70>
+<AST.AST object at 0x7f3e81560520> -- <AST.AST object at 0x7f3e815606a0>
+<AST.AST object at 0x7f3e815606a0> -- <AST.AST object at 0x7f3e81560250>
+<AST.AST object at 0x7f3e815606a0> -- <AST.AST object at 0x7f3e81560c40>
+<AST.AST object at 0x7f3e81560c40> -- <AST.AST object at 0x7f3e81560760>
+}
