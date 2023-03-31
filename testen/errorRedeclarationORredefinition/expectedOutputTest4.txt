@@ -1,0 +1,5 @@
+we verwachten hier 2 errors:
+[ Error ] at line 2: Variable a has already been defined in the current scope
+[ Error ] at line 5: Variable c has already been defined in the current scope
+
+omdat de variable a en c al is gedeclareerd of initaliseerd kunnen we het niet meer opnieuw doen.

@@ -1,0 +1,2 @@
+we verwachten een error: [ Error ] at line 3: Variable y can't assign incompatible type: expects an int or float or char
+omdat we hier de pointer y correct hebben gedereferenced hebben verwacht het een value, maar hier word een adress gegeven

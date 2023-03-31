@@ -1,0 +1,1 @@
+we verwachten hier geen error, omdat de variable y een const pointer is mogen we wel de adress naar waar de pointer wijst veranderen maar niet de waarde er in.

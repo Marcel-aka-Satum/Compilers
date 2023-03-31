@@ -1,0 +1,2 @@
+we verwachten een error: [ Error ] at line 2: Can not assign variable PI with type const
+Omdat de variable PI een const is en een const variable mogen we niet reassignen
