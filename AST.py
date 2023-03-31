@@ -119,10 +119,28 @@ class AST:
                 else:
                     value = self.children[2].children[0].node.getRuleName()[1]
                 symbolTable.insert_value(varName, value)
+            elif self.children[2].node.getRuleName() == "opUnary":
+                varName = self.children[0].children[1].children[0].node.getRuleName()
+                type = symbolTable.get_symbol(varName)[0]
+                if type == "int":
+                    value = int(self.children[2].children[0].node.getRuleName())
+                else:
+                    value = float(self.children[2].children[0].node.getRuleName())
+                symbolTable.insert_value(varName, value)
+
+
         elif self.node.getRuleName() == "assignmentStatement":
             if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
                 varName = self.children[0].children[0].node.getRuleName()
-                if len(self.children[2].children) == 1:
+                if self.children[2].node.getRuleName() == "opUnary":
+                    type = symbolTable.get_symbol(varName)[0]
+                    if type == "int":
+                        value = int(self.children[2].children[0].node.getRuleName())
+                    else:
+                        value = float(self.children[2].children[0].node.getRuleName())
+                    symbolTable.insert_value(varName, value)
+
+                elif len(self.children[2].children) == 1:
                     if symbolTable.get_symbol(varName)[0] == "int":
                         try:
                             value = int(self.children[2].children[0].node.getRuleName())
@@ -150,28 +168,36 @@ class AST:
                 else:
                     value = self.children[2].children[0].node.getRuleName()[1]
                 symbolTable.insert_value(varName, value)
+
         else:
             for i in self.children:
                 i.initialiseSymbolTable(symbolTable)
 
 
 
-    def constantPropagation(self, dict, symbolTable):
+    def constantPropagation(self, dict, arr,  symbolTable):
         if self.node.getRuleName() == "expr":
+            for i in arr:
+                if i in dict:
+                    dict.pop(i)
+            arr.clear()
             for i in self.children:
-                i.constantPropagation(dict, symbolTable)
+                i.constantPropagation(dict,arr, symbolTable)
         elif self.node.getRuleName() == "assignmentStatement":
             if self.children[0].node.getRuleName() == "nameIdentifier":
                 varName = self.children[0].children[0].node.getRuleName()
             else:
                 varName = self.children[0].children[1].children[0].node.getRuleName()
             if varName in dict:
-                dict.pop(varName)
+                arr.append(varName)
+            rightSide = self.children[2]
+            rightSide.constantPropagation(dict, arr,  symbolTable)
+
         elif self.node.getRuleName() == "variableDefinition":
             rightSide = self.children[2]
             name = self.children[0].children[1].children[0].node.getRuleName()
             dict[name] = self.children[2]
-            rightSide.constantPropagation(dict, symbolTable)
+            rightSide.constantPropagation(dict, arr, symbolTable)
         elif self.node.getRuleName() == "nameIdentifier":
             tempName = self.children[0].node.getRuleName()
             if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "assignmentStatement" and self.parent.node.getRuleName() != "variableDeclaration":
@@ -184,7 +210,7 @@ class AST:
 
         else:
             for i in self.children:
-                i.constantPropagation(dict, symbolTable)
+                i.constantPropagation(dict, arr, symbolTable)
 
 
     def constantFolding(self, symbolTable):
@@ -207,7 +233,10 @@ class AST:
                     try:
                         leftValue = int(leftValue.children[0].node.getRuleName())
                     except ValueError:
-                        leftValue = float(leftValue.children[0].node.getRuleName())
+                        try:
+                            leftValue = float(leftValue.children[0].node.getRuleName())
+                        except ValueError:
+                            leftValue = ord(leftValue.children[0].node.getRuleName()[1])
                 else:
                     possible = False
 
@@ -217,7 +246,10 @@ class AST:
                     try:
                         leftValue = int(leftValue.children[0].node.getRuleName())
                     except ValueError:
-                        leftValue = float(leftValue.children[0].node.getRuleName())
+                        try:
+                            leftValue = float(leftValue.children[0].node.getRuleName())
+                        except ValueError:
+                            leftValue = ord(leftValue.children[0].node.getRuleName()[1])
                 else:
                     possible = False
 
@@ -236,7 +268,10 @@ class AST:
                     try:
                         rightValue = int(rightValue.children[0].node.getRuleName())
                     except ValueError:
-                        rightValue = float(rightValue.children[0].node.getRuleName())
+                        try:
+                            rightValue = float(rightValue.children[0].node.getRuleName())
+                        except ValueError:
+                            rightValue = ord(rightValue.children[0].node.getRuleName()[1])
                 else:
                     possible = False
             else:
@@ -245,7 +280,10 @@ class AST:
                     try:
                         rightValue = int(rightValue.children[0].node.getRuleName())
                     except ValueError:
-                        rightValue = float(rightValue.children[0].node.getRuleName())
+                        try:
+                            rightValue = float(rightValue.children[0].node.getRuleName())
+                        except ValueError:
+                            rightValue = ord(rightValue.children[0].node.getRuleName()[1])
                 else:
                     possible = False
 
