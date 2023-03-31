@@ -27,11 +27,16 @@ def main(argv):
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
     ast.printInDot(argv)
-    ##generate LLVM from C
-    llvm = LLVM(argv)
-    llvm.generate_LLVM(symbolTable.symbol_table.symbol_tables)
-    # Print the symbol table
+
+    #print symbol table
     # print(symbolTable.symbol_table.symbol_tables)
+    ##generate LLVM from C
+    llvm = LLVM(argv, symbolTable)
+    llvm.look_for_value(ast)
+    llvm.generate_LLVM()
+    # Print the LLVM symbol table
+    # print(llvm.table.symbol_table.symbol_tables)
+
 
 if __name__ == '__main__':
     main("test.c")
