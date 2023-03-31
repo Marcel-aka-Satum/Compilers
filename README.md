@@ -224,6 +224,9 @@ Our printDot function produces new AST tree
 ```
 ### 2 Code Generation: LLVM
 ```
+NOTE !!! OUR LLVM IS WITHOUT MAIN FUNCTION BECAUSE WE THOUGHT WE DIDN'T HAVE TO DO IT RIGHT NOW 
+(FUNCTIONS ARE PROJECT 5)
+
 Our LLVM class in LLVM.py produces LLVM code from our C test file in a .ll format
 see example in main.py how to use it.
 >main.py
