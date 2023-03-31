@@ -9,7 +9,7 @@ opAnd: opAnd '&&' opOr | opOr;
 opOr: opOr '||' opCompare | opCompare;
 
 opCompare: opCompare '==' opAddOrSub | opCompare '<=' opAddOrSub | opCompare '>=' opAddOrSub
-	 | opCompare '!=' opAddOrSub | opCompare '<' opAddOrSub | opCompare '>' | opAddOrSub | opAddOrSub;
+	 | opCompare '!=' opAddOrSub | opCompare '<' opAddOrSub | opCompare '>' opAddOrSub | opAddOrSub;
 
 opAddOrSub: opAddOrSub '+' opMultOrDiv | opAddOrSub '-' opMultOrDiv | opMultOrDiv;
 
@@ -19,11 +19,11 @@ opUnary: '+' brackets | '-' brackets | '!' brackets | brackets;
 
 brackets: '(' opAnd ')' | variableDefinition | variableDeclaration | assignmentStatement | dataTypes | printFunction;
 
-variableDefinition: variableDeclaration '=' opAddOrSub;
+variableDefinition: variableDeclaration '=' opAnd;
 
 variableDeclaration: constWord referenceID;
 
-assignmentStatement: referenceID '=' opAddOrSub | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAddOrSub;
+assignmentStatement: referenceID '=' opAddOrSub | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
 
 constWord: 'const' pointerWord | pointerWord;
 
