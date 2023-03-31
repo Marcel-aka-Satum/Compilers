@@ -29,6 +29,9 @@ def runAll():
         current_path += f"/{i}"
         files = os.listdir(current_path)
         for j in files:
+            #only .c files will be tested
+            if(j[-2:] != '.c'):
+                continue 
             temp_old2 = current_path
             current_path += f"/{j}"
             try:
@@ -48,6 +51,9 @@ def runCorrect():
     oldpath = current_path
     files = os.listdir(oldpath)
     for j in files:
+        #only .c files will be tested
+        if(j[-2:] != '.c'):
+            continue 
         temp_old2 = current_path
         current_path += f"/{j}"
         try:
