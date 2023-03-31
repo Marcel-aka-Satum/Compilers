@@ -225,3 +225,8 @@ Our printDot function produces new AST tree
 ### 2 Code Generation: LLVM
 ```
 Our LLVM class in LLVM.py produces LLVM code from our C test file in a .ll format
+see example in main.py how to use it.
+>main.py
+    llvm = LLVM(argv, symbolTable) //make llvm object that will store llvm data
+    llvm.look_for_value(ast) // check for needed values in symboltable
+    llvm.generate_LLVM() // generate llvm files
