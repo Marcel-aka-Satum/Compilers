@@ -1,0 +1,27 @@
+graph ast { 
+<AST.AST object at 0x7f3e817e9190>[label="prog"] 
+<AST.AST object at 0x7f3e817c5eb0>[label="expr"] 
+<AST.AST object at 0x7f3e81711970>[label="variableDefinition"] 
+<AST.AST object at 0x7f3e81711d90>[label="variableDeclaration"] 
+<AST.AST object at 0x7f3e81711ca0>[label="constWord"] 
+<AST.AST object at 0x7f3e81711670>[label="const"] 
+<AST.AST object at 0x7f3e817116d0>[label="reservedWord"] 
+<AST.AST object at 0x7f3e81711af0>[label="int"] 
+<AST.AST object at 0x7f3e817119d0>[label="nameIdentifier"] 
+<AST.AST object at 0x7f3e81771820>[label="x"] 
+<AST.AST object at 0x7f3e81711340>[label="="] 
+<AST.AST object at 0x7f3e816748b0>[label="opMultOrDiv"] 
+<AST.AST object at 0x7f3e81674f10>[label="0"] 
+<AST.AST object at 0x7f3e817e9190> -- <AST.AST object at 0x7f3e817c5eb0>
+<AST.AST object at 0x7f3e817c5eb0> -- <AST.AST object at 0x7f3e81711970>
+<AST.AST object at 0x7f3e81711970> -- <AST.AST object at 0x7f3e81711d90>
+<AST.AST object at 0x7f3e81711d90> -- <AST.AST object at 0x7f3e81711ca0>
+<AST.AST object at 0x7f3e81711ca0> -- <AST.AST object at 0x7f3e81711670>
+<AST.AST object at 0x7f3e81711ca0> -- <AST.AST object at 0x7f3e817116d0>
+<AST.AST object at 0x7f3e817116d0> -- <AST.AST object at 0x7f3e81711af0>
+<AST.AST object at 0x7f3e81711d90> -- <AST.AST object at 0x7f3e817119d0>
+<AST.AST object at 0x7f3e817119d0> -- <AST.AST object at 0x7f3e81771820>
+<AST.AST object at 0x7f3e81711970> -- <AST.AST object at 0x7f3e81711340>
+<AST.AST object at 0x7f3e81711970> -- <AST.AST object at 0x7f3e816748b0>
+<AST.AST object at 0x7f3e816748b0> -- <AST.AST object at 0x7f3e81674f10>
+}
