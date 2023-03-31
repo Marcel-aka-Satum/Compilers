@@ -10,8 +10,20 @@ class LLVM:
         self.argv = argv
         self.values2 = []
         self.table = symbolTable
+        self.register = []
+        self.comments = []
 
     def generate_LLVM(self):
+        for comment in self.comments:
+            if comment[0] == '/' and comment[1] == '*':
+                a = comment.split('\n')
+                for i in a:
+                    if i == '/*' or i == '*/':
+                        continue
+                    else:
+                        self.output += f";{i}\n"
+            else:
+                self.output += f";{comment}\n"
         #loop through symbolTable
         for dict1 in self.table.symbol_table.symbol_tables:
             #loop through dicts of table (can have multiple scopes)
@@ -62,6 +74,7 @@ class LLVM:
     
     #look in symbol table if AST nodes needs to be replaced by value this function will do it ... hopefully
     def look_for_value(self, ast):
+        self.get_all_comments(ast)
         for child in ast.children:
             self.look_for_value(child)
             if(ast.node.getRuleName() == 'expr'):
@@ -113,6 +126,19 @@ class LLVM:
         argv += ".ll"
         file = open(argv, "w")
         file.write(self.output)
+
+    def get_all_comments(self, node):
+        if node.node.getRuleName() == "comment":
+            self.traverse_child(node)
+        for child in node.children:
+            self.get_all_comments(child)
+
+    def traverse_child(self, node):
+        for child in node.children:
+            if child.node.getRuleName() not in self.comments:
+                self.comments.append(child.node.getRuleName())
+            self.traverse_child(child)
+
 
 def get_leftmost_node(node):
     if not node:  # base case for empty tree or leaf node

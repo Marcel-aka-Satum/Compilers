@@ -3,6 +3,7 @@ from AST import *
 from SemanticAnalysisVisitor import *
 from LLVM import *
 
+
 def main(argv):
     input_stream = FileStream(argv)
     lexer = MyGrammarLexer(input_stream)
@@ -27,7 +28,7 @@ def main(argv):
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
     ast.printInDot(argv)
-    #print symbol table
+    # print symbol table
     # print(symbolTable.symbol_table.symbol_tables)
 
     ##generate LLVM from C
@@ -35,8 +36,8 @@ def main(argv):
     llvm.look_for_value(ast)
     llvm.generate_LLVM()
     # Print the LLVM symbol table
-    #print(llvm.table.symbol_table.symbol_tables)
-    
+    # print(llvm.table.symbol_table.symbol_tables)
+
 
 if __name__ == '__main__':
     main("test.c")

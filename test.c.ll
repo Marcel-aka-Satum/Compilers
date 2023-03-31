@@ -1,4 +1,2 @@
 ;hallo
-;ik ben dora
-;tomas
-@a = dso_local global i32 20, allign 4
+@a = dso_local global i32 50, allign 4
