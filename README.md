@@ -121,6 +121,7 @@ The following operators must be supported:
 • (mandatory) Brackets to overwrite the order of operations.
 • (mandatory) Logical operators &&, ||, and !.
 • (optional) Binary operator %.
+• (optional) Comparison operators >=, <=, and !=.
 ```
 All of the above are implementend in our grammar.
 
@@ -194,6 +195,10 @@ We created a file that tests all of this types "runTest.py" look more in Documen
 Our grammar is extended for the following.
 ```
 • (mandatory) Comments.
+    - (optional) Instead of simply ignoring comments, you can increase the readability
+      of the generated LLVM code by retaining the comments from the input code
+      during the compilation process. The comments will thus be stored in the AST.
+      Such comments can then be put into the LLVM code.
 • (mandatory) Support for single line comments and multi line comments.
 • (mandatory) Outputting to the standard output using printf.
 ```
