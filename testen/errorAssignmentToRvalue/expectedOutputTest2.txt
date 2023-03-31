@@ -1,2 +1,0 @@
-we verwachten een error: [ Error ] at line 3: assignment to an rvalue
-Omdat het output van (a+b) een rvalue is en we mogen een rvalue niet assignen 

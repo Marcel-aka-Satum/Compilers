@@ -35,8 +35,8 @@ def main(argv):
     llvm.look_for_value(ast)
     llvm.generate_LLVM()
     # Print the LLVM symbol table
-    # print(llvm.table.symbol_table.symbol_tables)
-
+    print(llvm.table.symbol_table.symbol_tables)
+    
 
 if __name__ == '__main__':
     main("test.c")

@@ -1,2 +1,0 @@
-we verwachten een error: [ Error ] at line 1: assignment to an rvalue
-Omdat we een rvalue niet mogen assignen

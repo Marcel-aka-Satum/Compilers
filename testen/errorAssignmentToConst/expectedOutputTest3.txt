@@ -1,2 +1,0 @@
-we verwachten een error: [ Error ] at line 2: Can not assign variable a with type const
-Omdat de variable a een const is en we mogen een const variable niet reassignen

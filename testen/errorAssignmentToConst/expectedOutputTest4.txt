@@ -1,2 +1,0 @@
-we verwachten een error: [ Error ] at line 3: Can not assign variable y with type const
-Omdat de variable y een const pointer is mogen we de waarde in dat adress niet veranderen
