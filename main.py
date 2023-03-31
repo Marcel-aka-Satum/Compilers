@@ -17,30 +17,21 @@ def main(argv):
     ast.optimize()
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
-    try:
-        # Visit the AST and look for errors
-        symbolTable.visit(ast)
-    except:
-        if symbolTable.error:
-            exit()
-        else:
-            print("error")
-    if symbolTable.error:
-        exit()
+    # Visit the AST and look for errors
+    symbolTable.visit(ast)
 
     # Constant propagation and constant folding
-    ast.constantPropagation(dict(), [], symbolTable.symbol_table)
+    ast.constantPropagation(dict(), symbolTable.symbol_table)
     ast.constantFolding(symbolTable.symbol_table)
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table)
     # Print the AST in dot
     ast.printInDot(argv)
-
+    ##generate LLVM from C
+    llvm = LLVM(argv)
+    llvm.generate_LLVM(symbolTable.symbol_table.symbol_tables)
     # Print the symbol table
-    print(symbolTable.symbol_table.symbol_tables)
-    
-    # llvm = LLVM()
-    # llvm.generate_LLVM(symbolTable.symbol_table.symbol_tables)
+    # print(symbolTable.symbol_table.symbol_tables)
 
 if __name__ == '__main__':
     main("test.c")
