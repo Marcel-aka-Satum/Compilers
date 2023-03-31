@@ -1,0 +1,54 @@
+graph ast { 
+<AST.AST object at 0x7ff2864cdc10>[label="prog"] 
+<AST.AST object at 0x7ff2861ea760>[label="comment"] 
+<AST.AST object at 0x7ff2861f7fa0>[label="/*
+* hallo dit is een lange comment in onze programma :)
+*/"] 
+<AST.AST object at 0x7ff2861f76d0>[label="expr"] 
+<AST.AST object at 0x7ff28632feb0>[label="variableDefinition"] 
+<AST.AST object at 0x7ff28632f730>[label="variableDeclaration"] 
+<AST.AST object at 0x7ff28632f4c0>[label="reservedWord"] 
+<AST.AST object at 0x7ff28632f520>[label="int"] 
+<AST.AST object at 0x7ff2861c2b50>[label="nameIdentifier"] 
+<AST.AST object at 0x7ff2861c2550>[label="a"] 
+<AST.AST object at 0x7ff28632f6d0>[label="="] 
+<AST.AST object at 0x7ff2861c2970>[label="int"] 
+<AST.AST object at 0x7ff2861c2370>[label="10"] 
+<AST.AST object at 0x7ff2861ee6d0>[label="comment"] 
+<AST.AST object at 0x7ff28632f940>[label="//hier is wat kortere comment
+"] 
+<AST.AST object at 0x7ff28632f910>[label="expr"] 
+<AST.AST object at 0x7ff2862e8d00>[label="variableDefinition"] 
+<AST.AST object at 0x7ff2862e8610>[label="variableDeclaration"] 
+<AST.AST object at 0x7ff2862e8430>[label="reservedWord"] 
+<AST.AST object at 0x7ff2862e8a00>[label="float"] 
+<AST.AST object at 0x7ff2862e8310>[label="nameIdentifier"] 
+<AST.AST object at 0x7ff2862e87f0>[label="b"] 
+<AST.AST object at 0x7ff2862e8c70>[label="="] 
+<AST.AST object at 0x7ff2862ec0a0>[label="float"] 
+<AST.AST object at 0x7ff2862ecb50>[label="20.4"] 
+<AST.AST object at 0x7ff2864cdc10> -- <AST.AST object at 0x7ff2861ea760>
+<AST.AST object at 0x7ff2861ea760> -- <AST.AST object at 0x7ff2861f7fa0>
+<AST.AST object at 0x7ff2864cdc10> -- <AST.AST object at 0x7ff2861f76d0>
+<AST.AST object at 0x7ff2861f76d0> -- <AST.AST object at 0x7ff28632feb0>
+<AST.AST object at 0x7ff28632feb0> -- <AST.AST object at 0x7ff28632f730>
+<AST.AST object at 0x7ff28632f730> -- <AST.AST object at 0x7ff28632f4c0>
+<AST.AST object at 0x7ff28632f4c0> -- <AST.AST object at 0x7ff28632f520>
+<AST.AST object at 0x7ff28632f730> -- <AST.AST object at 0x7ff2861c2b50>
+<AST.AST object at 0x7ff2861c2b50> -- <AST.AST object at 0x7ff2861c2550>
+<AST.AST object at 0x7ff28632feb0> -- <AST.AST object at 0x7ff28632f6d0>
+<AST.AST object at 0x7ff28632feb0> -- <AST.AST object at 0x7ff2861c2970>
+<AST.AST object at 0x7ff2861c2970> -- <AST.AST object at 0x7ff2861c2370>
+<AST.AST object at 0x7ff2864cdc10> -- <AST.AST object at 0x7ff2861ee6d0>
+<AST.AST object at 0x7ff2861ee6d0> -- <AST.AST object at 0x7ff28632f940>
+<AST.AST object at 0x7ff2864cdc10> -- <AST.AST object at 0x7ff28632f910>
+<AST.AST object at 0x7ff28632f910> -- <AST.AST object at 0x7ff2862e8d00>
+<AST.AST object at 0x7ff2862e8d00> -- <AST.AST object at 0x7ff2862e8610>
+<AST.AST object at 0x7ff2862e8610> -- <AST.AST object at 0x7ff2862e8430>
+<AST.AST object at 0x7ff2862e8430> -- <AST.AST object at 0x7ff2862e8a00>
+<AST.AST object at 0x7ff2862e8610> -- <AST.AST object at 0x7ff2862e8310>
+<AST.AST object at 0x7ff2862e8310> -- <AST.AST object at 0x7ff2862e87f0>
+<AST.AST object at 0x7ff2862e8d00> -- <AST.AST object at 0x7ff2862e8c70>
+<AST.AST object at 0x7ff2862e8d00> -- <AST.AST object at 0x7ff2862ec0a0>
+<AST.AST object at 0x7ff2862ec0a0> -- <AST.AST object at 0x7ff2862ecb50>
+}
