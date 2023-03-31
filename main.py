@@ -21,7 +21,7 @@ def main(argv):
     symbolTable.visit(ast)
 
     # Constant propagation and constant folding
-    ast.constantPropagation(dict(), symbolTable.symbol_table)
+    ast.constantPropagation(dict(), [], symbolTable.symbol_table)
     ast.constantFolding(symbolTable.symbol_table)
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table)
