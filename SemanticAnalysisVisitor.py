@@ -35,6 +35,7 @@ class SemanticAnalysisVisitor:
         self.line += nlines
 
     def visit_assignment_statement(self, node):
+        possible = True
         if node.children[0].node.getRuleName() != "nameIdentifier" and node.children[0].node.getRuleName() != "referenceID":
             print(f"[ Error ] at line {self.line}: assignment to an rvalue")
             self.error = True
@@ -42,6 +43,9 @@ class SemanticAnalysisVisitor:
             var_name = node.children[0].children[0].node.getRuleName()
         else:
             var_name = node.children[0].children[1].children[0].node.getRuleName()
+            if node.children[0].children[0].node.getRuleName() == "&":
+                print(f"[ Error ] at line {self.line}: assignment to rvalue, cannot assign an address")
+                self.error = True
         check = None
         if self.symbol_table.get_symbol(var_name) != None:
             check = self.symbol_table.get_symbol(var_name)[1][0]
@@ -74,6 +78,7 @@ class SemanticAnalysisVisitor:
             if node.children[0].node.getRuleName() == "referenceID":
                 type = self.symbol_table.get_symbol(var_name)[0]
                 if node.children[0].children[0].node.getRuleName()[0] == '*':
+                    possible = False
                     if node.children[2].node.getRuleName() == "nameIdentifier":
                         if type != "int" and type != "float" and type != "char":
                             print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
@@ -146,7 +151,8 @@ class SemanticAnalysisVisitor:
             rightSide = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[2]
         else:
             rightSide = node.children[2]
-        self.symbol_table.insert_value(var_name, rightSide)
+        if possible:
+            self.symbol_table.insert_value(var_name, rightSide)
 
         for child in node.children:
             self.visit(child)
@@ -212,8 +218,11 @@ class SemanticAnalysisVisitor:
                 type = node.children[0].children[0].children[0].node.getRuleName()
             if extra == "pointer" or extra == "const pointer":
                 if node.children[2].node.getRuleName() != "referenceID":
-                    print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
-                    self.error = True
+                    newName = node.children[2].children[0].node.getRuleName()
+                    newSize = self.symbol_table.get_symbol(newName)[1][1]
+                    if newSize == None or size != newSize:
+                        print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
+                        self.error = True
                 elif node.children[0].node.getRuleName() == "referenceID":
                     if node.children[0].children[0].node.getRuleName() == "*":
                         if node.children[2].node.getRuleName() == "nameIdentifier":
@@ -249,8 +258,9 @@ class SemanticAnalysisVisitor:
             elif (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "nameIdentifier":
                 type3 = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[1][0]
                 if type3 == "pointer" or type3 == "const pointer":
-                    print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected value but got assigned an pointer instead ")
-                    self.error = True
+                    if extra != "pointer" and extra != "const pointer":
+                        print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected value but got assigned an pointer instead ")
+                        self.error = True
             if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
                 if type == "int":
                     if node.children[2].node.getRuleName() == "char":
@@ -278,7 +288,13 @@ class SemanticAnalysisVisitor:
                     else:
                         rightSide = node.children[2].children[0].node.getRuleName()[1]
             else:
-                rightSide = node.children[2]
+                if node.children[2].node.getRuleName() == "referenceID":
+                    if node.children[2].children[0].node.getRuleName()[0] == '*':
+                        rightSide = node.children[2]
+                    else:
+                        rightSide = node.children[2].children[1].children[0].node.getRuleName()
+                else:
+                    rightSide = node.children[2]
 
             tempArray = [type, [extra, size], rightSide]
             self.symbol_table.insert_symbol(var_name, tempArray)

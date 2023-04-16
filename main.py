@@ -1,4 +1,4 @@
-from MyGrammarLexer import MyGrammarLexer
+﻿from MyGrammarLexer import MyGrammarLexer
 from AST import *
 from SemanticAnalysisVisitor import *
 from LLVM import *
@@ -19,8 +19,16 @@ def main(argv):
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
-    symbolTable.visit(ast)
-
+    try:
+        symbolTable.visit(ast)
+    except:
+        if symbolTable.error:
+            exit()
+        else:
+            print("ERROR")
+            exit()
+    if symbolTable.error:
+        exit()
     # Constant propagation and constant folding
     ast.constantPropagation(dict(), [], symbolTable.symbol_table)
     ast.constantFolding(symbolTable.symbol_table)
@@ -29,8 +37,7 @@ def main(argv):
     # Print the AST in dot
     ast.printInDot(argv)
     # print symbol table
-    # print(symbolTable.symbol_table.symbol_tables)
-
+    print(symbolTable.symbol_table.symbol_tables)
     ##generate LLVM from C
     llvm = LLVM(argv, symbolTable)
     llvm.look_for_value(ast)

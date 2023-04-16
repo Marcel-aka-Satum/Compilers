@@ -64,10 +64,14 @@ class LLVM:
                     if(dict1[key][1] == 'const'):
                         self.output += f"@{key} = dso_local consant i8 {ord(value)}, allign 1\n"
                     else:
-                        self.output += f"@{key} = dso_local global i8 {ord(value)}, allign 1\n"
+                        try:
+                            self.output += f"@{key} = dso_local global i8 {ord(value)}, allign 1\n"
+                        except TypeError:
+                            pass
         self.print_ll(self.argv)
 
     def traverse_node(self, node):
+        parent = None
         if node.node.getRuleName() == "referenceID":
             parent = value = node.children[1].children[0].node.getRuleName()
         return parent

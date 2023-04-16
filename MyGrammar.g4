@@ -1,8 +1,8 @@
 grammar MyGrammar;
 
-prog: (comment expr comment)+ | (comment expr)+ | (expr comment)+ | expr | comment;
+prog: expr;
 
-expr: opAnd ';' | opAnd ';' expr;
+expr: opAnd ';' | opAnd ';' expr | comment expr;
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -50,7 +50,7 @@ comment: BLOCK_COMMENT+ | COMMENT+;
 POINTER: '*';
 POINTERS: ('*')+;
 ID: [a-zA-Z]([a-zA-Z0-9_])*;
-CHAR: '\'' ([a-zA-Z] | INT)'\'';
+CHAR: '\'' ([a-zA-Z] | INT | .)'\'';
 INT: [0-9]+;
 FLOAT: [0-9]*'.'[0-9]+ | [0-9]+'.'[0-9]*;
 COMMENT: '//' .*? '\r'? '\n';

@@ -1,2 +1,1 @@
-int a = 1 && 0;
-float b = 1 || 0;
+int this_is_not_correct = 4;
