@@ -25,14 +25,18 @@ class SemanticAnalysisVisitor:
                 self.visit(child)
 
     def visit_expr(self, node):
-        self.line += 1
+        if node.children[0].node.getRuleName() != "comment":
+            self.line += 1;
         for child in node.children:
             self.visit(child)
 
     def visit_comment(self, node):
-        comment = node.children[0].node.getRuleName()
-        nlines = len(comment.splitlines())
-        self.line += nlines
+        if len(node.children) == 1:
+            comment = node.children[0].node.getRuleName()
+            nLines = len(comment.splitlines())
+        else:
+            nLines = len(node.children)
+        self.line += nLines
 
     def visit_assignment_statement(self, node):
         possible = True
