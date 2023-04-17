@@ -22,7 +22,7 @@ class AST:
         for newChild in syntaxTree.getChildren():
             temp = AST(newChild)
             temp.parent = self
-            if temp.node.getRuleName() != "(" and temp.node.getRuleName() != ")" and temp.node.getRuleName() != ";":
+            if temp.node.getRuleName() != "(" and temp.node.getRuleName() != ")" and temp.node.getRuleName() != ";" and temp.node.getRuleName() != "":
                 self.children.append(temp)
 
     def addNodes(self):

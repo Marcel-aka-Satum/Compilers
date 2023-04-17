@@ -215,5 +215,32 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#argument.
+    def enterArgument(self, ctx:MyGrammarParser.ArgumentContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#argument.
+    def exitArgument(self, ctx:MyGrammarParser.ArgumentContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#funcDefinition.
+    def enterFuncDefinition(self, ctx:MyGrammarParser.FuncDefinitionContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#funcDefinition.
+    def exitFuncDefinition(self, ctx:MyGrammarParser.FuncDefinitionContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#body.
+    def enterBody(self, ctx:MyGrammarParser.BodyContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#body.
+    def exitBody(self, ctx:MyGrammarParser.BodyContext):
+        pass
+
+
 
 del MyGrammarParser

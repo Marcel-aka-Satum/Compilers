@@ -20,6 +20,8 @@ class SemanticAnalysisVisitor:
             self.visit_assignment_statement(node)
         elif node.node.getRuleName() == "comment":
             self.visit_comment(node)
+        elif node.node.getRuleName() == "}":
+            self.line +=1
         else:
             for child in node.children:
                 self.visit(child)
@@ -260,7 +262,11 @@ class SemanticAnalysisVisitor:
                         print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type")
                         self.error = True
             elif (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "nameIdentifier":
-                type3 = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName())[1][0]
+                nodeName = node.children[2].children[0].node.getRuleName()
+                if nodeName not in self.symbol_table.symbol_tables:
+                    print(f"[ Error ] at line {self.line}: variable {nodeName} has not been initialised or declared")
+                    self.error = True
+                type3 = self.symbol_table.get_symbol(nodeName)[1][0]
                 if type3 == "pointer" or type3 == "const pointer":
                     if extra != "pointer" and extra != "const pointer":
                         print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected value but got assigned an pointer instead ")

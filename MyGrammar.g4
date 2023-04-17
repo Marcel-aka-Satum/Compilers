@@ -2,7 +2,7 @@ grammar MyGrammar;
 
 prog: expr;
 
-expr: opAnd ';' | opAnd ';' expr | comment expr;
+expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr |;
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -46,6 +46,12 @@ nameIdentifier: ID;
 printFunction: 'printf' '(' opAnd ')';
 
 comment: BLOCK_COMMENT+ | COMMENT+;
+
+argument: referenceID;
+
+funcDefinition: 'int' ID '(' argument* ')' '{' body '}';
+
+body: expr;
 
 POINTER: '*';
 POINTERS: ('*')+;
