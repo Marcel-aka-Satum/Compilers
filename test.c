@@ -1,5 +1,3 @@
-int main() {
-    int this_is_not_correct = 4;
-    int a = 3;
+for(;;){
+    int b = 30;
 }
-int c = 3;

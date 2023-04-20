@@ -45,7 +45,7 @@ class AST:
         file.write(graph)
 
     def optimize(self):
-        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr":
+        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement":
             for i in self.children:
                 i.optimize()
         elif len(self.children) == 1:
@@ -549,6 +549,11 @@ class AST:
                 value = float(value.children[0].node.getRuleName())
             elif value.node.getRuleName() == "char":
                 possible = False
+            elif value.node.getRuleName() == "nameIdentifier":
+                name = value.children[0].node.getRuleName()
+                value = symbolTable.get_symbol(name)[2]
+                if value != 0 and value != 1:
+                    possible = False
             else:
                 value.constantFolding(symbolTable)
                 if len(value.children) == 1:
@@ -568,7 +573,7 @@ class AST:
                     self.children.pop()
                     self.children[0].children.clear()
                 elif self.children[0].node.getRuleName() == "!":
-                    if value == "0":
+                    if value == 0:
                         self.children[0].node.ruleName = 1
                     else:
                         self.children[0].node.ruleName = 0

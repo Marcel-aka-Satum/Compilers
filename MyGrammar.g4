@@ -2,7 +2,9 @@ grammar MyGrammar;
 
 prog: expr;
 
-expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr |;
+expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | variableDefinition expr
+    | variableDeclaration ';' expr | assignmentStatement expr | printFunction expr | conditionStatement expr |
+    | BREAK ';' expr | CONTINUE ';' expr |;
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -17,13 +19,13 @@ opMultOrDiv: opMultOrDiv '*' opUnary | opMultOrDiv '/' opUnary | opMultOrDiv '%'
 
 opUnary: '+' brackets | '-' brackets | '!' brackets | brackets;
 
-brackets: '(' opAnd ')' | variableDefinition | variableDeclaration | assignmentStatement | dataTypes | printFunction;
+brackets: '(' opAnd ')' | dataTypes;
 
-variableDefinition: variableDeclaration '=' opAnd;
+variableDefinition: variableDeclaration '=' opAnd ';';
 
 variableDeclaration: constWord referenceID;
 
-assignmentStatement: referenceID '=' opAddOrSub | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
+assignmentStatement: referenceID '=' opAddOrSub ';'| dataTypes '=' opAddOrSub ';'| '(' opAnd ')' '=' opAnd;
 
 constWord: 'const' pointerWord | pointerWord;
 
@@ -43,7 +45,20 @@ referenceID: '&'nameIdentifier | POINTER nameIdentifier | POINTERS nameIdentifie
 
 nameIdentifier: ID;
 
-printFunction: 'printf' '(' opAnd ')';
+conditionStatement: ifStatement (elifStatement)* (elseStatement)? | whileStatement | forLoop;
+
+printFunction: 'printf' '(' opAnd ')' ';';
+
+ifStatement: 'if' '(' opAnd ')' '{' body '}';
+
+elifStatement: 'elif' '(' opAnd ')' '{' body '}';
+
+elseStatement: 'else' '{' body '}';
+
+whileStatement: 'while' '(' opAnd ')' '{' body '}';
+
+forLoop: 'for' '(' ((variableDeclaration ';' | variableDefinition | assignmentStatement) opAnd ';' referenceID '=' opAnd
+| ';' ';') ')' '{' body '}';
 
 comment: BLOCK_COMMENT+ | COMMENT+;
 
@@ -55,6 +70,8 @@ body: expr;
 
 POINTER: '*';
 POINTERS: ('*')+;
+BREAK: 'break';
+CONTINUE: 'continue';
 ID: [a-zA-Z]([a-zA-Z0-9_])*;
 CHAR: '\'' ([a-zA-Z] | INT | .)'\'';
 INT: [0-9]+;
