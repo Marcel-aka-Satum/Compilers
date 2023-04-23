@@ -260,42 +260,6 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by MyGrammarParser#forStatement.
-    def enterForStatement(self, ctx:MyGrammarParser.ForStatementContext):
-        pass
-
-    # Exit a parse tree produced by MyGrammarParser#forStatement.
-    def exitForStatement(self, ctx:MyGrammarParser.ForStatementContext):
-        pass
-
-
-    # Enter a parse tree produced by MyGrammarParser#deel1.
-    def enterDeel1(self, ctx:MyGrammarParser.Deel1Context):
-        pass
-
-    # Exit a parse tree produced by MyGrammarParser#deel1.
-    def exitDeel1(self, ctx:MyGrammarParser.Deel1Context):
-        pass
-
-
-    # Enter a parse tree produced by MyGrammarParser#deel2.
-    def enterDeel2(self, ctx:MyGrammarParser.Deel2Context):
-        pass
-
-    # Exit a parse tree produced by MyGrammarParser#deel2.
-    def exitDeel2(self, ctx:MyGrammarParser.Deel2Context):
-        pass
-
-
-    # Enter a parse tree produced by MyGrammarParser#deel3.
-    def enterDeel3(self, ctx:MyGrammarParser.Deel3Context):
-        pass
-
-    # Exit a parse tree produced by MyGrammarParser#deel3.
-    def exitDeel3(self, ctx:MyGrammarParser.Deel3Context):
-        pass
-
-
     # Enter a parse tree produced by MyGrammarParser#comment.
     def enterComment(self, ctx:MyGrammarParser.CommentContext):
         pass

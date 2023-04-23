@@ -3,7 +3,7 @@ grammar MyGrammar;
 prog: expr;
 
 expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | variableDefinition expr
-    | variableDeclaration ';' expr | assignmentStatement expr | printFunction expr | conditionStatement expr |
+    | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr | conditionStatement expr |
     | BREAK ';' expr | CONTINUE ';' expr |;
 
 opAnd: opAnd '&&' opOr | opOr;
@@ -25,7 +25,7 @@ variableDefinition: variableDeclaration '=' opAnd ';';
 
 variableDeclaration: constWord referenceID;
 
-assignmentStatement: referenceID '=' opAddOrSub ';'| dataTypes '=' opAddOrSub ';'| '(' opAnd ')' '=' opAnd;
+assignmentStatement: referenceID '=' opAddOrSub | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
 
 constWord: 'const' pointerWord | pointerWord;
 
@@ -57,7 +57,7 @@ elseStatement: 'else' '{' body '}';
 
 whileStatement: 'while' '(' opAnd ')' '{' body '}';
 
-forLoop: 'for' '(' ((variableDeclaration ';' | variableDefinition | assignmentStatement) opAnd ';' referenceID '=' opAnd
+forLoop: 'for' '(' ((variableDeclaration ';' | variableDefinition | assignmentStatement ';') opAnd ';' assignmentStatement
 | ';' ';') ')' '{' body '}';
 
 comment: BLOCK_COMMENT+ | COMMENT+;

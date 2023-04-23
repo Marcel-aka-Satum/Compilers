@@ -38,12 +38,6 @@ def main(argv):
     ast.printInDot(argv)
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
-    ##generate LLVM from C
-    llvm = LLVM(argv, symbolTable)
-    llvm.look_for_value(ast)
-    llvm.generate_LLVM()
-    # Print the LLVM symbol table
-    # print(llvm.table.symbol_table.symbol_tables)
 
 
 if __name__ == '__main__':
