@@ -66,6 +66,13 @@ class AST:
                     self.parent.children[index] = temp.parent
                     found = True
         elif len(self.children) >= 2:
+            if self.node.getRuleName() == "whileStatement":
+                self.children.pop(0)
+                self.children.pop(1)
+                self.children.pop(2)
+            elif self.node.getRuleName() == "unNamedScope":
+                self.children.pop(0)
+                self.children.pop(1)
             for i in self.children:
                 i.optimize()
 

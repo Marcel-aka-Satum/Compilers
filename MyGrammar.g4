@@ -3,8 +3,8 @@ grammar MyGrammar;
 prog: expr;
 
 expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | variableDefinition expr
-    | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr | conditionStatement expr |
-    | BREAK ';' expr | CONTINUE ';' expr |;
+    | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr | unNamedScope expr
+    | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr |;
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -59,6 +59,8 @@ whileStatement: 'while' '(' opAnd ')' '{' body '}';
 
 forLoop: 'for' '(' ((variableDeclaration ';' | variableDefinition | assignmentStatement ';') opAnd ';' assignmentStatement
 | ';' ';') ')' '{' body '}';
+
+unNamedScope: '{' body '}';
 
 comment: BLOCK_COMMENT+ | COMMENT+;
 

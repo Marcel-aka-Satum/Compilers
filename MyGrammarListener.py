@@ -260,6 +260,15 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#unNamedScope.
+    def enterUnNamedScope(self, ctx:MyGrammarParser.UnNamedScopeContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#unNamedScope.
+    def exitUnNamedScope(self, ctx:MyGrammarParser.UnNamedScopeContext):
+        pass
+
+
     # Enter a parse tree produced by MyGrammarParser#comment.
     def enterComment(self, ctx:MyGrammarParser.CommentContext):
         pass
