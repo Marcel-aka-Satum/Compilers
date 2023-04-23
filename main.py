@@ -9,7 +9,6 @@ def main(argv):
     lexer = MyGrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = MyGrammarParser(stream)
-
     # Create syntax tree
     syntaxTree = parser.prog()
     # Create AST
@@ -19,16 +18,8 @@ def main(argv):
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
-    try:
-        symbolTable.visit(ast)
-    except:
-        if symbolTable.error:
-            exit()
-        else:
-            print("ERROR")
-            exit()
-    if symbolTable.error:
-        exit()
+    symbolTable.visit(ast)
+    ast.convertToWhile()
     # Constant propagation and constant folding
     ast.constantPropagation(dict(), [], symbolTable.symbol_table)
     ast.constantFolding(symbolTable.symbol_table)

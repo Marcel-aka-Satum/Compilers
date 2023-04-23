@@ -45,7 +45,9 @@ class AST:
         file.write(graph)
 
     def optimize(self):
-        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement":
+        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction":
+            if self.node.getRuleName() == "printFunction" and len(self.children) == 2:
+                self.children.pop(0)
             for i in self.children:
                 i.optimize()
         elif len(self.children) == 1:
@@ -65,16 +67,74 @@ class AST:
                     index = self.parent.children.index(self)
                     self.parent.children[index] = temp.parent
                     found = True
+                elif temp.node.getRuleName() == "expr":
+                    temp.parent = self.parent
+                    index = self.parent.children.index(self)
+                    self.parent.children[index] = temp
+                    for i in temp.children:
+                        i.optimize()
+                    found = True
         elif len(self.children) >= 2:
             if self.node.getRuleName() == "whileStatement":
-                self.children.pop(0)
-                self.children.pop(1)
-                self.children.pop(2)
+                if len(self.children) == 5:
+                    self.children.pop(0)
+                    self.children.pop(1)
+                    self.children.pop(2)
             elif self.node.getRuleName() == "unNamedScope":
                 self.children.pop(0)
                 self.children.pop(1)
+            elif self.node.getRuleName() == "printFunction" and len(self.children) == 2:
+                self.children.pop(0)
             for i in self.children:
                 i.optimize()
+
+    def convertToWhile(self):
+        if self.node.getRuleName() == "forLoop":
+            self.node.ruleName = "whileStatement"
+            defenition = self.children[1]
+            increment = self.children[3]
+            body = self.children[5]
+            found = False
+            if len(body.children) == 1:
+                body.children.append(copy.deepcopy(increment))
+                body.children[1].parent = body
+                body.children[1].children.clear()
+                body.children[1].node.ruleName = "expr"
+                body.children[1].children.append(copy.deepcopy(increment))
+                body.children[1].children[0].parent = body.children[1]
+            else:
+                body = body.children[1]
+                while not found:
+                    if len(body.children) != 2:
+                        body.children.append(copy.deepcopy(increment))
+                        body.children[1].parent = body
+                        body.children[1].children.clear()
+                        body.children[1].node.ruleName = "expr"
+                        body.children[1].children.append(copy.deepcopy(increment))
+                        body.children[1].children[0].parent = body.children[1]
+                        found = True
+                    else:
+                        body = body.children[1]
+
+            self.children.pop(0)
+            self.children.pop(0)
+            self.children.pop(1)
+            self.children.pop(1)
+            self.children.pop(2)
+            temp = self.parent.parent
+            index = self.parent.parent.parent.children.index(self.parent.parent)
+            self.parent.parent.parent.children[index] = copy.deepcopy(defenition)
+            self.parent.parent.parent.children[index].node.ruleName = "expr"
+            self.parent.parent.parent.children[index].parent = self.parent.parent.parent
+            self.parent.parent.parent.children[index].children.clear()
+            self.parent.parent.parent.children[index].children.append(copy.deepcopy(defenition))
+            self.parent.parent.parent.children[index].children[0].parent = self.parent.parent.parent.children[index]
+            self.parent.parent.parent.children[index].children.append(copy.deepcopy(temp))
+            self.parent.parent.parent.children[index].children[1].parent = self.parent.parent.parent.children[index]
+        else:
+            for i in self.children:
+                i.convertToWhile()
+
 
     def initialiseSymbolTable(self, symbolTable):
         if self.node.getRuleName() == "variableDefinition":
@@ -230,7 +290,7 @@ class AST:
             while not found:
                 if curr.node.getRuleName() == "forLoop" or curr.node.getRuleName() == "whileStatement":
                     found = True
-                elif curr.parent.node.getRuleName() == "expr":
+                elif curr.node.getRuleName() == "prog":
                     break
                 else:
                     curr = curr.parent
