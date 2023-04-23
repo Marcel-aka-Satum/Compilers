@@ -218,13 +218,23 @@ class AST:
             rightSide.constantPropagation(dict, arr, symbolTable)
         elif self.node.getRuleName() == "nameIdentifier":
             tempName = self.children[0].node.getRuleName()
-            if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "assignmentStatement" and self.parent.node.getRuleName() != "variableDeclaration":
-                if self.parent.node.getRuleName() == "printFunction":
-                    varName = self.children[0].node.getRuleName()
-                    self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName)[0]
-                self.children.append(copy.deepcopy(dict[tempName]))
-            elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
-                self.children.append(copy.deepcopy(dict[tempName]))
+            found = False
+            curr = self
+            while not found:
+                if curr.node.getRuleName() == "forLoop" or curr.node.getRuleName() == "whileStatement":
+                    found = True
+                elif curr.parent.node.getRuleName() == "expr":
+                    break
+                else:
+                    curr = curr.parent
+            if not found:
+                if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "assignmentStatement" and self.parent.node.getRuleName() != "variableDeclaration":
+                    if self.parent.node.getRuleName() == "printFunction":
+                        varName = self.children[0].node.getRuleName()
+                        self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName)[0]
+                    self.children.append(copy.deepcopy(dict[tempName]))
+                elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
+                    self.children.append(copy.deepcopy(dict[tempName]))
 
         else:
             for i in self.children:
@@ -236,6 +246,14 @@ class AST:
             leftValue = self.children[0]
             rightValue = self.children[2]
             possible = True
+            curr = self
+            while possible:
+                if curr.node.getRuleName() == "forLoop" or curr.node.getRuleName() == "whileStatement":
+                    possible = False
+                elif curr.parent.node.getRuleName() == "expr":
+                    break
+                else:
+                    curr = curr.parent
             if leftValue.node.getRuleName() == "int":
                 leftValue = int(leftValue.children[0].node.getRuleName())
             elif leftValue.node.getRuleName() == "float":
