@@ -29,7 +29,7 @@ def main(argv):
         exit()
     ast.convertToWhile()
     # Constant propagation and constant folding
-    ast.constantPropagation(dict(), [], symbolTable.symbol_table)
+    ast.constantPropagation(dict(), [], symbolTable.symbol_table, None)
     ast.constantFolding(symbolTable.symbol_table, None)
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table, None)
@@ -37,7 +37,6 @@ def main(argv):
     ast.printInDot(argv)
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
-
 
 if __name__ == '__main__':
     main("test.c")

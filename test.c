@@ -2,7 +2,7 @@
 * My program
 */
 { // unnamed scope
-    int x = 10;
+    int x = 1;
     while (x < 10) {
         int result = x * 2;
         if ( x > 5) {

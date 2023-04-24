@@ -270,14 +270,14 @@ class AST:
 
 
 
-    def constantPropagation(self, dict, arr,  symbolTable):
+    def constantPropagation(self, dict, arr,  symbolTable, scope):
         if self.node.getRuleName() == "expr":
             for i in arr:
                 if i in dict:
                     dict.pop(i)
             arr.clear()
             for i in self.children:
-                i.constantPropagation(dict,arr, symbolTable)
+                i.constantPropagation(dict,arr, symbolTable, scope)
         elif self.node.getRuleName() == "assignmentStatement":
             if self.children[0].node.getRuleName() == "nameIdentifier":
                 varName = self.children[0].children[0].node.getRuleName()
@@ -286,13 +286,13 @@ class AST:
             if varName in dict:
                 arr.append(varName)
             rightSide = self.children[2]
-            rightSide.constantPropagation(dict, arr,  symbolTable)
+            rightSide.constantPropagation(dict, arr,  symbolTable, scope)
 
         elif self.node.getRuleName() == "variableDefinition":
             rightSide = self.children[2]
             name = self.children[0].children[1].children[0].node.getRuleName()
             dict[name] = self.children[2]
-            rightSide.constantPropagation(dict, arr, symbolTable)
+            rightSide.constantPropagation(dict, arr, symbolTable, scope)
         elif self.node.getRuleName() == "nameIdentifier":
             tempName = self.children[0].node.getRuleName()
             found = False
@@ -308,14 +308,27 @@ class AST:
                 if tempName in dict and self.parent.node.getRuleName() != "variableDefinition" and self.parent.node.getRuleName() != "assignmentStatement" and self.parent.node.getRuleName() != "variableDeclaration":
                     if self.parent.node.getRuleName() == "printFunction":
                         varName = self.children[0].node.getRuleName()
-                        self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName)[0]
+                        self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName, scope)[0]
                     self.children.append(copy.deepcopy(dict[tempName]))
                 elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
                     self.children.append(copy.deepcopy(dict[tempName]))
-
+        elif self.node.getRuleName() == "unNamedScope" or self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement" or self.node.getRuleName() == "whileStatement" or self.node.getRuleName() == "forLoop":
+            scope = self.node.getRuleName()
+            for i in self.children:
+                i.constantPropagation(dict, arr, symbolTable, scope)
+        elif self.node.getRuleName() == "}":
+            if scope in symbolTable.scopes:
+                if symbolTable.scopes[scope] == None:
+                    scope = None
+                else:
+                    scope = symbolTable.scopes[scope][1]
+            else:
+                scope = None
+            for i in self.children:
+                i.constantPropagation(dict, arr, symbolTable, scope)
         else:
             for i in self.children:
-                i.constantPropagation(dict, arr, symbolTable)
+                i.constantPropagation(dict, arr, symbolTable, scope)
 
 
     def constantFolding(self, symbolTable, scope):
