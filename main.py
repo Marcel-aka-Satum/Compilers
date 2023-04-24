@@ -18,13 +18,21 @@ def main(argv):
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
-    symbolTable.visit(ast)
+    try:
+        symbolTable.visit(ast)
+    except:
+        if symbolTable.error:
+            exit()
+        else:
+            print("ERROR")
+    if symbolTable.error:
+        exit()
     ast.convertToWhile()
     # Constant propagation and constant folding
     ast.constantPropagation(dict(), [], symbolTable.symbol_table)
-    ast.constantFolding(symbolTable.symbol_table)
+    ast.constantFolding(symbolTable.symbol_table, None)
     # Initialise the symbol table after the constant folding
-    ast.initialiseSymbolTable(symbolTable.symbol_table)
+    ast.initialiseSymbolTable(symbolTable.symbol_table, None)
     # Print the AST in dot
     ast.printInDot(argv)
     # print symbol table

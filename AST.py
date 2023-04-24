@@ -78,12 +78,9 @@ class AST:
             if self.node.getRuleName() == "whileStatement":
                 if len(self.children) == 5:
                     self.children.pop(0)
-                    self.children.pop(1)
-                    self.children.pop(2)
-            elif self.node.getRuleName() == "unNamedScope":
-                self.children.pop(0)
-                self.children.pop(1)
             elif self.node.getRuleName() == "printFunction" and len(self.children) == 2:
+                self.children.pop(0)
+            elif self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement":
                 self.children.pop(0)
             for i in self.children:
                 i.optimize()
@@ -136,43 +133,43 @@ class AST:
                 i.convertToWhile()
 
 
-    def initialiseSymbolTable(self, symbolTable):
+    def initialiseSymbolTable(self, symbolTable, scope):
         if self.node.getRuleName() == "variableDefinition":
             if self.children[0].children[0].node.getRuleName() == "pointerWord":
                 varType = self.children[0].children[0].children[0].children[0].node.getRuleName()
                 name = self.children[0].children[1].children[0].node.getRuleName()
-                tableType = symbolTable.get_symbol(name)[0]
+                tableType = symbolTable.get_symbol(name, scope)[0]
                 if varType == "char" and tableType == "int":
                     self.children[0].children[0].children[0].children[0].node.ruleName = "int"
             else:
                 varType = self.children[0].children[0].children[0].node.getRuleName()
                 name = self.children[0].children[1].children[0].node.getRuleName()
-                tableType = symbolTable.get_symbol(name)[0]
+                tableType = symbolTable.get_symbol(name, scope)[0]
                 if varType == "char" and tableType == "int":
                     self.children[0].children[0].children[0].node.ruleName = "int"
             if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
                 if len(self.children[2].children) == 1:
                     value = None
-                    if symbolTable.get_symbol(varName)[0] == "int":
+                    if symbolTable.get_symbol(varName, scope)[0] == "int":
                         try:
                             value = int(self.children[2].children[0].node.getRuleName())
                         except ValueError:
                             value = float(self.children[2].children[0].node.getRuleName())
                             value = int(value)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         value = float(self.children[2].children[0].node.getRuleName())
                     else:
                         if self.children[2].children[0].node.getRuleName() == "int":
                             value = int(self.children[2].children[0].node.getRuleName())
                         elif self.children[2].children[0].node.getRuleName() == "float":
                             value = float(self.children[2].children[0].node.getRuleName())
-                    symbolTable.insert_value(varName, value)
+                    symbolTable.insert_value(varName, value, scope)
                 else:
-                    symbolTable.insert_symbol(varName, self.children[2])
+                    symbolTable.insert_symbol(varName, self.children[2], scope)
             elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or self.children[2].node.getRuleName() == "char":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
-                type = symbolTable.get_symbol(varName)[0]
+                type = symbolTable.get_symbol(varName, scope)[0]
                 if self.children[2].node.getRuleName() == "char" and (type == "int" or type == "float"):
                     value = ord(self.children[2].children[0].node.getRuleName()[1])
                 elif type == "int":
@@ -185,27 +182,27 @@ class AST:
                     value = float(self.children[2].children[0].node.getRuleName())
                 else:
                     value = self.children[2].children[0].node.getRuleName()[1]
-                symbolTable.insert_value(varName, value)
+                symbolTable.insert_value(varName, value, scope)
             elif self.children[2].node.getRuleName() == "opUnary":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
-                type = symbolTable.get_symbol(varName)[0]
-                const = symbolTable.get_symbol(varName)[1][0]
+                type = symbolTable.get_symbol(varName, scope)[0]
+                const = symbolTable.get_symbol(varName, scope)[1][0]
                 if const != "pointer" and const != "const pointer":
                     if type == "int":
                         value = int(self.children[2].children[0].node.getRuleName())
                     else:
                         value = float(self.children[2].children[0].node.getRuleName())
-                    symbolTable.insert_value(varName, value)
+                    symbolTable.insert_value(varName, value, scope)
             elif self.children[2].node.getRuleName() == "nameIdentifier" and len(self.children[2].children) == 2:
                 varName = self.children[2].children[0].node.getRuleName()
-                type = symbolTable.get_symbol(varName)[0]
-                const = symbolTable.get_symbol(varName)[1][0]
+                type = symbolTable.get_symbol(varName, scope)[0]
+                const = symbolTable.get_symbol(varName, scope)[1][0]
                 if const != "pointer" and const != "const pointer":
                     if type == "int":
                         value = int(self.children[2].children[1].children[0].node.getRuleName())
                     else:
                         value = float(self.children[2].children[1].children[0].node.getRuleName())
-                    symbolTable.insert_value(name, value)
+                    symbolTable.insert_value(name, value, scope)
 
 
         elif self.node.getRuleName() == "assignmentStatement":
@@ -217,20 +214,20 @@ class AST:
                         value = int(self.children[2].children[0].node.getRuleName())
                     else:
                         value = float(self.children[2].children[0].node.getRuleName())
-                    symbolTable.insert_value(varName, value)
+                    symbolTable.insert_value(varName, value, scope)
 
                 elif len(self.children[2].children) == 1:
-                    if symbolTable.get_symbol(varName)[0] == "int":
+                    if symbolTable.get_symbol(varName, scope)[0] == "int":
                         try:
                             value = int(self.children[2].children[0].node.getRuleName())
                         except ValueError:
                             value = float(self.children[2].children[0].node.getRuleName())
                             value = int(value)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         value = float(self.children[2].children[0].node.getRuleName())
-                    symbolTable.insert_value(varName, value)
+                    symbolTable.insert_value(varName, value, scope)
                 else:
-                    symbolTable.insert_symbol(varName, self.children[2])
+                    symbolTable.insert_symbol(varName, self.children[2], scope)
             elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or self.children[2].node.getRuleName() == "char":
                 possible = True
                 if self.children[0].node.getRuleName() == "referenceID":
@@ -238,7 +235,7 @@ class AST:
                     varName = self.children[0].children[1].children[0].node.getRuleName()
                 else:
                     varName = self.children[0].children[0].node.getRuleName()
-                type = symbolTable.get_symbol(varName)[0]
+                type = symbolTable.get_symbol(varName, scope)[0]
                 if self.children[2].node.getRuleName() == "char" and (type == "int" or type == "float"):
                     value = ord(self.children[2].children[0].node.getRuleName()[1])
                 elif type == "int":
@@ -252,11 +249,24 @@ class AST:
                 else:
                     value = self.children[2].children[0].node.getRuleName()[1]
                 if possible:
-                    symbolTable.insert_value(varName, value)
-
+                    symbolTable.insert_value(varName, value, scope)
+        elif self.node.getRuleName() == "unNamedScope" or self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement" or self.node.getRuleName() == "whileStatement" or self.node.getRuleName() == "forLoop":
+            scope = self.node.getRuleName()
+            for i in self.children:
+                i.initialiseSymbolTable(symbolTable, scope)
+        elif self.node.getRuleName() == "}":
+            if scope in symbolTable.scopes:
+                if symbolTable.scopes[scope] == None:
+                    scope = None
+                else:
+                    scope = symbolTable.scopes[scope][1]
+            else:
+                scope = None
+            for i in self.children:
+                i.initialiseSymbolTable(symbolTable, scope)
         else:
             for i in self.children:
-                i.initialiseSymbolTable(symbolTable)
+                i.initialiseSymbolTable(symbolTable, scope)
 
 
 
@@ -308,7 +318,7 @@ class AST:
                 i.constantPropagation(dict, arr, symbolTable)
 
 
-    def constantFolding(self, symbolTable):
+    def constantFolding(self, symbolTable, scope):
         if self.node.getRuleName() == "opAddOrSub" or self.node.getRuleName() == "opMultOrDiv" or self.node.getRuleName() == "opCompare" or self.node.getRuleName() == "opAnd" or self.node.getRuleName() == "opOr":
             leftValue = self.children[0]
             rightValue = self.children[2]
@@ -331,7 +341,7 @@ class AST:
                 possible = False
             elif leftValue.node.getRuleName() == "nameIdentifier" and len(leftValue.children) == 2:
                 leftValue = leftValue.children[1]
-                leftValue.constantFolding(symbolTable)
+                leftValue.constantFolding(symbolTable, scope)
                 if len(leftValue.children) == 1:
                     try:
                         leftValue = int(leftValue.children[0].node.getRuleName())
@@ -344,7 +354,7 @@ class AST:
                     possible = False
 
             else:
-                leftValue.constantFolding(symbolTable)
+                leftValue.constantFolding(symbolTable,scope)
                 if len(leftValue.children) == 1:
                     try:
                         leftValue = int(leftValue.children[0].node.getRuleName())
@@ -366,7 +376,7 @@ class AST:
                 possible = False
             elif rightValue.node.getRuleName() == "nameIdentifier" and len(rightValue.children) == 2:
                 rightValue = rightValue.children[1]
-                rightValue.constantFolding(symbolTable)
+                rightValue.constantFolding(symbolTable,scope)
                 if len(rightValue.children) == 1:
                     try:
                         rightValue = int(rightValue.children[0].node.getRuleName())
@@ -378,7 +388,7 @@ class AST:
                 else:
                     possible = False
             else:
-                rightValue.constantFolding(symbolTable)
+                rightValue.constantFolding(symbolTable,scope)
                 if len(rightValue.children) == 1:
                     try:
                         rightValue = int(rightValue.children[0].node.getRuleName())
@@ -424,10 +434,10 @@ class AST:
                                 break
                             curr = curr.parent
                     if find:
-                        type = symbolTable.get_symbol(name)[0]
+                        type = symbolTable.get_symbol(name, scope)[0]
                     else:
                         if varName != None:
-                            type = symbolTable.get_symbol(varName)[0]
+                            type = symbolTable.get_symbol(varName, scope)[0]
                 if self.children[1].node.getRuleName() == "+":
                     if type == None:
                         self.children[0].node.ruleName = leftValue + rightValue
@@ -640,7 +650,7 @@ class AST:
                 if value != 0 and value != 1:
                     possible = False
             else:
-                value.constantFolding(symbolTable)
+                value.constantFolding(symbolTable,scope)
                 if len(value.children) == 1:
                     try:
                         value = int(value.children[0].node.getRuleName())
@@ -664,9 +674,23 @@ class AST:
                         self.children[0].node.ruleName = 0
                     self.children.pop()
                     self.children[0].children.clear()
+        elif self.node.getRuleName() == "unNamedScope" or self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement" or self.node.getRuleName() == "whileStatement" or self.node.getRuleName() == "forLoop":
+            scope = self.node.getRuleName()
+            for i in self.children:
+                i.constantFolding(symbolTable, scope)
+        elif self.node.getRuleName() == "}":
+            if scope in symbolTable.scopes:
+                if symbolTable.scopes[scope] == None:
+                    scope = None
+                else:
+                    scope = symbolTable.scopes[scope][1]
+            else:
+                scope = None
+            for i in self.children:
+                i.constantFolding(symbolTable, scope)
         else:
             for i in self.children:
-                i.constantFolding(symbolTable)
+                i.constantFolding(symbolTable, scope)
 
 
 

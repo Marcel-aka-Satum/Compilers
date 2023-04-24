@@ -1,3 +1,14 @@
-for(int i = 0; i < 10; i = i+1){
-    printf(i);
+/*
+* My program
+*/
+{ // unnamed scope
+    int x = 10;
+    while (x < 10) {
+        int result = x * 2;
+        if ( x > 5) {
+            result = result * x;
+        }
+    printf(result); //show the result
+    x = x + 1;
+    }
 }
