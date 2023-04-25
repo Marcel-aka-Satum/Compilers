@@ -14,7 +14,9 @@ def main(argv):
     # Create AST
     ast = AST(syntaxTree)
     # Optimize the AST
-    ast.optimize()
+    #ast.convertToWhile()
+    countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
+    ast.optimize(countScopes)
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
@@ -27,7 +29,6 @@ def main(argv):
             print("ERROR")
     if symbolTable.error:
         exit()
-    ast.convertToWhile()
     # Constant propagation and constant folding
     ast.constantPropagation(dict(), [], symbolTable.symbol_table, None)
     ast.constantFolding(symbolTable.symbol_table, None)

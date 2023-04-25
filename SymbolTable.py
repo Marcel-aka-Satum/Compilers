@@ -18,17 +18,27 @@ class SymbolTable:
                 self.symbol_tables[scope][symbol_name][2] = value
             else:
                 arr = self.scopes[scope]
+                if arr != None:
+                    for i in arr:
+                        if i in self.symbol_tables:
+                            if symbol_name in self.symbol_tables[i]:
+                                self.symbol_tables[i][symbol_name][2] = value
+                else:
+                    if None in self.symbol_tables:
+                        if symbol_name in self.symbol_tables[None]:
+                            self.symbol_tables[None][symbol_name][2] = value
+
+        else:
+            arr = self.scopes[scope]
+            if arr != None:
                 for i in arr:
                     if i in self.symbol_tables:
                         if symbol_name in self.symbol_tables[i]:
                             self.symbol_tables[i][symbol_name][2] = value
-
-        else:
-            arr = self.scopes[scope]
-            for i in arr:
-                if i in self.symbol_tables:
-                    if symbol_name in self.symbol_tables[i]:
-                        self.symbol_tables[i][symbol_name][2] = value
+            else:
+                if None in self.symbol_tables:
+                    if symbol_name in self.symbol_tables[None]:
+                        self.symbol_tables[None][symbol_name][2] = value
 
 
 

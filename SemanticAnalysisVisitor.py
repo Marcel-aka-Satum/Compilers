@@ -22,7 +22,7 @@ class SemanticAnalysisVisitor:
             self.visit_assignment_statement(node)
         elif node.node.getRuleName() == "comment":
             self.visit_comment(node)
-        elif node.node.getRuleName() == "unNamedScope" or node.node.getRuleName() == "ifStatement" or node.node.getRuleName() == "elifStatement" or node.node.getRuleName() == "elseStatement" or node.node.getRuleName() == "whileStatement" or node.node.getRuleName() == "forLoop":
+        elif node.node.getRuleName()[:12] == "unNamedScope" or node.node.getRuleName()[:11] == "ifStatement" or node.node.getRuleName()[:13] == "elifStatement" or node.node.getRuleName()[:13] == "elseStatement" or node.node.getRuleName()[:14] == "whileStatement" or node.node.getRuleName()[:7] == "forLoop":
             if self.currScope != None:
                 self.symbol_table.scopes[node.node.getRuleName()] = [None, self.currScope]
                 arr = self.symbol_table.scopes[self.currScope]
@@ -223,7 +223,14 @@ class SemanticAnalysisVisitor:
     def visit_variable_definition(self, node):
         # Check if the variable has already been defined in the current scope
         var_name = node.children[0].children[1].children[0].node.getRuleName()
-        if self.symbol_table.get_symbol(var_name, self.currScope) is not None:
+        test1 = False
+        test2 = False
+        if self.currScope in self.symbol_table.symbol_tables:
+            test1 = True
+        if test1:
+            if var_name in self.symbol_table.symbol_tables[self.currScope]:
+                test2 = True
+        if test1 and test2:
             print(f"[ Error ] at line {self.line}: Variable {var_name} has already been defined in the current scope")
             self.error = True
         else:

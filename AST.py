@@ -44,12 +44,12 @@ class AST:
         file = open(argv, "w")
         file.write(graph)
 
-    def optimize(self):
+    def optimize(self, dict):
         if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction":
             if self.node.getRuleName() == "printFunction" and len(self.children) == 2:
                 self.children.pop(0)
             for i in self.children:
-                i.optimize()
+                i.optimize(dict)
         elif len(self.children) == 1:
             found = False
             temp = self
@@ -60,7 +60,7 @@ class AST:
                     index = self.parent.children.index(self)
                     self.parent.children[index] = temp
                     for i in temp.children:
-                        i.optimize()
+                        i.optimize(dict)
                     found = True
                 elif len(temp.children) == 0:
                     temp.parent.parent = self.parent
@@ -72,25 +72,59 @@ class AST:
                     index = self.parent.children.index(self)
                     self.parent.children[index] = temp
                     for i in temp.children:
-                        i.optimize()
+                        i.optimize(dict)
                     found = True
         elif len(self.children) >= 2:
-            if self.node.getRuleName() == "whileStatement":
+            if self.node.getRuleName()[:14] == "whileStatement":
                 if len(self.children) == 5:
                     self.children.pop(0)
+                dict["whileStatement"] += 1
+                if dict["whileStatement"] != 1:
+                    self.node.ruleName = "whileStatement" + str(dict["whileStatement"])
+
             elif self.node.getRuleName() == "printFunction" and len(self.children) == 2:
                 self.children.pop(0)
-            elif self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement":
-                if self.node.getRuleName() == "elifStatement":
+            elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement":
+                if self.node.getRuleName()[:13] == "elifStatement":
                     self.children.pop(0)
                     self.children.pop(0)
-                else:
+                    dict["elifStatement"] += 1
+                    if dict["elifStatement"] != 1:
+                        self.node.ruleName = "elifStatement" + str(dict["elifStatement"])
+                elif self.node.getRuleName()[:11] == "ifStatement":
                     self.children.pop(0)
+                    dict["ifStatement"] += 1
+                    if dict["ifStatement"] != 1:
+                        self.node.ruleName = "ifStatement" + str(dict["ifStatement"])
+                elif self.node.getRuleName()[:13] == "elseStatement":
+                    self.children.pop(0)
+                    dict["elseStatement"] += 1
+                    if dict["elseStatement"] != 1:
+                        self.node.ruleName = "elseStatement" + str(dict["elseStatement"])
+            elif self.node.getRuleName()[:12] == "unNamedScope":
+                dict["unNamedScope"] += 1
+                if dict["unNamedScope"] != 1:
+                    self.node.ruleName = "unNamedScope" + str(dict["unNamedScope"])
+            elif self.node.getRuleName()[:7] == "forLoop":
+                self.children.pop(0)
+                dict["forLoop"] += 1
+                if dict["forLoop"] != 1:
+                    self.node.ruleName = "forLoop" + str(dict["forLoop"])
             for i in self.children:
-                i.optimize()
+                i.optimize(dict)
 
     def convertToWhile(self):
-        if self.node.getRuleName() == "forLoop":
+        if len(self.children) == 4:
+            if self.node.getRuleName()[:7] == "forLoop":
+                self.node.ruleName = "whileStatement"
+                temp = self.children[0]
+                self.children[0].node.ruleName = "int"
+                self.children[0].children.append(copy.deepcopy(temp))
+                self.children[0].children[0].node.ruleName = 1
+                self.children[0].children[0].parent = self.children[0]
+                for i in self.children:
+                    i.convertToWhile()
+        elif self.node.getRuleName()[:7] == "forLoop":
             self.node.ruleName = "whileStatement"
             defenition = self.children[1]
             increment = self.children[3]
@@ -132,6 +166,8 @@ class AST:
             self.parent.parent.parent.children[index].children[0].parent = self.parent.parent.parent.children[index]
             self.parent.parent.parent.children[index].children.append(copy.deepcopy(temp))
             self.parent.parent.parent.children[index].children[1].parent = self.parent.parent.parent.children[index]
+            for i in self.children:
+                i.convertToWhile()
         else:
             for i in self.children:
                 i.convertToWhile()
@@ -254,7 +290,7 @@ class AST:
                     value = self.children[2].children[0].node.getRuleName()[1]
                 if possible:
                     symbolTable.insert_value(varName, value, scope)
-        elif self.node.getRuleName() == "unNamedScope" or self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement" or self.node.getRuleName() == "whileStatement" or self.node.getRuleName() == "forLoop":
+        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement" or self.node.getRuleName()[:14] == "whileStatement" or self.node.getRuleName()[:7] == "forLoop":
             scope = self.node.getRuleName()
             for i in self.children:
                 i.initialiseSymbolTable(symbolTable, scope)
@@ -302,7 +338,7 @@ class AST:
             found = False
             curr = self
             while not found:
-                if curr.node.getRuleName() == "forLoop" or curr.node.getRuleName() == "whileStatement":
+                if curr.node.getRuleName()[:7] == "forLoop" or curr.node.getRuleName()[:14] == "whileStatement":
                     found = True
                 elif curr.node.getRuleName() == "prog":
                     break
@@ -316,7 +352,7 @@ class AST:
                     self.children.append(copy.deepcopy(dict[tempName]))
                 elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
                     self.children.append(copy.deepcopy(dict[tempName]))
-        elif self.node.getRuleName() == "unNamedScope" or self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement" or self.node.getRuleName() == "whileStatement" or self.node.getRuleName() == "forLoop":
+        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement" or self.node.getRuleName()[:14] == "whileStatement" or self.node.getRuleName()[:7] == "forLoop":
             scope = self.node.getRuleName()
             for i in self.children:
                 i.constantPropagation(dict, arr, symbolTable, scope)
@@ -342,7 +378,7 @@ class AST:
             possible = True
             curr = self
             while possible:
-                if curr.node.getRuleName() == "forLoop" or curr.node.getRuleName() == "whileStatement":
+                if curr.node.getRuleName()[:7] == "forLoop" or curr.node.getRuleName()[:14] == "whileStatement":
                     possible = False
                 elif curr.parent.node.getRuleName() == "expr":
                     break
@@ -691,7 +727,7 @@ class AST:
                         self.children[0].node.ruleName = 0
                     self.children.pop()
                     self.children[0].children.clear()
-        elif self.node.getRuleName() == "unNamedScope" or self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement" or self.node.getRuleName() == "whileStatement" or self.node.getRuleName() == "forLoop":
+        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement" or self.node.getRuleName()[:14] == "whileStatement" or self.node.getRuleName()[:7] == "forLoop":
             scope = self.node.getRuleName()
             for i in self.children:
                 i.constantFolding(symbolTable, scope)
@@ -708,15 +744,3 @@ class AST:
         else:
             for i in self.children:
                 i.constantFolding(symbolTable, scope)
-
-
-
-
-
-
-
-
-
-
-
-
