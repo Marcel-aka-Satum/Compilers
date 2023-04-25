@@ -81,7 +81,11 @@ class AST:
             elif self.node.getRuleName() == "printFunction" and len(self.children) == 2:
                 self.children.pop(0)
             elif self.node.getRuleName() == "ifStatement" or self.node.getRuleName() == "elifStatement" or self.node.getRuleName() == "elseStatement":
-                self.children.pop(0)
+                if self.node.getRuleName() == "elifStatement":
+                    self.children.pop(0)
+                    self.children.pop(0)
+                else:
+                    self.children.pop(0)
             for i in self.children:
                 i.optimize()
 

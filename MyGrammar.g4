@@ -51,7 +51,7 @@ printFunction: 'printf' '(' opAnd ')' ';';
 
 ifStatement: 'if' '(' opAnd ')' '{' body '}';
 
-elifStatement: 'elif' '(' opAnd ')' '{' body '}';
+elifStatement: 'else' 'if' '(' opAnd ')' '{' body '}';
 
 elseStatement: 'else' '{' body '}';
 
