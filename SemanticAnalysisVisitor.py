@@ -38,7 +38,7 @@ class SemanticAnalysisVisitor:
             self.addScope(node)
         elif node.node.getRuleName() == "}":
             if self.currScope in self.symbol_table.scopes:
-                if self.symbol_table.scopes[self.currScope] == None:
+                if self.symbol_table.scopes[self.currScope] == [None] or self.symbol_table.scopes[self.currScope] == None:
                     self.currScope = None
                 else:
                     self.currScope = self.symbol_table.scopes[self.currScope][1]
@@ -59,40 +59,45 @@ class SemanticAnalysisVisitor:
 
     def visitFuncDef(self, node):
         name = node.children[1].node.getRuleName()
+        self.currScope = name
+        self.addScope(node.children[1])
         type = node.children[0].children[0].node.getRuleName()
         arguments = dict()
         temp = node.children[2]
         count = 0
-        for i in range(len(temp.children)):
-            if temp.children[i].node.getRuleName() == "reservedWord":
-                argName = temp.children[i + 1].node.getRuleName()
-                argType = temp.children[i].children[0].node.getRuleName()
-                arguments[count] = [[None, None], argType]
-                input = [argType, [None, None], None]
-                self.symbol_table.insert_symbol(argName, input, name)
-                count += 1
-            elif temp.children[i].node.getRuleName() == "constWord":
-                argName = temp.children[i + 1].node.getRuleName()
-                if temp.children[i].children[1].node.getRuleName() == "pointerWord":
-                    argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
-                    size = len(temp.children[i].children[1].children[1].node.getRuleName())
-                    arguments[count] = [["const pointer", size], argType]
-                    input = [argType, ["const pointer", size], None]
+        if temp.node.getRuleName() == "{":
+            arguments = None
+        else:
+            for i in range(len(temp.children)):
+                if temp.children[i].node.getRuleName() == "reservedWord":
+                    argName = temp.children[i + 1].node.getRuleName()
+                    argType = temp.children[i].children[0].node.getRuleName()
+                    arguments[count] = [[None, None], argType]
+                    input = [argType, [None, None], None]
                     self.symbol_table.insert_symbol(argName, input, name)
-                else:
-                    argType = temp.children[i].children[1].children[0].node.getRuleName()
-                    arguments[count] = [["const", None], argType]
-                    input = [argType, ["const", None], None]
+                    count += 1
+                elif temp.children[i].node.getRuleName() == "constWord":
+                    argName = temp.children[i + 1].node.getRuleName()
+                    if temp.children[i].children[1].node.getRuleName() == "pointerWord":
+                        argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
+                        size = len(temp.children[i].children[1].children[1].node.getRuleName())
+                        arguments[count] = [["const pointer", size], argType]
+                        input = [argType, ["const pointer", size], None]
+                        self.symbol_table.insert_symbol(argName, input, name)
+                    else:
+                        argType = temp.children[i].children[1].children[0].node.getRuleName()
+                        arguments[count] = [["const", None], argType]
+                        input = [argType, ["const", None], None]
+                        self.symbol_table.insert_symbol(argName, input, name)
+                    count += 1
+                elif temp.children[i].node.getRuleName() == "pointerWord":
+                    argName = temp.children[i + 1].node.getRuleName()
+                    argType = temp.children[i].children[0].children[0].node.getRuleName()
+                    size = len(temp.children[i].children[1].node.getRuleName())
+                    arguments[count] = [["pointer", size], argType]
+                    input = [argType, ["pointer", size], None]
                     self.symbol_table.insert_symbol(argName, input, name)
-                count += 1
-            elif temp.children[i].node.getRuleName() == "pointerWord":
-                argName = temp.children[i + 1].node.getRuleName()
-                argType = temp.children[i].children[0].children[0].node.getRuleName()
-                size = len(temp.children[i].children[1].node.getRuleName())
-                arguments[count] = [["pointer", size], argType]
-                input = [argType, ["pointer", size], None]
-                self.symbol_table.insert_symbol(argName, input, name)
-                count += 1
+                    count += 1
         value = [type, arguments]
         self.symbol_table.funcDict[name] = value
 
@@ -100,7 +105,8 @@ class SemanticAnalysisVisitor:
             self.visit(child)
 
     def visitFuncDecl(self, node):
-        pass
+        name = node.children[1].node.getRuleName()
+        self.symbol_table.funcDict[name] = None
 
     def visitFuncCall(self, node):
         pass

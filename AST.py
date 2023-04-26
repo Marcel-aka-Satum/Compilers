@@ -294,9 +294,13 @@ class AST:
             scope = self.node.getRuleName()
             for i in self.children:
                 i.initialiseSymbolTable(symbolTable, scope)
+        elif self.node.getRuleName() == "funcDefinition":
+            scope = self.children[1].node.getRuleName()
+            for i in self.children:
+                i.initialiseSymbolTable(symbolTable, scope)
         elif self.node.getRuleName() == "}":
             if scope in symbolTable.scopes:
-                if symbolTable.scopes[scope] == None:
+                if symbolTable.scopes[scope] == None or symbolTable.scopes[scope] == [None]:
                     scope = None
                 else:
                     scope = symbolTable.scopes[scope][1]
@@ -356,9 +360,13 @@ class AST:
             scope = self.node.getRuleName()
             for i in self.children:
                 i.constantPropagation(dict, arr, symbolTable, scope)
+        elif self.node.getRuleName() == "funcDefinition":
+            scope = self.children[1].node.getRuleName()
+            for i in self.children:
+                i.constantPropagation(dict, arr, symbolTable, scope)
         elif self.node.getRuleName() == "}":
             if scope in symbolTable.scopes:
-                if symbolTable.scopes[scope] == None:
+                if symbolTable.scopes[scope] == None or symbolTable.scopes[scope] == [None]:
                     scope = None
                 else:
                     scope = symbolTable.scopes[scope][1]
@@ -731,9 +739,13 @@ class AST:
             scope = self.node.getRuleName()
             for i in self.children:
                 i.constantFolding(symbolTable, scope)
+        elif self.node.getRuleName() == "funcDefinition":
+            scope = self.children[1].node.getRuleName()
+            for i in self.children:
+                i.constantFolding(symbolTable, scope)
         elif self.node.getRuleName() == "}":
             if scope in symbolTable.scopes:
-                if symbolTable.scopes[scope] == None:
+                if symbolTable.scopes[scope] == None or symbolTable.scopes[scope] == [None]:
                     scope = None
                 else:
                     scope = symbolTable.scopes[scope][1]

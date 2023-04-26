@@ -48,27 +48,39 @@ class SymbolTable:
             if symbol_name in self.symbol_tables[scope]:
                 return self.symbol_tables[scope][symbol_name]
             else:
-                arr = self.scopes[scope]
-                if arr != None:
-                    for i in arr:
-                        if i in self.symbol_tables:
-                            if symbol_name in self.symbol_tables[i]:
-                                return self.symbol_tables[i][symbol_name]
+                check = False
+                if scope == None:
+                    check = True
+                if check or scope[:12] == "unNamedScope" or scope[:11] == "ifStatement" or scope[:13] == "elifStatement" or scope[:13] == "elseStatement" or scope[:14] == "whileStatement" or scope[:7] == "forLoop":
+                    arr = self.scopes[scope]
+                    if arr != None:
+                        for i in arr:
+                            if i in self.symbol_tables:
+                                if symbol_name in self.symbol_tables[i]:
+                                    return self.symbol_tables[i][symbol_name]
+                    else:
+                        if None in self.symbol_tables:
+                            if symbol_name in self.symbol_tables[None]:
+                                return self.symbol_tables[None][symbol_name]
                 else:
-                    if None in self.symbol_tables:
-                        if symbol_name in self.symbol_tables[None]:
-                            return self.symbol_tables[None][symbol_name]
+                    return None
             return None
         else:
-            if scope in self.scopes:
-                arr = self.scopes[scope]
-                if arr != None:
-                    for i in arr:
-                        if i in self.symbol_tables:
-                            if symbol_name in self.symbol_tables[i]:
-                                return self.symbol_tables[i][symbol_name]
-                else:
-                    if None in self.symbol_tables:
-                        if symbol_name in self.symbol_tables[None]:
-                            return self.symbol_tables[None][symbol_name]
+            check = False
+            if scope == None:
+                check = True
+            if check or scope[:12] == "unNamedScope" or scope[:11] == "ifStatement" or scope[:13] == "elifStatement" or scope[:13] == "elseStatement" or scope[:14] == "whileStatement" or scope[:7] == "forLoop":
+                if scope in self.scopes:
+                    arr = self.scopes[scope]
+                    if arr != None:
+                        for i in arr:
+                            if i in self.symbol_tables:
+                                if symbol_name in self.symbol_tables[i]:
+                                    return self.symbol_tables[i][symbol_name]
+                    else:
+                        if None in self.symbol_tables:
+                            if symbol_name in self.symbol_tables[None]:
+                                return self.symbol_tables[None][symbol_name]
+            else:
+                return None
             return None
