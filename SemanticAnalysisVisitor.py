@@ -9,9 +9,8 @@ class SemanticAnalysisVisitor:
         self.currScope = None
 
     def visit(self, node):
-        if node.node.getRuleName() == "expr":
-            self.visit_expr(node)
-        elif node.node.getRuleName() == "variableDefinition":
+        self.line = node.node.getLine()
+        if node.node.getRuleName() == "variableDefinition":
             self.visit_variable_definition(node)
         elif node.node.getRuleName() == "variableDeclaration":
             self.visit_variable_declaration(node)
@@ -25,8 +24,6 @@ class SemanticAnalysisVisitor:
             self.visitFuncDecl(node)
         elif node.node.getRuleName() == "funcDeclaration":
             self.visitFuncCall(node)
-        elif node.node.getRuleName() == "comment":
-            self.visit_comment(node)
         elif node.node.getRuleName()[:12] == "unNamedScope" or node.node.getRuleName()[:11] == "ifStatement" or node.node.getRuleName()[:13] == "elifStatement" or node.node.getRuleName()[:13] == "elseStatement" or node.node.getRuleName()[:14] == "whileStatement" or node.node.getRuleName()[:7] == "forLoop":
             if self.currScope != None:
                 self.symbol_table.scopes[node.node.getRuleName()] = [None, self.currScope]
@@ -110,20 +107,6 @@ class SemanticAnalysisVisitor:
 
     def visitFuncCall(self, node):
         pass
-
-    def visit_expr(self, node):
-        if node.children[0].node.getRuleName() != "comment":
-            self.line += 1
-        for child in node.children:
-            self.visit(child)
-
-    def visit_comment(self, node):
-        if len(node.children) == 1:
-            comment = node.children[0].node.getRuleName()
-            nLines = len(comment.splitlines())
-        else:
-            nLines = len(node.children)
-        self.line += nLines
 
     def visit_assignment_statement(self, node):
         possible = True
