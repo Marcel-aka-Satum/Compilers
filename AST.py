@@ -12,11 +12,16 @@ class Node:
     def getRuleName(self): return str(self.ruleName)
 
     def getLine(self):
-        try:
-            line = self.tree.start.line
-        except:
-            line = 0
+        try: line = self.tree.start.line
+        except: line = 0
+
         return line
+
+    def getCollom(self):
+        try: collom = self.tree.start.column
+        except: collom = 0
+
+        return collom
 class AST:
     def __init__(self, syntaxTree):
         self.parent = None

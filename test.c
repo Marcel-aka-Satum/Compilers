@@ -8,7 +8,7 @@ int main(){
     int x = 1;
     while (x < 10) {
         int result = mul(x, 2);
-        if ( x > 5) {
+        if (x > 5) {
             result = mul(result, x);
         }
         printf(result); //show the result

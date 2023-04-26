@@ -5,11 +5,13 @@ class SemanticAnalysisVisitor:
     def __init__(self):
         self.symbol_table = SymbolTable()
         self.line = 0
+        self.collom = 0;
         self.error = False
         self.currScope = None
 
     def visit(self, node):
         self.line = node.node.getLine()
+        self.collom = node.node.getCollom()
         if node.node.getRuleName() == "variableDefinition":
             self.visit_variable_definition(node)
         elif node.node.getRuleName() == "variableDeclaration":
@@ -111,14 +113,14 @@ class SemanticAnalysisVisitor:
     def visit_assignment_statement(self, node):
         possible = True
         if node.children[0].node.getRuleName() != "nameIdentifier" and node.children[0].node.getRuleName() != "referenceID":
-            print(f"[ Error ] at line {self.line}: assignment to an rvalue")
+            print(f"[ Error ] at line {self.line} at position {self.collom}: assignment to an rvalue")
             self.error = True
         if node.children[0].node.getRuleName() == "nameIdentifier":
             var_name = node.children[0].children[0].node.getRuleName()
         else:
             var_name = node.children[0].children[1].children[0].node.getRuleName()
             if node.children[0].children[0].node.getRuleName() == "&":
-                print(f"[ Error ] at line {self.line}: assignment to rvalue, cannot assign an address")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: assignment to rvalue, cannot assign an address")
                 self.error = True
         check = None
         if self.symbol_table.get_symbol(var_name, self.currScope) != None:
@@ -127,27 +129,27 @@ class SemanticAnalysisVisitor:
                 if check == "const pointer" and node.children[2].node.getRuleName() == "referenceID":
                     if node.children[0].node.getRuleName() == "referenceID":
                         if node.children[0].children[0].node.getRuleName() == "*":
-                            print(f"[ Error ] at line {self.line}: Can not assign variable {var_name} with type const")
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: Can not assign variable {var_name} with type const")
                             self.error = True
                 else:
-                    print(f"[ Error ] at line {self.line}: Can not assign variable {var_name} with type const")
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: Can not assign variable {var_name} with type const")
                     self.error = True
         else:
-            print(f"[ Error ] at line {self.line}: Can not assign the undeclared variable {var_name} ")
+            print(f"[ Error ] at line {self.line} at position {self.collom}: Can not assign the undeclared variable {var_name}")
             self.error = True
         if check == "pointer":
             if node.children[2].node.getRuleName() != "referenceID":
                 if node.children[0].node.getRuleName() == "referenceID":
                     if node.children[0].children[0].node.getRuleName()[0] != '*':
-                        print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects an address")
                         self.error = True
                     else:
                         size = self.symbol_table.get_symbol(var_name, self.currScope)[1][1]
                         if len(node.children[0].children[0].node.getRuleName()) != size:
-                            print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects a {size} pointer")
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects a {size} pointer")
                             self.error = True
                 else:
-                    print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects an address")
                     self.error = True
             if node.children[0].node.getRuleName() == "referenceID":
                 type = self.symbol_table.get_symbol(var_name, self.currScope)[0]
@@ -155,16 +157,16 @@ class SemanticAnalysisVisitor:
                     possible = False
                     if node.children[2].node.getRuleName() == "nameIdentifier":
                         if type != "int" and type != "float" and type != "char":
-                            print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
                             self.error = True
                     elif node.children[2].node.getRuleName() == "referenceID":
-                        print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
                         self.error = True
 
         type = self.symbol_table.get_symbol(var_name, self.currScope)[0]
         if (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "referenceID" and node.children[2].children[0].node.getRuleName()[0] != '*':
             if check != "pointer" and check != "const pointer":
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expects a value but an adress was given")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: expects a value but an adress was given")
                 self.error = True
         elif (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "referenceID" and node.children[2].children[0].node.getRuleName()[0] == '*':
             varName = node.children[2].children[1].children[0].node.getRuleName()
@@ -174,10 +176,10 @@ class SemanticAnalysisVisitor:
                 if count == len(node.children[2].children[0].node.getRuleName()):
                     pass
                 else:
-                    print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects a {count} pointer")
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects a {count} pointer")
                     self.error = True
             else:
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: {varName} is not a pointer")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: {varName} is not a pointer")
                 self.error = True
 
         if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
@@ -213,14 +215,14 @@ class SemanticAnalysisVisitor:
         elif node.children[2].node.getRuleName() == "nameIdentifier":
             type2 = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName(), self.currScope)[0]
             if (type == "int" or type == "float") and type2 == "char":
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected int or float")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: expected int or float")
                 self.error = True
             elif type == "char" and (type2 == "int" or type2 == "float"):
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: expected char")
                 self.error = True
             varType = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName(), self.currScope)[1][0]
             if varType == "pointer" or varType == "const pointer":
-                print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected char but got assigned an pointer")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: expected char but got assigned an pointer")
                 self.error = True
             rightSide = self.symbol_table.get_symbol(node.children[2].children[0].node.getRuleName(), self.currScope)[2]
         else:
@@ -235,13 +237,13 @@ class SemanticAnalysisVisitor:
             var_name = node.children[1].children[0].node.getRuleName()
             # Check if the variable has already been defined in the current scope
             if self.symbol_table.get_symbol(var_name, self.currScope) is not None:
-                print(f"[ Error ] at line {self.line}: Variable {var_name} has already been defined in the current scope")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} has already been defined in the current scope")
                 self.error = True
             # Check if the variable is not declared const
             extra = None
             size = None
             if node.children[0].node.getRuleName() == "constWord":
-                print(f"[ Error ] at line {self.line}: Variable {var_name} needs to be initialised because it is declared const")
+                print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} needs to be initialised because it is declared const")
                 self.error = True
             elif node.children[0].node.getRuleName() == "pointerWord":
                 extra = "pointer"
@@ -274,7 +276,7 @@ class SemanticAnalysisVisitor:
             if var_name in self.symbol_table.symbol_tables[self.currScope]:
                 test2 = True
         if test1 and test2:
-            print(f"[ Error ] at line {self.line}: Variable {var_name} has already been defined in the current scope")
+            print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} has already been defined in the current scope")
             self.error = True
         else:
             # Add the variable to the symbol table
@@ -302,16 +304,16 @@ class SemanticAnalysisVisitor:
                     newName = node.children[2].children[0].node.getRuleName()
                     newSize = self.symbol_table.get_symbol(newName, self.currScope)[1][1]
                     if newSize == None or size != newSize:
-                        print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an address")
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects an address")
                         self.error = True
                 elif node.children[0].node.getRuleName() == "referenceID":
                     if node.children[0].children[0].node.getRuleName() == "*":
                         if node.children[2].node.getRuleName() == "nameIdentifier":
                             if type != "int" and type != "float" and type != "char":
-                                print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
+                                print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
                                 self.error = True
                         elif node.children[2].node.getRuleName() == "referenceID":
-                            print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects an int or float or char")
                             self.error = True
 
             if (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "referenceID":
@@ -324,27 +326,27 @@ class SemanticAnalysisVisitor:
                             if count == len(node.children[2].children[0].node.getRuleName()):
                                 pass
                             else:
-                                print(f"[ Error ] at line {self.line}: Variable {var_name} can't assign incompatible type: expects a {count} pointer")
+                                print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} can't assign incompatible type: expects a {count} pointer")
                                 self.error = True
                         else:
-                            print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: {varName} is not a pointer")
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: {varName} is not a pointer")
                             self.error = True
                     else:
-                        print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expects a value but got an adress instead")
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: expects a value but got an adress instead")
                         self.error = True
                 else:
                     if node.children[2].children[0].node.getRuleName() != "&":
-                        print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type")
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type")
                         self.error = True
             elif (type == "int" or type == "float" or type == "char") and node.children[2].node.getRuleName() == "nameIdentifier":
                 nodeName = node.children[2].children[0].node.getRuleName()
                 if self.symbol_table.get_symbol(nodeName, self.currScope) == None:
-                    print(f"[ Error ] at line {self.line}: variable {nodeName} has not been initialised or declared")
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: variable {nodeName} has not been initialised or declared")
                     self.error = True
                 type3 = self.symbol_table.get_symbol(nodeName, self.currScope)[1][0]
                 if type3 == "pointer" or type3 == "const pointer":
                     if extra != "pointer" and extra != "const pointer":
-                        print(f"[ Error ] at line {self.line}: {var_name} got assigned an incompatible type: expected value but got assigned an pointer instead ")
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: expected value but got assigned an pointer instead ")
                         self.error = True
             if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
                 if type == "int":
@@ -393,7 +395,7 @@ class SemanticAnalysisVisitor:
         var_name = node.children[0].node.getRuleName()
         var_node = self.symbol_table.get_symbol(var_name, self.currScope)
         if var_node is None:
-            print(f"[ Error ] at line {self.line}: Variable {var_name} has not been initialized or declared")
+            print(f"[ Error ] at line {self.line} at position {self.collom}: Variable {var_name} has not been initialized or declared")
             self.error = True
 
         # Visit its children
