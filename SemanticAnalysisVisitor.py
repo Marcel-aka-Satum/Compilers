@@ -9,7 +9,6 @@ class SemanticAnalysisVisitor:
         self.currScope = None
 
     def visit(self, node):
-
         if node.node.getRuleName() == "expr":
             self.visit_expr(node)
         elif node.node.getRuleName() == "variableDefinition":
@@ -20,6 +19,12 @@ class SemanticAnalysisVisitor:
             self.visit_name_identifier(node)
         elif node.node.getRuleName() == "assignmentStatement":
             self.visit_assignment_statement(node)
+        elif node.node.getRuleName() == "funcDefinition":
+            self.visitFuncDef(node)
+        elif node.node.getRuleName() == "funcDeclaration":
+            self.visitFuncDecl(node)
+        elif node.node.getRuleName() == "funcDeclaration":
+            self.visitFuncCall(node)
         elif node.node.getRuleName() == "comment":
             self.visit_comment(node)
         elif node.node.getRuleName()[:12] == "unNamedScope" or node.node.getRuleName()[:11] == "ifStatement" or node.node.getRuleName()[:13] == "elifStatement" or node.node.getRuleName()[:13] == "elseStatement" or node.node.getRuleName()[:14] == "whileStatement" or node.node.getRuleName()[:7] == "forLoop":
@@ -40,16 +45,65 @@ class SemanticAnalysisVisitor:
 
             else:
                 self.currScope = None
-            self.line +=1
+            self.line += 1
         else:
             for child in node.children:
                 self.visit(child)
+
     def addScope(self, node):
         self.currScope = node.node.getRuleName()
         if self.currScope not in self.symbol_table.scopes:
             self.symbol_table.scopes[self.currScope] = None
         for child in node.children:
             self.visit(child)
+
+    def visitFuncDef(self, node):
+        name = node.children[1].node.getRuleName()
+        type = node.children[0].children[0].node.getRuleName()
+        arguments = dict()
+        temp = node.children[2]
+        count = 0
+        for i in range(len(temp.children)):
+            if temp.children[i].node.getRuleName() == "reservedWord":
+                argName = temp.children[i + 1].node.getRuleName()
+                argType = temp.children[i].children[0].node.getRuleName()
+                arguments[count] = [[None, None], argType]
+                input = [argType, [None, None], None]
+                self.symbol_table.insert_symbol(argName, input, name)
+                count += 1
+            elif temp.children[i].node.getRuleName() == "constWord":
+                argName = temp.children[i + 1].node.getRuleName()
+                if temp.children[i].children[1].node.getRuleName() == "pointerWord":
+                    argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
+                    size = len(temp.children[i].children[1].children[1].node.getRuleName())
+                    arguments[count] = [["const pointer", size], argType]
+                    input = [argType, ["const pointer", size], None]
+                    self.symbol_table.insert_symbol(argName, input, name)
+                else:
+                    argType = temp.children[i].children[1].children[0].node.getRuleName()
+                    arguments[count] = [["const", None], argType]
+                    input = [argType, ["const", None], None]
+                    self.symbol_table.insert_symbol(argName, input, name)
+                count += 1
+            elif temp.children[i].node.getRuleName() == "pointerWord":
+                argName = temp.children[i + 1].node.getRuleName()
+                argType = temp.children[i].children[0].children[0].node.getRuleName()
+                size = len(temp.children[i].children[1].node.getRuleName())
+                arguments[count] = [["pointer", size], argType]
+                input = [argType, ["pointer", size], None]
+                self.symbol_table.insert_symbol(argName, input, name)
+                count += 1
+        value = [type, arguments]
+        self.symbol_table.funcDict[name] = value
+
+        for child in node.children:
+            self.visit(child)
+
+    def visitFuncDecl(self, node):
+        pass
+
+    def visitFuncCall(self, node):
+        pass
 
     def visit_expr(self, node):
         if node.children[0].node.getRuleName() != "comment":

@@ -2,6 +2,7 @@ class SymbolTable:
     def __init__(self):
         self.symbol_tables = dict()
         self.scopes = dict()
+        self.funcDict = dict()
 
     def insert_symbol(self, symbol_name, symbol_node, scope):
         set = {symbol_name: symbol_node}

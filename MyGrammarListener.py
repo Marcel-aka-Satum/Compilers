@@ -296,12 +296,48 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#funcDeclaration.
+    def enterFuncDeclaration(self, ctx:MyGrammarParser.FuncDeclarationContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#funcDeclaration.
+    def exitFuncDeclaration(self, ctx:MyGrammarParser.FuncDeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#argumentCall.
+    def enterArgumentCall(self, ctx:MyGrammarParser.ArgumentCallContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#argumentCall.
+    def exitArgumentCall(self, ctx:MyGrammarParser.ArgumentCallContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#functionCall.
+    def enterFunctionCall(self, ctx:MyGrammarParser.FunctionCallContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#functionCall.
+    def exitFunctionCall(self, ctx:MyGrammarParser.FunctionCallContext):
+        pass
+
+
     # Enter a parse tree produced by MyGrammarParser#body.
     def enterBody(self, ctx:MyGrammarParser.BodyContext):
         pass
 
     # Exit a parse tree produced by MyGrammarParser#body.
     def exitBody(self, ctx:MyGrammarParser.BodyContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#returnStatement.
+    def enterReturnStatement(self, ctx:MyGrammarParser.ReturnStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#returnStatement.
+    def exitReturnStatement(self, ctx:MyGrammarParser.ReturnStatementContext):
         pass
 
 

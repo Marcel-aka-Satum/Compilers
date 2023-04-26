@@ -2,9 +2,9 @@ grammar MyGrammar;
 
 prog: expr;
 
-expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | variableDefinition expr
-    | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr | unNamedScope expr
-    | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr |;
+expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | funcDeclaration expr | functionCall ';' expr
+    | variableDefinition expr | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr
+    | unNamedScope expr | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr | returnStatement expr |;
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -21,7 +21,7 @@ opUnary: '+' brackets | '-' brackets | '!' brackets | brackets;
 
 brackets: '(' opAnd ')' | dataTypes;
 
-variableDefinition: variableDeclaration '=' opAnd ';';
+variableDefinition: variableDeclaration '=' (opAnd | functionCall) ';';
 
 variableDeclaration: constWord referenceID;
 
@@ -31,7 +31,7 @@ constWord: 'const' pointerWord | pointerWord;
 
 pointerWord: reservedWord POINTER | reservedWord POINTERS | reservedWord;
 
-reservedWord: 'int' | 'float' | 'char';
+reservedWord: 'int' | 'float' | 'char' | 'void';
 
 dataTypes: int | float | char | referenceID;
 
@@ -64,11 +64,19 @@ unNamedScope: '{' body '}';
 
 comment: BLOCK_COMMENT+ | COMMENT+;
 
-argument: referenceID;
+argument: (constWord (ID)? ',')*(constWord (ID)?) |;
 
-funcDefinition: 'int' ID '(' argument* ')' '{' body '}';
+funcDefinition: constWord ID '(' argument ')' '{' body '}';
+
+funcDeclaration: constWord ID '(' argument ')' ';';
+
+argumentCall: ((ID | dataTypes) ',')*(ID | dataTypes) |;
+
+functionCall: ID '(' argumentCall ')';
 
 body: expr;
+
+returnStatement: 'return' opAnd ';';
 
 POINTER: '*';
 POINTERS: ('*')+;

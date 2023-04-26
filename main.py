@@ -14,7 +14,7 @@ def main(argv):
     # Create AST
     ast = AST(syntaxTree)
     # Optimize the AST
-    #ast.convertToWhile()
+    ast.convertToWhile()
     countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
     ast.optimize(countScopes)
     # Create the symbol table
@@ -30,14 +30,14 @@ def main(argv):
     if symbolTable.error:
         exit()
     # Constant propagation and constant folding
-    ast.constantPropagation(dict(), [], symbolTable.symbol_table, None)
-    ast.constantFolding(symbolTable.symbol_table, None)
+    #ast.constantPropagation(dict(), [], symbolTable.symbol_table, None)
+    #ast.constantFolding(symbolTable.symbol_table, None)
     # Initialise the symbol table after the constant folding
-    ast.initialiseSymbolTable(symbolTable.symbol_table, None)
+    #ast.initialiseSymbolTable(symbolTable.symbol_table, None)
     # Print the AST in dot
     ast.printInDot(argv)
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
-
+    print(symbolTable.symbol_table.funcDict)
 if __name__ == '__main__':
     main("test.c")
