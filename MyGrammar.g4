@@ -25,7 +25,7 @@ variableDefinition: variableDeclaration '=' (opAnd | functionCall) ';';
 
 variableDeclaration: constWord referenceID;
 
-assignmentStatement: referenceID '=' opAddOrSub | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
+assignmentStatement: referenceID '=' (opAddOrSub | functionCall) | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
 
 constWord: 'const' pointerWord | pointerWord;
 

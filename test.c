@@ -1,3 +1,3 @@
-void mul(int x, int y){
-    return x * y;
-}
+int a = 10;
+a = mul(x, 5);
+int c = 20;
