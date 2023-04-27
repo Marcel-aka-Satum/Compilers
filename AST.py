@@ -364,7 +364,12 @@ class AST:
                     if self.parent.node.getRuleName() == "printFunction":
                         varName = self.children[0].node.getRuleName()
                         self.parent.children[0].node.ruleName = symbolTable.get_symbol(varName, scope)[0]
-                    self.children.append(copy.deepcopy(dict[tempName]))
+                    test = False
+                    if self.parent.node.getRuleName() == "referenceID":
+                        if self.parent.children[0].node.getRuleName() == "&":
+                            test = True
+                    if not test:
+                        self.children.append(copy.deepcopy(dict[tempName]))
                 elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
                     self.children.append(copy.deepcopy(dict[tempName]))
         elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement" or self.node.getRuleName()[:14] == "whileStatement" or self.node.getRuleName()[:7] == "forLoop":

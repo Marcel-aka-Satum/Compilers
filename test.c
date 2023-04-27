@@ -1,5 +1,6 @@
 int mul(int x, int y){
     return x * y;
+    int b = 10;
 }
 /*
 * My program

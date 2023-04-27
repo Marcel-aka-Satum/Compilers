@@ -27,6 +27,7 @@ def main(argv):
             exit()
         else:
             print("ERROR")
+
     if symbolTable.error:
         exit()
     # Constant propagation and constant folding
@@ -38,5 +39,6 @@ def main(argv):
     ast.printInDot(argv)
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
+    print(symbolTable.symbol_table.funcDict)
 if __name__ == '__main__':
     main("test.c")

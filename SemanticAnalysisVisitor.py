@@ -8,6 +8,7 @@ class SemanticAnalysisVisitor:
         self.collom = 0;
         self.error = False
         self.currScope = None
+        self.ret = None
 
     def visit(self, node):
         self.line = node.node.getLine()
@@ -24,8 +25,30 @@ class SemanticAnalysisVisitor:
             self.visitFuncDef(node)
         elif node.node.getRuleName() == "funcDeclaration":
             self.visitFuncDecl(node)
-        elif node.node.getRuleName() == "funcDeclaration":
+        elif node.node.getRuleName() == "functionCall":
             self.visitFuncCall(node)
+        elif node.node.getRuleName() == "returnStatement":
+            self.ret = True
+            name = self.currScope
+            type = self.symbol_table.funcDict[name][0]
+            varType = node.children[1].node.getRuleName()
+            if type == "void":
+                print(f"[ Error ] at line {self.line} at position {self.collom}: void function {name} cannot return a type")
+                self.error = True
+            else:
+                if varType == "int" or varType == "float" or varType == "char":
+                    if type != varType:
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} returned a {varType} but expected an {type}")
+                        self.error = True
+                elif varType == "nameIdentifier":
+                    varName = node.children[1].children[0].node.getRuleName()
+                    varType = self.symbol_table.get_symbol(varName, name)[0]
+                    if type != varType:
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} returned a {varType} but expected an {type}")
+                        self.error = True
+            for child in node.children:
+                self.visit(child)
+
         elif node.node.getRuleName()[:12] == "unNamedScope" or node.node.getRuleName()[:11] == "ifStatement" or node.node.getRuleName()[:13] == "elifStatement" or node.node.getRuleName()[:13] == "elseStatement" or node.node.getRuleName()[:14] == "whileStatement" or node.node.getRuleName()[:7] == "forLoop":
             if self.currScope != None:
                 self.symbol_table.scopes[node.node.getRuleName()] = [None, self.currScope]
@@ -36,6 +59,16 @@ class SemanticAnalysisVisitor:
                             self.symbol_table.scopes[node.node.getRuleName()].append(i)
             self.addScope(node)
         elif node.node.getRuleName() == "}":
+            if self.currScope != None:
+                if self.currScope[:12] != "unNamedScope" and self.currScope[:11] != "ifStatement" and self.currScope[:13] != "elifStatement" and self.currScope[:13] != "elseStatement" and self.currScope[:14] != "whileStatement" and self.currScope[:7] != "forLoop":
+                    name = self.currScope
+                    type = self.symbol_table.funcDict[name][0]
+                    if type != "void":
+                        if self.ret == None:
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: non-void function {name} needs to return a {type}")
+                            self.error = True
+            self.ret = None
+
             if self.currScope in self.symbol_table.scopes:
                 if self.symbol_table.scopes[self.currScope] == [None] or self.symbol_table.scopes[self.currScope] == None:
                     self.currScope = None
@@ -56,11 +89,20 @@ class SemanticAnalysisVisitor:
         for child in node.children:
             self.visit(child)
 
+    def findReturn(self, node):
+        if node.node.getRuleName() == "returnStatement":
+            return [True, node]
+        else:
+            temp = [False, None]
+            for i in node.children:
+                temp = self.findReturn(i)
+            return temp
+
     def visitFuncDef(self, node):
         name = node.children[1].node.getRuleName()
+        type = node.children[0].children[0].node.getRuleName()
         self.currScope = name
         self.addScope(node.children[1])
-        type = node.children[0].children[0].node.getRuleName()
         arguments = dict()
         temp = node.children[2]
         count = 0
@@ -71,7 +113,7 @@ class SemanticAnalysisVisitor:
                 if temp.children[i].node.getRuleName() == "reservedWord":
                     argName = temp.children[i + 1].node.getRuleName()
                     argType = temp.children[i].children[0].node.getRuleName()
-                    arguments[count] = [[None, None], argType]
+                    arguments[count] = [[False, None], argType]
                     input = [argType, [None, None], None]
                     self.symbol_table.insert_symbol(argName, input, name)
                     count += 1
@@ -80,12 +122,12 @@ class SemanticAnalysisVisitor:
                     if temp.children[i].children[1].node.getRuleName() == "pointerWord":
                         argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
                         size = len(temp.children[i].children[1].children[1].node.getRuleName())
-                        arguments[count] = [["const pointer", size], argType]
+                        arguments[count] = [[True, size], argType]
                         input = [argType, ["const pointer", size], None]
                         self.symbol_table.insert_symbol(argName, input, name)
                     else:
                         argType = temp.children[i].children[1].children[0].node.getRuleName()
-                        arguments[count] = [["const", None], argType]
+                        arguments[count] = [[False, None], argType]
                         input = [argType, ["const", None], None]
                         self.symbol_table.insert_symbol(argName, input, name)
                     count += 1
@@ -93,7 +135,7 @@ class SemanticAnalysisVisitor:
                     argName = temp.children[i + 1].node.getRuleName()
                     argType = temp.children[i].children[0].children[0].node.getRuleName()
                     size = len(temp.children[i].children[1].node.getRuleName())
-                    arguments[count] = [["pointer", size], argType]
+                    arguments[count] = [[True, size], argType]
                     input = [argType, ["pointer", size], None]
                     self.symbol_table.insert_symbol(argName, input, name)
                     count += 1
@@ -108,7 +150,66 @@ class SemanticAnalysisVisitor:
         self.symbol_table.funcDict[name] = None
 
     def visitFuncCall(self, node):
-        pass
+        name = node.children[0].node.getRuleName()
+        if name not in self.symbol_table.funcDict:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has not been declared or defined")
+            self.error = True
+        else:
+            if self.symbol_table.funcDict[name] != None:
+                size = len(self.symbol_table.funcDict[name][1])
+                count = 0
+                for i in node.children[1].children:
+                    type = None
+                    extra = None
+                    if i.node.getRuleName() != ",":
+                        if count > size - 1:
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} expects {size} arguments but more were given")
+                            self.error = True
+                        if i.node.getRuleName() == "int" or i.node.getRuleName() == "float" or i.node.getRuleName() == "char":
+                            type = [[False, None], i.node.getRuleName()]
+                        elif i.node.getRuleName() == "referenceID":
+                            varName = i.children[1].children[0].node.getRuleName()
+                            varType = self.symbol_table.get_symbol(varName, self.currScope)[0]
+                            if i.children[0].node.getRuleName() == "&":
+                                type = [[True, None], varType]
+                                extra = True
+                            else:
+                                varSize = len(i.children[0].node.getRuleName())
+                                checkSize = self.symbol_table.get_symbol(varName, self.currScope)[1][1]
+                                if varSize != checkSize:
+                                    print(f"[ Error ] at line {self.line} at position {self.collom}: {varName} expects {checkSize} pointer but got {varSize} instead")
+                                    self.error = True
+                                type = [[False, None], varType]
+                        else:
+                            varName = i.node.getRuleName()
+                            varType = self.symbol_table.get_symbol(varName, self.currScope)[0]
+                            varPointer = self.symbol_table.get_symbol(varName, self.currScope)[1][0]
+                            if varPointer == "const pointer" or varPointer == "pointer":
+                                varSize = self.symbol_table.get_symbol(varName, self.currScope)[1][1]
+                                type = [[True, varSize], varType]
+                            else:
+                                type = [[False, None], varType]
+                        checkValue = self.symbol_table.funcDict[name][1][count]
+                        if checkValue[1] != type[1]:
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} argument {count} expects a {checkValue[1]} but got an {type[1]} instead")
+                            self.error = True
+                        if checkValue[0][0] == True:
+                            if type[0][0] != True:
+                                print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} argument {count} expects an adress but got an value instead")
+                                self.error = True
+                            elif checkValue[0][1] != type[0][1] and not extra:
+                                print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} argument {count} expects an {checkValue[0][1]} pointer but got {type[0][1]} instead")
+                                self.error = True
+                        if checkValue[0][0] == False and checkValue[0][1] == None:
+                            if type[0][0] != False:
+                                print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} argument {count} expects a value but got an adress instead")
+                                self.error = True
+                        count += 1
+
+
+
+
+
 
     def visit_assignment_statement(self, node):
         possible = True
