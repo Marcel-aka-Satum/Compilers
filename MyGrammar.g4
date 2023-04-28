@@ -83,7 +83,7 @@ POINTERS: ('*')+;
 BREAK: 'break';
 CONTINUE: 'continue';
 ID: [a-zA-Z]([a-zA-Z0-9_])*;
-CHAR: '\'' ([a-zA-Z] | INT | .)'\'';
+CHAR: ['].[']|['][\\].['];
 INT: [0-9]+;
 FLOAT: [0-9]*'.'[0-9]+ | [0-9]+'.'[0-9]*;
 COMMENT: '//' .*? '\r'? '\n';
