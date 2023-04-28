@@ -21,11 +21,34 @@ T__19=20
 T__20=21
 T__21=22
 T__22=23
+<<<<<<< Updated upstream
 ID=24
 CHAR=25
 INT=26
 FLOAT=27
 WS=28
+=======
+T__23=24
+T__24=25
+T__25=26
+T__26=27
+T__27=28
+T__28=29
+T__29=30
+T__30=31
+T__31=32
+POINTER=33
+POINTERS=34
+BREAK=35
+CONTINUE=36
+ID=37
+CHAR=38
+INT=39
+FLOAT=40
+COMMENT=41
+BLOCK_COMMENT=42
+WS=43
+>>>>>>> Stashed changes
 ';'=1
 '&&'=2
 '||'=3
@@ -37,6 +60,7 @@ WS=28
 '>'=9
 '+'=10
 '-'=11
+<<<<<<< Updated upstream
 '*'=12
 '/'=13
 '%'=14
@@ -49,3 +73,29 @@ WS=28
 'float'=21
 'char'=22
 '&'=23
+=======
+'/'=12
+'%'=13
+'!'=14
+'('=15
+')'=16
+'='=17
+'const'=18
+'int'=19
+'float'=20
+'char'=21
+'void'=22
+'&'=23
+'printf'=24
+'if'=25
+'{'=26
+'}'=27
+'else'=28
+'while'=29
+'for'=30
+','=31
+'return'=32
+'*'=33
+'break'=35
+'continue'=36
+>>>>>>> Stashed changes

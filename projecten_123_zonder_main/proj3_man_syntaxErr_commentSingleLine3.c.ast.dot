@@ -1,0 +1,23 @@
+graph ast { 
+<AST.AST object at 0x7efcf3f354f0>[label="prog"] 
+<AST.AST object at 0x7efcf3f35d00>[label="expr"] 
+<AST.AST object at 0x7efcf3f35250>[label="variableDefinition"] 
+<AST.AST object at 0x7efcf3f34100>[label="variableDeclaration"] 
+<AST.AST object at 0x7efcf3f32bb0>[label="reservedWord"] 
+<AST.AST object at 0x7efcf3f32730>[label="int"] 
+<AST.AST object at 0x7efcf3f327f0>[label="nameIdentifier"] 
+<AST.AST object at 0x7efcf3f32c70>[label="this_is_not_correct"] 
+<AST.AST object at 0x7efcf3f34f70>[label="="] 
+<AST.AST object at 0x7efcf3f3cb50>[label="int"] 
+<AST.AST object at 0x7efcf3f3c850>[label="4"] 
+<AST.AST object at 0x7efcf3f354f0> -- <AST.AST object at 0x7efcf3f35d00>
+<AST.AST object at 0x7efcf3f35d00> -- <AST.AST object at 0x7efcf3f35250>
+<AST.AST object at 0x7efcf3f35250> -- <AST.AST object at 0x7efcf3f34100>
+<AST.AST object at 0x7efcf3f34100> -- <AST.AST object at 0x7efcf3f32bb0>
+<AST.AST object at 0x7efcf3f32bb0> -- <AST.AST object at 0x7efcf3f32730>
+<AST.AST object at 0x7efcf3f34100> -- <AST.AST object at 0x7efcf3f327f0>
+<AST.AST object at 0x7efcf3f327f0> -- <AST.AST object at 0x7efcf3f32c70>
+<AST.AST object at 0x7efcf3f35250> -- <AST.AST object at 0x7efcf3f34f70>
+<AST.AST object at 0x7efcf3f35250> -- <AST.AST object at 0x7efcf3f3cb50>
+<AST.AST object at 0x7efcf3f3cb50> -- <AST.AST object at 0x7efcf3f3c850>
+}

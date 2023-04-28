@@ -2,7 +2,13 @@ grammar MyGrammar;
 
 prog: expr;
 
+<<<<<<< Updated upstream
 expr: opAnd ';' | opAnd ';' expr;
+=======
+expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | funcDeclaration expr | functionCall ';' expr
+    | variableDefinition expr | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr
+    | unNamedScope expr | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr | returnStatement expr |;
+>>>>>>> Stashed changes
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -19,17 +25,25 @@ opUnary: '+' brackets | '-' brackets | '!' brackets | brackets;
 
 brackets: '(' opAnd ')' | variableDefinition | variableDeclaration | assignmentStatement | dataTypes;
 
+<<<<<<< Updated upstream
 variableDefinition: variableDeclaration '=' opAddOrSub;
 
 variableDeclaration: constWord referenceID;
 
 assignmentStatement: referenceID '=' opAddOrSub;
+=======
+variableDefinition: variableDeclaration '=' (opAnd | functionCall) ';';
+
+variableDeclaration: constWord referenceID;
+
+assignmentStatement: referenceID '=' (opAddOrSub | functionCall) | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
+>>>>>>> Stashed changes
 
 constWord: 'const' pointerWord | pointerWord;
 
 pointerWord: reservedWord'*' | reservedWord;
 
-reservedWord: 'int' | 'float' | 'char';
+reservedWord: 'int' | 'float' | 'char' | 'void';
 
 dataTypes: int | float | char | referenceID;
 
@@ -43,6 +57,46 @@ referenceID: '&'nameIdentifier | nameIdentifier;
 
 nameIdentifier: ID;
 
+<<<<<<< Updated upstream
+=======
+conditionStatement: ifStatement (elifStatement)* (elseStatement)? | whileStatement | forLoop;
+
+printFunction: 'printf' '(' opAnd ')' ';';
+
+ifStatement: 'if' '(' opAnd ')' '{' body '}';
+
+elifStatement: 'else' 'if' '(' opAnd ')' '{' body '}';
+
+elseStatement: 'else' '{' body '}';
+
+whileStatement: 'while' '(' opAnd ')' '{' body '}';
+
+forLoop: 'for' '(' ((variableDeclaration ';' | variableDefinition | assignmentStatement ';') opAnd ';' assignmentStatement
+| ';' ';') ')' '{' body '}';
+
+unNamedScope: '{' body '}';
+
+comment: BLOCK_COMMENT+ | COMMENT+;
+
+argument: (constWord (ID)? ',')*(constWord (ID)?) |;
+
+funcDefinition: constWord ID '(' argument ')' '{' body '}';
+
+funcDeclaration: constWord ID '(' argument ')' ';';
+
+argumentCall: ((ID | dataTypes) ',')*(ID | dataTypes) |;
+
+functionCall: ID '(' argumentCall ')';
+
+body: expr;
+
+returnStatement: 'return' opAnd ';';
+
+POINTER: '*';
+POINTERS: ('*')+;
+BREAK: 'break';
+CONTINUE: 'continue';
+>>>>>>> Stashed changes
 ID: [a-zA-Z]([a-zA-Z0-9_])*;
 CHAR: '\'' [a-zA-Z] '\'';
 INT: [0-9]+;

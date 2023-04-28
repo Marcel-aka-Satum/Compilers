@@ -197,5 +197,152 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+<<<<<<< Updated upstream
+=======
+    # Enter a parse tree produced by MyGrammarParser#conditionStatement.
+    def enterConditionStatement(self, ctx:MyGrammarParser.ConditionStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#conditionStatement.
+    def exitConditionStatement(self, ctx:MyGrammarParser.ConditionStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#printFunction.
+    def enterPrintFunction(self, ctx:MyGrammarParser.PrintFunctionContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#printFunction.
+    def exitPrintFunction(self, ctx:MyGrammarParser.PrintFunctionContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#ifStatement.
+    def enterIfStatement(self, ctx:MyGrammarParser.IfStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#ifStatement.
+    def exitIfStatement(self, ctx:MyGrammarParser.IfStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#elifStatement.
+    def enterElifStatement(self, ctx:MyGrammarParser.ElifStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#elifStatement.
+    def exitElifStatement(self, ctx:MyGrammarParser.ElifStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#elseStatement.
+    def enterElseStatement(self, ctx:MyGrammarParser.ElseStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#elseStatement.
+    def exitElseStatement(self, ctx:MyGrammarParser.ElseStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#whileStatement.
+    def enterWhileStatement(self, ctx:MyGrammarParser.WhileStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#whileStatement.
+    def exitWhileStatement(self, ctx:MyGrammarParser.WhileStatementContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#forLoop.
+    def enterForLoop(self, ctx:MyGrammarParser.ForLoopContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#forLoop.
+    def exitForLoop(self, ctx:MyGrammarParser.ForLoopContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#unNamedScope.
+    def enterUnNamedScope(self, ctx:MyGrammarParser.UnNamedScopeContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#unNamedScope.
+    def exitUnNamedScope(self, ctx:MyGrammarParser.UnNamedScopeContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#comment.
+    def enterComment(self, ctx:MyGrammarParser.CommentContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#comment.
+    def exitComment(self, ctx:MyGrammarParser.CommentContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#argument.
+    def enterArgument(self, ctx:MyGrammarParser.ArgumentContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#argument.
+    def exitArgument(self, ctx:MyGrammarParser.ArgumentContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#funcDefinition.
+    def enterFuncDefinition(self, ctx:MyGrammarParser.FuncDefinitionContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#funcDefinition.
+    def exitFuncDefinition(self, ctx:MyGrammarParser.FuncDefinitionContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#funcDeclaration.
+    def enterFuncDeclaration(self, ctx:MyGrammarParser.FuncDeclarationContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#funcDeclaration.
+    def exitFuncDeclaration(self, ctx:MyGrammarParser.FuncDeclarationContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#argumentCall.
+    def enterArgumentCall(self, ctx:MyGrammarParser.ArgumentCallContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#argumentCall.
+    def exitArgumentCall(self, ctx:MyGrammarParser.ArgumentCallContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#functionCall.
+    def enterFunctionCall(self, ctx:MyGrammarParser.FunctionCallContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#functionCall.
+    def exitFunctionCall(self, ctx:MyGrammarParser.FunctionCallContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#body.
+    def enterBody(self, ctx:MyGrammarParser.BodyContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#body.
+    def exitBody(self, ctx:MyGrammarParser.BodyContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#returnStatement.
+    def enterReturnStatement(self, ctx:MyGrammarParser.ReturnStatementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#returnStatement.
+    def exitReturnStatement(self, ctx:MyGrammarParser.ReturnStatementContext):
+        pass
+
+
+>>>>>>> Stashed changes
 
 del MyGrammarParser
