@@ -17,17 +17,11 @@ def main(argv):
     ast.convertToWhile()
     countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
     ast.optimize(countScopes)
+    ast.removeDeadCode()
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
-    try:
-        symbolTable.visit(ast)
-    except:
-        if symbolTable.error:
-            exit()
-        else:
-            print("ERROR")
-            exit()
+    symbolTable.visit(ast)
 
     if symbolTable.error:
         exit()
@@ -40,6 +34,5 @@ def main(argv):
     ast.printInDot(argv)
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
-    print(symbolTable.symbol_table.funcDict)
 if __name__ == '__main__':
     main("test.c")

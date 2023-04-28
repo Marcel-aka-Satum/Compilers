@@ -55,6 +55,19 @@ class AST:
         file = open(argv, "w")
         file.write(graph)
 
+    def removeDeadCode(self):
+        if self.node.getRuleName() == "returnStatement" or self.node.getRuleName() == "break" or self.node.getRuleName() == "continue":
+            for i in self.parent.children:
+                if i != self:
+                    self.parent.children.remove(i)
+        elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:14] == "whileStatement":
+            if len(self.children[0].children) == 1:
+                if self.children[0].children[0].node.getRuleName() == "0":
+                    self.parent.parent.children.remove(self.parent)
+                    self.parent.children.remove(self)
+        else:
+            for i in self.children:
+                i.removeDeadCode()
     def optimize(self, dict):
         if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction":
             if self.node.getRuleName() == "printFunction" and len(self.children) == 2:
@@ -190,14 +203,10 @@ class AST:
                 varType = self.children[0].children[0].children[0].children[0].node.getRuleName()
                 name = self.children[0].children[1].children[0].node.getRuleName()
                 tableType = symbolTable.get_symbol(name, scope)[0]
-                if varType == "char" and tableType == "int":
-                    self.children[0].children[0].children[0].children[0].node.ruleName = "int"
             else:
                 varType = self.children[0].children[0].children[0].node.getRuleName()
                 name = self.children[0].children[1].children[0].node.getRuleName()
                 tableType = symbolTable.get_symbol(name, scope)[0]
-                if varType == "char" and tableType == "int":
-                    self.children[0].children[0].children[0].node.ruleName = "int"
             if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
                 if len(self.children[2].children) == 1:
@@ -232,7 +241,10 @@ class AST:
                 elif type == "float":
                     value = float(self.children[2].children[0].node.getRuleName())
                 else:
-                    value = self.children[2].children[0].node.getRuleName()[1]
+                    if self.children[2].node.getRuleName() == "int":
+                        value = int(self.children[2].children[0].node.getRuleName())
+                    else:
+                        value = self.children[2].children[0].node.getRuleName()[1]
                 symbolTable.insert_value(varName, value, scope)
             elif self.children[2].node.getRuleName() == "opUnary":
                 varName = self.children[0].children[1].children[0].node.getRuleName()

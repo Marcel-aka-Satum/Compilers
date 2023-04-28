@@ -8,6 +8,7 @@ class SemanticAnalysisVisitor:
         self.collom = 0;
         self.error = False
         self.currScope = None
+        self.funcScope = None
         self.ret = None
 
     def visit(self, node):
@@ -29,7 +30,7 @@ class SemanticAnalysisVisitor:
             self.visitFuncCall(node)
         elif node.node.getRuleName() == "returnStatement":
             self.ret = True
-            name = self.currScope
+            name = self.funcScope
             type = self.symbol_table.funcDict[name][0]
             varType = node.children[1].node.getRuleName()
             if type == "void":
@@ -61,13 +62,14 @@ class SemanticAnalysisVisitor:
         elif node.node.getRuleName() == "}":
             if self.currScope != None:
                 if self.currScope[:12] != "unNamedScope" and self.currScope[:11] != "ifStatement" and self.currScope[:13] != "elifStatement" and self.currScope[:13] != "elseStatement" and self.currScope[:14] != "whileStatement" and self.currScope[:7] != "forLoop":
-                    name = self.currScope
+                    name = self.funcScope
                     type = self.symbol_table.funcDict[name][0]
                     if type != "void":
                         if self.ret == None:
                             print(f"[ Error ] at line {self.line} at position {self.collom}: non-void function {name} needs to return a {type}")
                             self.error = True
-            self.ret = None
+                    self.funcScope = None
+                    self.ret = None
 
             if self.currScope in self.symbol_table.scopes:
                 if self.symbol_table.scopes[self.currScope] == [None] or self.symbol_table.scopes[self.currScope] == None:
@@ -101,7 +103,11 @@ class SemanticAnalysisVisitor:
     def visitFuncDef(self, node):
         name = node.children[1].node.getRuleName()
         type = node.children[0].children[0].node.getRuleName()
+        if name in self.symbol_table.funcDict:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has already been defined")
+            self.error = True
         self.currScope = name
+        self.funcScope = name
         self.addScope(node.children[1])
         arguments = dict()
         temp = node.children[2]
@@ -475,6 +481,17 @@ class SemanticAnalysisVisitor:
                         type = "int"
                     else:
                         rightSide = node.children[2].children[0].node.getRuleName()[1]
+                        if rightSide == '\\':
+                            rightSide = node.children[2].children[0].node.getRuleName()[1:3]
+                            if rightSide == "\\n":
+                                rightSide = ord('\n')
+                            elif rightSide == "\\t":
+                                rightSide = ord('\t')
+                            elif rightSide == "\\r":
+                                rightSide = ord('\r')
+                            node.children[2].node.ruleName = "int"
+                            node.children[2].children[0].node.ruleName = rightSide
+
             else:
                 if node.children[2].node.getRuleName() == "referenceID":
                     if node.children[2].children[0].node.getRuleName()[0] == '*':
