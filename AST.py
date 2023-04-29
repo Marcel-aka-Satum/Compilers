@@ -4,24 +4,24 @@ import copy
 
 class Node:
     def __init__(self, syntaxTree):
-        self.tree = syntaxTree
+        try:
+            self.line = syntaxTree.start.line
+        except:
+            self.line = 0
+        try:
+            self.collom = syntaxTree.start.column
+        except:
+            self.collom = 0
+
         if syntaxTree.getChildCount() > 0:
             self.ruleName = MyGrammarParser.ruleNames[syntaxTree.getRuleIndex()]
         else: self.ruleName = syntaxTree.getText()
 
     def getRuleName(self): return str(self.ruleName)
 
-    def getLine(self):
-        try: line = self.tree.start.line
-        except: line = 0
+    def getLine(self): return self.line
 
-        return line
-
-    def getCollom(self):
-        try: collom = self.tree.start.column
-        except: collom = 0
-
-        return collom
+    def getCollom(self): return self.collom
 class AST:
     def __init__(self, syntaxTree):
         self.parent = None

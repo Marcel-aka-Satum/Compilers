@@ -17,17 +17,16 @@ def main(argv):
     ast.convertToWhile()
     countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
     ast.optimize(countScopes)
-    ast.removeDeadCode()
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
     # Visit the AST and look for errors
     symbolTable.visit(ast)
-
     if symbolTable.error:
         exit()
     # Constant propagation and constant folding
-    #ast.constantPropagation(dict(), [], symbolTable.symbol_table, None)
+    ast.constantPropagation(dict(), [], symbolTable.symbol_table, None)
     ast.constantFolding(symbolTable.symbol_table, None)
+    ast.removeDeadCode()
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table, None)
     # Print the AST in dot

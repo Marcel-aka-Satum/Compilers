@@ -7,7 +7,6 @@ int mul(int x, int y){
 */
 int main(){
     int x = 1;
-    if (0){}
     while (x < 10) {
     int result = mul(x, 2);
         if ( x > 5) {
