@@ -215,6 +215,24 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#scanFunction.
+    def enterScanFunction(self, ctx:MyGrammarParser.ScanFunctionContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#scanFunction.
+    def exitScanFunction(self, ctx:MyGrammarParser.ScanFunctionContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#printArg.
+    def enterPrintArg(self, ctx:MyGrammarParser.PrintArgContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#printArg.
+    def exitPrintArg(self, ctx:MyGrammarParser.PrintArgContext):
+        pass
+
+
     # Enter a parse tree produced by MyGrammarParser#ifStatement.
     def enterIfStatement(self, ctx:MyGrammarParser.IfStatementContext):
         pass
@@ -320,6 +338,51 @@ class MyGrammarListener(ParseTreeListener):
 
     # Exit a parse tree produced by MyGrammarParser#functionCall.
     def exitFunctionCall(self, ctx:MyGrammarParser.FunctionCallContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#arrDecl.
+    def enterArrDecl(self, ctx:MyGrammarParser.ArrDeclContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#arrDecl.
+    def exitArrDecl(self, ctx:MyGrammarParser.ArrDeclContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#arrDef.
+    def enterArrDef(self, ctx:MyGrammarParser.ArrDefContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#arrDef.
+    def exitArrDef(self, ctx:MyGrammarParser.ArrDefContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#arrCall.
+    def enterArrCall(self, ctx:MyGrammarParser.ArrCallContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#arrCall.
+    def exitArrCall(self, ctx:MyGrammarParser.ArrCallContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#arrAssign.
+    def enterArrAssign(self, ctx:MyGrammarParser.ArrAssignContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#arrAssign.
+    def exitArrAssign(self, ctx:MyGrammarParser.ArrAssignContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#lib.
+    def enterLib(self, ctx:MyGrammarParser.LibContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#lib.
+    def exitLib(self, ctx:MyGrammarParser.LibContext):
         pass
 
 

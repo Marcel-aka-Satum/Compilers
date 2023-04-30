@@ -134,6 +134,17 @@ class AST:
                 dict["forLoop"] += 1
                 if dict["forLoop"] != 1:
                     self.node.ruleName = "forLoop" + str(dict["forLoop"])
+            elif self.node.getRuleName() == "arrDef":
+                for i in self.children:
+                    if i.node.getRuleName() == "arrAssign":
+                        if len(i.children) > 1:
+                            if i.children[0].node.getRuleName() == "{" and i.children[1].node.getRuleName() == "}":
+                                i.node.ruleName = "int"
+                                i.children[0].node.ruleName = 0
+                                i.children.pop()
+                            else:
+                                i.children.pop(len(i.children) - 1)
+                                i.children.pop(0)
             for i in self.children:
                 i.optimize(dict)
 

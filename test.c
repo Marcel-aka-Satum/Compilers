@@ -1,3 +1,4 @@
+#include <stdio.h>
 int mul(int x, int y){
     return x * y;
     int b = 10;
@@ -6,16 +7,6 @@ int mul(int x, int y){
 * My program
 */
 int main(){
-    int x = 1;
-    while (x < 10) {
-    int result = mul(x, 2);
-        if ( x > 5) {
-            int b = 10;
-            break;
-            printf(result);
-        }
-        printf(result); //show the result
-        x = x + 1;
-    }
+    int arr[2] = {1,2};
     return 0;
 }

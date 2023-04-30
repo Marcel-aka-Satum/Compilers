@@ -4,7 +4,8 @@ prog: expr;
 
 expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | funcDeclaration expr | functionCall ';' expr
     | variableDefinition expr | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr
-    | unNamedScope expr | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr | returnStatement expr |;
+    | unNamedScope expr | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr | returnStatement expr
+    | arrDecl expr | arrDef expr | lib expr | scanFunction expr |;
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -21,11 +22,11 @@ opUnary: '+' brackets | '-' brackets | '!' brackets | brackets;
 
 brackets: '(' opAnd ')' | dataTypes;
 
-variableDefinition: variableDeclaration '=' (opAnd | functionCall) ';';
+variableDefinition: variableDeclaration '=' (opAnd | functionCall | arrCall) ';';
 
 variableDeclaration: constWord referenceID;
 
-assignmentStatement: referenceID '=' (opAddOrSub | functionCall) | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
+assignmentStatement: referenceID '=' (opAddOrSub | functionCall | arrCall) | dataTypes '=' opAddOrSub | '(' opAnd ')' '=' opAnd;
 
 constWord: 'const' pointerWord | pointerWord;
 
@@ -33,7 +34,7 @@ pointerWord: reservedWord POINTER | reservedWord POINTERS | reservedWord;
 
 reservedWord: 'int' | 'float' | 'char' | 'void';
 
-dataTypes: int | float | char | referenceID;
+dataTypes: int | float | char | referenceID | functionCall | arrCall;
 
 int: INT;
 
@@ -47,7 +48,11 @@ nameIdentifier: ID;
 
 conditionStatement: ifStatement (elifStatement)* (elseStatement)? | whileStatement | forLoop;
 
-printFunction: 'printf' '(' opAnd ')' ';';
+printFunction: 'printf' '(' printArg ')' ';';
+
+scanFunction: 'scanf' '(' ')' ';';
+
+printArg: (('"%d"' | '"%i"' | '"%s"' | '"%c"') ',' dataTypes);
 
 ifStatement: 'if' '(' opAnd ')' '{' body '}';
 
@@ -73,6 +78,16 @@ funcDeclaration: constWord ID '(' argument ')' ';';
 argumentCall: ((ID | dataTypes) ',')*(ID | dataTypes) |;
 
 functionCall: ID '(' argumentCall ')';
+
+arrDecl: constWord ID '[' (INT | nameIdentifier) ']' ';';
+
+arrDef: constWord ID '[' (INT | nameIdentifier) ']' '=' arrAssign ';';
+
+arrCall: nameIdentifier '[' (INT | nameIdentifier) ']';
+
+arrAssign: '{' (dataTypes ',')* (dataTypes)? '}' | '{' '}' | dataTypes;
+
+lib: '#include' '<stdio.h>';
 
 body: expr;
 
