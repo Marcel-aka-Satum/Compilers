@@ -164,6 +164,7 @@ class SemanticAnalysisVisitor:
             if self.symbol_table.funcDict[name] != None:
                 size = len(self.symbol_table.funcDict[name][1])
                 count = 0
+                temp = False
                 for i in node.children[1].children:
                     type = None
                     extra = None
@@ -171,6 +172,7 @@ class SemanticAnalysisVisitor:
                         if count > size - 1:
                             print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} expects {size} arguments but more were given")
                             self.error = True
+                            temp = True
                         if i.node.getRuleName() == "int" or i.node.getRuleName() == "float" or i.node.getRuleName() == "char":
                             type = [[False, None], i.node.getRuleName()]
                         elif i.node.getRuleName() == "referenceID":
@@ -211,6 +213,9 @@ class SemanticAnalysisVisitor:
                                 print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} argument {count} expects a value but got an adress instead")
                                 self.error = True
                         count += 1
+                if count != size and not temp:
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} expects {size} arguments but less were given")
+                    self.error = True
 
 
 

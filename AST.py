@@ -69,7 +69,7 @@ class AST:
             for i in self.children:
                 i.removeDeadCode()
     def optimize(self, dict):
-        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction":
+        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "argumentCall":
             if self.node.getRuleName() == "printFunction" and len(self.children) == 2:
                 self.children.pop(0)
             for i in self.children:

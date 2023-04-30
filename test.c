@@ -10,7 +10,7 @@ int main(){
     while (x < 10) {
     int result = mul(x, 2);
         if ( x > 5) {
-            int b = 22;
+            int b = 10;
             break;
             printf(result);
         }
