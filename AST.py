@@ -38,6 +38,16 @@ class AST:
 
     def addNodes(self):
         string = str(self)
+        if len(self.node.getRuleName()) > 1:
+            if self.node.getRuleName()[1] == '%':
+                if self.node.getRuleName()[2] == 'i':
+                    self.node.ruleName = "%i"
+                elif self.node.getRuleName()[2] == 'd':
+                    self.node.ruleName = "%d"
+                elif self.node.getRuleName()[2] == 's':
+                    self.node.ruleName = "%s"
+                elif self.node.getRuleName()[2] == 'c':
+                    self.node.ruleName = "%c"
         string += '[label="{}"] \n'.format(self.node.getRuleName())
         for child in self.children:
             string += child.addNodes()
@@ -69,7 +79,7 @@ class AST:
             for i in self.children:
                 i.removeDeadCode()
     def optimize(self, dict):
-        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "argumentCall":
+        if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "argumentCall" or self.node.getRuleName() == "arrArg":
             if self.node.getRuleName() == "printFunction" and len(self.children) == 2:
                 self.children.pop(0)
             for i in self.children:
