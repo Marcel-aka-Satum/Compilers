@@ -106,7 +106,7 @@ class SemanticAnalysisVisitor:
             self.visit(child)
 
     def visitArrAssign(self, node):
-        name = node.children[0].children[0].node.getRuleName()
+        name = node.children[0].node.getRuleName()
         arr = self.symbol_table.get_symbol(name, self.currScope)
         if arr == None:
             print(f"[ Error ] at line {self.line} at position {self.collom}: Array {name} has not been initialized or declared")
