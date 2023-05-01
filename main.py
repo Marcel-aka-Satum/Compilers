@@ -16,10 +16,10 @@ def main(argv):
     # Optimize the AST
     ast.convertToWhile()
     countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
-
     ast.optimize(countScopes)
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
+    ast.printInDot(argv)
     # Visit the AST and look for errors
     try:
         symbolTable.visit(ast)
@@ -38,7 +38,6 @@ def main(argv):
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table, None)
     # Print the AST in dot
-    ast.printInDot(argv)
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
 if __name__ == '__main__':

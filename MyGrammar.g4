@@ -3,7 +3,7 @@ grammar MyGrammar;
 prog: expr;
 
 expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | funcDeclaration expr | functionCall ';' expr
-    | variableDefinition expr | variableDeclaration ';' expr | assignmentStatement ';' expr | printFunction expr
+    | variableDefinition expr | variableDeclaration ';' expr | arrAssign expr | assignmentStatement ';' expr | printFunction expr
     | unNamedScope expr | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr | returnStatement expr
     | arrDecl expr | arrDef expr | lib expr | scanFunction expr |;
 
@@ -81,11 +81,13 @@ functionCall: ID '(' argumentCall ')';
 
 arrDecl: constWord ID '[' (INT | nameIdentifier) ']' ';';
 
-arrDef: constWord ID '[' (INT | nameIdentifier) ']' '=' arrAssign ';';
+arrDef: constWord ID '[' (INT | nameIdentifier) ']' '=' arrArg ';';
 
 arrCall: nameIdentifier '[' (INT | nameIdentifier) ']';
 
-arrAssign: '{' (dataTypes ',')* (dataTypes)? '}' | '{' '}' | dataTypes;
+arrArg: '{' (dataTypes ',')* (dataTypes)? '}' | '{' '}';
+
+arrAssign: nameIdentifier '[' (INT | nameIdentifier) ']' '=' dataTypes ';';
 
 lib: '#include' '<stdio.h>';
 
