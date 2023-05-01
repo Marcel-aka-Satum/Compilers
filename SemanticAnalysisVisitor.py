@@ -31,8 +31,16 @@ class SemanticAnalysisVisitor:
             self.visitFuncCall(node)
         elif node.node.getRuleName() == "arrDef":
             self.visitArrDef(node)
+        elif node.node.getRuleName() == "arrAssign":
+            self.visitArrAssign(node)
         elif node.node.getRuleName() == "returnStatement":
             self.visitReturn(node)
+        elif node.node.getRuleName() == "lib":
+            self.lib = True
+            for child in node.children:
+                self.visit(child)
+        elif node.node.getRuleName() == "printFunction" or node.node.getRuleName() == "scanFunction":
+            self.visitPrintOrScan(node)
         elif node.node.getRuleName()[:12] == "unNamedScope" or node.node.getRuleName()[:11] == "ifStatement" or node.node.getRuleName()[:13] == "elifStatement" or node.node.getRuleName()[:13] == "elseStatement" or node.node.getRuleName()[:14] == "whileStatement" or node.node.getRuleName()[:7] == "forLoop":
             if self.currScope != None:
                 self.symbol_table.scopes[node.node.getRuleName()] = [None, self.currScope]
@@ -67,6 +75,13 @@ class SemanticAnalysisVisitor:
             for child in node.children:
                 self.visit(child)
 
+    def visitPrintOrScan(self, node):
+        if not self.lib:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: cannot use function without including stdio.h")
+            self.error = True
+        for child in node.children:
+            self.visit(child)
+
     def visitReturn(self, node):
         self.ret = True
         name = self.funcScope
@@ -85,11 +100,59 @@ class SemanticAnalysisVisitor:
                 varName = node.children[1].children[0].node.getRuleName()
                 varType = self.symbol_table.get_symbol(varName, name)[0]
                 if type != varType:
-                    print(
-                        f"[ Error ] at line {self.line} at position {self.collom}: function {name} returned a {varType} but expected an {type}")
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} returned a {varType} but expected an {type}")
                     self.error = True
         for child in node.children:
             self.visit(child)
+
+    def visitArrAssign(self, node):
+        name = node.children[0].children[0].node.getRuleName()
+        arr = self.symbol_table.get_symbol(name, self.currScope)
+        if arr == None:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: Array {name} has not been initialized or declared")
+            self.error = True
+        else:
+            isConst = False
+            if arr[1][0] == "const" or arr[1][0] == "const pointer":
+                print(f"[ Error ] at line {self.line} at position {self.collom}: {name} is a const array, wich can not be reassigned")
+                self.error = True
+            else:
+                type = arr[0]
+                i = node.children[5]
+                if i.node.getRuleName() == "int":
+                    if type == "float":
+                        new = float(i.children[0].node.getRuleName())
+                        i.node.ruleName = "float"
+                        i.children[0].node.ruleName = new
+                    elif type == "char":
+                        new = chr(int(i.children[0].node.getRuleName()))
+                        i.node.ruleName = "char"
+                        i.children[0].node.ruleName = new
+                elif i.node.getRuleName() == "float":
+                    if type == "int":
+                        temp = float(i.children[0].node.getRuleName())
+                        new = int(temp)
+                        i.node.ruleName = "int"
+                        i.children[0].node.ruleName = new
+                    elif type == "char":
+                        temp = float(i.children[0].node.getRuleName())
+                        new = chr(int(temp))
+                        i.node.ruleName = "char"
+                        i.children[0].node.ruleName = new
+                elif i.node.getRuleName() == "char":
+                    if type == "int":
+                        temp = i.children[0].node.getRuleName()[1]
+                        new = ord(temp)
+                        i.node.ruleName = "int"
+                        i.children[0].node.ruleName = new
+                    elif type == "float":
+                        temp = ord(i.children[0].node.getRuleName()[1])
+                        new = float(temp)
+                        i.node.ruleName = "float"
+                        i.children[0].node.ruleName = new
+        for child in node.children:
+            self.visit(child)
+
     def visitArrDef(self, node):
         name = node.children[1].node.getRuleName()
         type = None
@@ -120,6 +183,38 @@ class SemanticAnalysisVisitor:
             tempArr = [type, ["pointer", size], rightSide, sizeArr]
         elif not pointer and not const:
             tempArr = [type, [None, size], rightSide, sizeArr]
+        for i in rightSide.children:
+            if i.node.getRuleName() == "int":
+                if type == "float":
+                    new = float(i.children[0].node.getRuleName())
+                    i.node.ruleName = "float"
+                    i.children[0].node.ruleName = new
+                elif type == "char":
+                    new = chr(int(i.children[0].node.getRuleName()))
+                    i.node.ruleName = "char"
+                    i.children[0].node.ruleName = new
+            elif i.node.getRuleName() == "float":
+                if type == "int":
+                    temp = float(i.children[0].node.getRuleName())
+                    new = int(temp)
+                    i.node.ruleName = "int"
+                    i.children[0].node.ruleName = new
+                elif type == "char":
+                    temp = float(i.children[0].node.getRuleName())
+                    new = chr(int(temp))
+                    i.node.ruleName = "char"
+                    i.children[0].node.ruleName = new
+            elif i.node.getRuleName() == "char":
+                if type == "int":
+                    temp = i.children[0].node.getRuleName()[1]
+                    new = ord(temp)
+                    i.node.ruleName = "int"
+                    i.children[0].node.ruleName = new
+                elif type == "float":
+                    temp = ord(i.children[0].node.getRuleName()[1])
+                    new = float(temp)
+                    i.node.ruleName = "float"
+                    i.children[0].node.ruleName = new
         self.symbol_table.insert_symbol(name, tempArr, self.currScope)
         for child in node.children:
             self.visit(child)

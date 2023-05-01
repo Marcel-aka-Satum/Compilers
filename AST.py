@@ -136,7 +136,7 @@ class AST:
                     self.node.ruleName = "forLoop" + str(dict["forLoop"])
             elif self.node.getRuleName() == "arrDef":
                 for i in self.children:
-                    if i.node.getRuleName() == "arrAssign":
+                    if i.node.getRuleName() == "arrArg":
                         if len(i.children) > 1:
                             if i.children[0].node.getRuleName() == "{" and i.children[1].node.getRuleName() == "}":
                                 i.node.ruleName = "int"

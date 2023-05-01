@@ -7,7 +7,7 @@ int mul(int x, int y){
 * My program
 */
 int main(){
-    int arr[2] = {1,2};
-    arr[1] = 6;
+    int arr[2] = {'<', 'c'};
+    test[1] = 3.2;
     return 0;
 }
