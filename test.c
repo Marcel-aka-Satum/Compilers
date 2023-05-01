@@ -8,6 +8,6 @@ int mul(int x, int y){
 */
 int main(){
     int arr[2] = {'<', 'c'};
-    test[1] = 3.2;
+    arr[1] = 3.2;
     return 0;
 }

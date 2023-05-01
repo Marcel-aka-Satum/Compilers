@@ -196,7 +196,7 @@ def serializedATN():
         0,0,0,517,515,1,0,0,0,517,518,1,0,0,0,518,521,1,0,0,0,519,517,1,
         0,0,0,520,522,3,30,15,0,521,520,1,0,0,0,521,522,1,0,0,0,522,523,
         1,0,0,0,523,527,5,33,0,0,524,525,5,32,0,0,525,527,5,33,0,0,526,511,
-        1,0,0,0,526,524,1,0,0,0,527,81,1,0,0,0,528,529,3,40,20,0,529,532,
+        1,0,0,0,526,524,1,0,0,0,527,81,1,0,0,0,528,529,5,46,0,0,529,532,
         5,37,0,0,530,533,5,48,0,0,531,533,3,40,20,0,532,530,1,0,0,0,532,
         531,1,0,0,0,533,534,1,0,0,0,534,535,5,38,0,0,535,536,5,17,0,0,536,
         537,3,30,15,0,537,538,5,1,0,0,538,83,1,0,0,0,539,540,5,39,0,0,540,
@@ -3469,12 +3469,8 @@ class MyGrammarParser ( Parser ):
             super().__init__(parent, invokingState)
             self.parser = parser
 
-        def nameIdentifier(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(MyGrammarParser.NameIdentifierContext)
-            else:
-                return self.getTypedRuleContext(MyGrammarParser.NameIdentifierContext,i)
-
+        def ID(self):
+            return self.getToken(MyGrammarParser.ID, 0)
 
         def dataTypes(self):
             return self.getTypedRuleContext(MyGrammarParser.DataTypesContext,0)
@@ -3482,6 +3478,10 @@ class MyGrammarParser ( Parser ):
 
         def INT(self):
             return self.getToken(MyGrammarParser.INT, 0)
+
+        def nameIdentifier(self):
+            return self.getTypedRuleContext(MyGrammarParser.NameIdentifierContext,0)
+
 
         def getRuleIndex(self):
             return MyGrammarParser.RULE_arrAssign
@@ -3504,7 +3504,7 @@ class MyGrammarParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 528
-            self.nameIdentifier()
+            self.match(MyGrammarParser.ID)
             self.state = 529
             self.match(MyGrammarParser.T__36)
             self.state = 532
