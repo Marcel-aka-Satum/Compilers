@@ -15,12 +15,12 @@ def main(argv):
     parser.addErrorListener(errorAnalysis())
     # Create syntax tree
     syntaxTree = parser.prog()
+    # Check if we have a syntax error, if so we stop.
     if parser.getNumberOfSyntaxErrors() >= 1:
         exit()
     # Create AST
     ast = AST(syntaxTree)
     # Optimize the AST
-    ast.convertToWhile()
     countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
     ast.optimize(countScopes)
     # Create the symbol table
