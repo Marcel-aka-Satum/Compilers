@@ -44,6 +44,10 @@ class AST:
                     a = self.node.getRuleName()
                     newStr = a[1:len(a)-1]
                     self.node.ruleName = newStr
+                elif self.parent.node.getRuleName() == "comment":
+                    a = self.node.getRuleName()
+                    b = a.translate({ord("\"") : None})
+                    self.node.ruleName = b
         string += '[label="{}"] \n'.format(self.node.getRuleName())
         for child in self.children:
             string += child.addNodes()
@@ -69,7 +73,6 @@ class AST:
         elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:14] == "whileStatement":
             if len(self.children[0].children) == 1:
                 if self.children[0].children[0].node.getRuleName() == "0":
-                    self.parent.parent.children.remove(self.parent)
                     self.parent.children.remove(self)
         else:
             for i in self.children:
@@ -567,9 +570,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue - rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue - rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -606,9 +609,9 @@ class AST:
                 elif self.children[1].node.getRuleName() == "%":
                     if type == None:
                         self.children[0].node.ruleName = leftValue % rightValue
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue % rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = float(leftValue % rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue % rightValue)
@@ -623,9 +626,9 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue < rightValue)
                     elif varName == "print":
                         self.children[0].node.ruleName = int(leftValue < rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue < rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = int(leftValue < rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue < rightValue)
@@ -640,9 +643,9 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue > rightValue)
                     elif varName == "print":
                         self.children[0].node.ruleName = int(leftValue > rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue > rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = int(leftValue > rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue > rightValue)
@@ -657,9 +660,9 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue == rightValue)
                     elif varName == "print":
                         self.children[0].node.ruleName = int(leftValue == rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue == rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = int(leftValue == rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue == rightValue)
@@ -674,9 +677,9 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue <= rightValue)
                     elif varName == "print":
                         self.children[0].node.ruleName = int(leftValue <= rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue <= rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = int(leftValue <= rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue <= rightValue)
@@ -691,9 +694,9 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue >= rightValue)
                     elif varName == "print":
                         self.children[0].node.ruleName = int(leftValue >= rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue >= rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = int(leftValue >= rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue >= rightValue)
@@ -708,9 +711,9 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue != rightValue)
                     elif varName == "print":
                         self.children[0].node.ruleName = int(leftValue != rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue != rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = int(leftValue >= rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue != rightValue)
@@ -750,9 +753,9 @@ class AST:
                         self.children[0].node.ruleName = int(leftValue or rightValue)
                     elif varName == "print":
                         self.children[0].node.ruleName = int(leftValue or rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "int":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "int":
                         self.children[0].node.ruleName = int(leftValue or rightValue)
-                    elif symbolTable.get_symbol(varName)[0] == "float":
+                    elif symbolTable.get_symbol(varName, scope)[0] == "float":
                         self.children[0].node.ruleName = int(leftValue or rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue or rightValue)

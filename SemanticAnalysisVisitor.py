@@ -86,11 +86,12 @@ class SemanticAnalysisVisitor:
         self.ret = True
         name = self.funcScope
         type = self.symbol_table.funcDict[name][0]
-        varType = node.children[1].node.getRuleName()
         if type == "void":
-            print(f"[ Error ] at line {self.line} at position {self.collom}: void function {name} cannot return a type")
-            self.error = True
+            if len(node.children) != 1:
+                print(f"[ Error ] at line {self.line} at position {self.collom}: void function {name} cannot return a type")
+                self.error = True
         else:
+            varType = node.children[1].node.getRuleName()
             if varType == "int" or varType == "float" or varType == "char":
                 if type != varType:
                     print(
@@ -238,8 +239,9 @@ class SemanticAnalysisVisitor:
         name = node.children[1].node.getRuleName()
         type = node.children[0].children[0].node.getRuleName()
         if name in self.symbol_table.funcDict:
-            print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has already been defined")
-            self.error = True
+            if self.symbol_table.funcDict[name] != None:
+                print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has already been defined")
+                self.error = True
         self.currScope = name
         self.funcScope = name
         self.addScope(node.children[1])
@@ -295,7 +297,7 @@ class SemanticAnalysisVisitor:
             print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has not been declared or defined")
             self.error = True
         else:
-            if self.symbol_table.funcDict[name] != None:
+            if self.symbol_table.funcDict[name][1] != None:
                 size = len(self.symbol_table.funcDict[name][1])
                 count = 0
                 temp = False
