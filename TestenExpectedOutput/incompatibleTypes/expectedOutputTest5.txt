@@ -1,2 +1,0 @@
-we verwachten een error: [ Error ] at line 2: y got assigned an incompatible type: expects a value but got an adress instead
-omdat y een int is verwacht het een waarde maar heeft hier een adress gekregen

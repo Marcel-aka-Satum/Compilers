@@ -1,2 +1,0 @@
-we verwachten een error: [ Error ] at line 3: Variable y can't assign incompatible type: expects a 3 pointer
-om de waarde in het adress van y te veranderen moeten wij de juiste dereference geven, hier word er 1 gegeven maar we verwachten er 3.

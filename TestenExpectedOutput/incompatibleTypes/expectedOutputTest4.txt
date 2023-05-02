@@ -1,2 +1,0 @@
-we verwachten hier een error: [ Error ] at line 1: Variable x can't assign incompatible type: expects an address
-omdat x een pointer is verwacht het een adress

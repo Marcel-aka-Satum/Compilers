@@ -1,2 +1,0 @@
-we verwachten hier een error: [ Error ] at line 2: Variable a has already been defined in the current scope
-omdat de variable al is gedeclareerd of initaliseerd kunnen we het niet meer opnieuw doen.

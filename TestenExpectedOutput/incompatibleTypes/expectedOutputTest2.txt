@@ -1,1 +1,0 @@
-We verwachten hier geen error, omdat we de char converten naar zijn asci waarde.
