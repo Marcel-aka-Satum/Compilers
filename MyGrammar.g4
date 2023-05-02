@@ -97,7 +97,7 @@ lib: '#include' '<stdio.h>';
 
 body: expr;
 
-returnStatement: 'return' opAnd ';';
+returnStatement: 'return' (opAnd|) ';';
 
 POINTER: '*';
 POINTERS: ('*')+;
