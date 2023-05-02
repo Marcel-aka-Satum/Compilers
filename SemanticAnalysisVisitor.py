@@ -323,14 +323,43 @@ class SemanticAnalysisVisitor:
                                     self.error = True
                                 type = [[False, None], varType]
                         else:
-                            varName = i.node.getRuleName()
-                            varType = self.symbol_table.get_symbol(varName, self.currScope)[0]
-                            varPointer = self.symbol_table.get_symbol(varName, self.currScope)[1][0]
-                            if varPointer == "const pointer" or varPointer == "pointer":
-                                varSize = self.symbol_table.get_symbol(varName, self.currScope)[1][1]
-                                type = [[True, varSize], varType]
+                            if len(i.children) != 0:
+                                left = i.children[0]
+                                right = i.children[2]
+                                if left.node.getRuleName() == "nameIdentifier":
+                                    temp1 = self.symbol_table.get_symbol(left.children[0].node.getRuleName(), self.currScope)[0]
+                                else:
+                                    temp1 = left.node.getRuleName()
+
+                                if right.node.getRuleName() == "nameIdentifier":
+                                    temp2 = self.symbol_table.get_symbol(right.children[0].node.getRuleName(), self.currScope)[0]
+                                else:
+                                    temp2 = right.node.getRuleName()
+
+                                if temp1 == temp2:
+                                    type = [[False, None], temp1]
+                                else:
+                                    if temp1 == "int" and temp2 == "float":
+                                        type = [[False, None], temp2]
+                                    elif temp1 == "float" and temp2 == "int":
+                                        type = [[False, None], temp1]
+                                    elif temp1 == "float" and temp2 == "char":
+                                        type = [[False, None], temp1]
+                                    elif temp1 == "char" and temp2 == "float":
+                                        type = [[False, None], temp2]
+                                    elif temp1 == "int" and temp2 == "char":
+                                        type = [[False, None], temp1]
+                                    elif temp1 == "char" and temp2 == "int":
+                                        type = [[False, None], temp2]
                             else:
-                                type = [[False, None], varType]
+                                varName = i.node.getRuleName()
+                                varType = self.symbol_table.get_symbol(varName, self.currScope)[0]
+                                varPointer = self.symbol_table.get_symbol(varName, self.currScope)[1][0]
+                                if varPointer == "const pointer" or varPointer == "pointer":
+                                    varSize = self.symbol_table.get_symbol(varName, self.currScope)[1][1]
+                                    type = [[True, varSize], varType]
+                                else:
+                                    type = [[False, None], varType]
                         checkValue = self.symbol_table.funcDict[name][1][count]
                         if checkValue[1] != type[1]:
                             print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} argument {count} expects a {checkValue[1]} but got an {type[1]} instead")
@@ -590,10 +619,14 @@ class SemanticAnalysisVisitor:
                     print(f"[ Error ] at line {self.line} at position {self.collom}: variable {nodeName} has not been initialised or declared")
                     self.error = True
                 type3 = self.symbol_table.get_symbol(nodeName, self.currScope)[1][0]
+                corrType = self.symbol_table.get_symbol(nodeName, self.currScope)[0]
                 if type3 == "pointer" or type3 == "const pointer":
                     if extra != "pointer" and extra != "const pointer":
                         print(f"[ Error ] at line {self.line} at position {self.collom}: {var_name} got assigned an incompatible type: expected value but got assigned an pointer instead ")
                         self.error = True
+                if type == "int" and corrType == "float":
+                    print(f"[ Warning ] at line {self.line} at position {self.collom}: variable {var_name} has loss of information (float to int)")
+
             if node.children[2].node.getRuleName() == "int" or node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
                 if type == "int":
                     if node.children[2].node.getRuleName() == "char":
@@ -604,6 +637,9 @@ class SemanticAnalysisVisitor:
                         except ValueError:
                             rightSide = float(node.children[2].children[0].node.getRuleName())
                             rightSide = int(rightSide)
+                            print(f"[ Warning ] at line {self.line} at position {self.collom}: variable {var_name} has loss of information (float to int)")
+                        node.children[2].node.ruleName = "int"
+                        node.children[2].children[0].node.ruleName = rightSide
                 elif type == "float":
                     if node.children[2].node.getRuleName() == "char":
                         rightSide = ord(node.children[2].children[0].node.getRuleName()[1])

@@ -1,24 +1,23 @@
-
 #include <stdio.h>
 
-int f(int a) {
-	if (a<2) {
-		return a;
-	}
-	else {
-		return f(a-1) + f(a-2);
-	}
+void f();
+
+void g();
+
+void f(){
+	printf("Hello ");
+	return;
 }
 
-// Recursive fibonnaci
+void g(){
+	printf("World\n");
+	f();
+	printf("World\n");
+}
+
 int main(){
-	int n;
-    printf("Enter a number:");
-	scanf("%d",&n);
-	int i = 2;
-	while(i <= n){
-		printf("fib(%d)\t= %d;\n", i, f(i));
-		i = i +1;
-	}
-	return 0;
+    // Should print "hello world" twice
+	f();
+	g();
+	return 1;
 }
