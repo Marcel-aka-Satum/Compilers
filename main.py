@@ -2,6 +2,7 @@
 from AST import *
 from SemanticAnalysisVisitor import *
 from LLVM import *
+from ErrorListener import *
 
 
 def main(argv):
@@ -9,8 +10,13 @@ def main(argv):
     lexer = MyGrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = MyGrammarParser(stream)
+    # remove the default error listenner and add the custom one
+    parser.removeErrorListeners()
+    parser.addErrorListener(errorAnalysis())
     # Create syntax tree
     syntaxTree = parser.prog()
+    if parser.getNumberOfSyntaxErrors() >= 1:
+        exit()
     # Create AST
     ast = AST(syntaxTree)
     # Optimize the AST

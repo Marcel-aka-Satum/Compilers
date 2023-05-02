@@ -2,6 +2,7 @@
 int mul(int x, int y){
     return x * y;
     int b = 10;
+    /
 }
 /*
 * My program
@@ -10,5 +11,6 @@ int main(){
     int a;
     int b;
     int c;
+    printf("hello");
     return 0;
 }
