@@ -34,7 +34,7 @@ pointerWord: reservedWord POINTER | reservedWord POINTERS | reservedWord;
 
 reservedWord: 'int' | 'float' | 'char' | 'void';
 
-dataTypes: int | float | char | referenceID | functionCall | arrCall;
+dataTypes: int | float | char |referenceID | functionCall | arrCall;
 
 int: INT;
 
@@ -56,7 +56,7 @@ scanFunction: 'scanf' '(' scanArg ')' ';';
 
 scanArg: (string ',' (referenceID ',')*(referenceID)) | string;
 
-printArg: (string ',' (opAnd ',')*(opAnd)) | string;
+printArg: (string ',' ((opAnd | string) ',')*(opAnd | string)) | string;
 
 ifStatement: 'if' '(' opAnd ')' '{' body '}';
 

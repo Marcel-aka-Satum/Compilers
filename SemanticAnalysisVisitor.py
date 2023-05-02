@@ -56,7 +56,7 @@ class SemanticAnalysisVisitor:
                     name = self.funcScope
                     type = self.symbol_table.funcDict[name][0]
                     if type != "void":
-                        if self.ret == None:
+                        if self.ret == None and self.currScope != "main":
                             print(f"[ Error ] at line {self.line} at position {self.collom}: non-void function {name} needs to return a {type}")
                             self.error = True
                     self.funcScope = None
