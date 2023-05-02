@@ -54,9 +54,9 @@ printFunction: 'printf' '(' printArg ')' ';';
 
 scanFunction: 'scanf' '(' scanArg ')' ';';
 
-scanArg: (string ',' (nameIdentifier ',')*(nameIdentifier)) | string;
+scanArg: (string ',' (referenceID ',')*(referenceID)) | string;
 
-printArg: (string ',' opAnd) | string;
+printArg: (string ',' (opAnd ',')*(opAnd)) | string;
 
 ifStatement: 'if' '(' opAnd ')' '{' body '}';
 
@@ -79,7 +79,7 @@ funcDefinition: constWord ID '(' argument ')' '{' body '}';
 
 funcDeclaration: constWord ID '(' argument ')' ';';
 
-argumentCall: ((ID | dataTypes) ',')*(ID | dataTypes) |;
+argumentCall: ((ID | opAnd) ',')*(ID | opAnd) |;
 
 functionCall: ID '(' argumentCall ')';
 
