@@ -1,9 +1,16 @@
 #include <stdio.h>
 
+// Should print the numbers 10 20 30
+
 int main(){
-	char a[5];
-    printf("Enter a 5-character string:");
-	scanf("%5s", &a);
-	printf("%s", a);
+	int a[3];
+	a[0] = 10;
+	a[1] = 20;
+	a[2] = 30;
+	int i = 1;
+	while(i < 4){
+		printf("%d; ", a[i-1]);
+		i++;
+	}
 	return 1;
 }

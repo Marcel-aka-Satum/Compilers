@@ -31,6 +31,8 @@ class SemanticAnalysisVisitor:
             self.visitFuncCall(node)
         elif node.node.getRuleName() == "arrDef":
             self.visitArrDef(node)
+        elif node.node.getRuleName() == "arrDecl":
+            self.visitArrDecl(node)
         elif node.node.getRuleName() == "arrAssign":
             self.visitArrAssign(node)
         elif node.node.getRuleName() == "returnStatement":
@@ -74,6 +76,43 @@ class SemanticAnalysisVisitor:
         else:
             for child in node.children:
                 self.visit(child)
+
+    def visitArrDecl(self, node):
+        name = node.children[1].node.getRuleName()
+        check = self.symbol_table.get_symbol(name, self.currScope)
+        if check is not None:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: array {name} has already been defined or declared")
+            self.error = True
+        type = None
+        const = False
+        pointer = False
+        size = None
+        sizeArr = int(node.children[3].node.getRuleName())
+        if node.children[0].node.getRuleName() == "constWord":
+            const = True
+            if node.children[0].children[1].node.getRuleName() == "pointerWord":
+                pointer = True
+                type = node.children[0].children[1].children[0].children[0].node.getRuleName()
+                size = len(node.children[0].children[1].children[1].node.getRuleName())
+            else:
+                type = node.children[0].children[1].children[0].node.getRuleName()
+        elif node.children[0].node.getRuleName() == "pointerWord":
+            pointer = True
+            type = node.children[0].children[0].children[0].node.getRuleName()
+            size = len(node.children[0].children[1].node.getRuleName())
+        elif node.children[0].node.getRuleName() == "reservedWord":
+            type = node.children[0].children[0].node.getRuleName()
+        if const and pointer:
+            tempArr = [type, ["const pointer", size], None, sizeArr]
+        elif const and not pointer:
+            tempArr = [type, ["const", size], None, sizeArr]
+        elif pointer and not const:
+            tempArr = [type, ["pointer", size], None, sizeArr]
+        elif not pointer and not const:
+            tempArr = [type, [None, size], None, sizeArr]
+        self.symbol_table.insert_symbol(name, tempArr, self.currScope)
+        for child in node.children:
+            self.visit(child)
 
     def visitPrintOrScan(self, node):
         if not self.lib:
@@ -156,6 +195,10 @@ class SemanticAnalysisVisitor:
 
     def visitArrDef(self, node):
         name = node.children[1].node.getRuleName()
+        check = self.symbol_table.get_symbol(name, self.currScope)
+        if check is not None:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: array {name} has already been defined or declared")
+            self.error = True
         type = None
         const = False
         pointer = False

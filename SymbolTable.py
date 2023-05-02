@@ -63,6 +63,9 @@ class SymbolTable:
                             if symbol_name in self.symbol_tables[None]:
                                 return self.symbol_tables[None][symbol_name]
                 else:
+                    if None in self.symbol_tables:
+                        if symbol_name in self.symbol_tables[None]:
+                            return self.symbol_tables[None][symbol_name]
                     return None
             return None
         else:
@@ -82,5 +85,8 @@ class SymbolTable:
                             if symbol_name in self.symbol_tables[None]:
                                 return self.symbol_tables[None][symbol_name]
             else:
+                if None in self.symbol_tables:
+                    if symbol_name in self.symbol_tables[None]:
+                        return self.symbol_tables[None][symbol_name]
                 return None
             return None
