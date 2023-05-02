@@ -562,9 +562,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue + rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue + rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -592,9 +592,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue * rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue * rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -607,9 +607,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue / rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue / rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -622,9 +622,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue % rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue % rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -637,9 +637,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue < rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue < rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -652,9 +652,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue > rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue > rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -667,9 +667,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue == rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue == rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -682,9 +682,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue <= rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue <= rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -697,9 +697,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue >= rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue >= rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -712,9 +712,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue >= rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue != rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -727,9 +727,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue and rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue and rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -742,9 +742,9 @@ class AST:
                         self.children[0].node.ruleName = float(leftValue or rightValue)
                     else:
                         self.children[0].node.ruleName = int(leftValue or rightValue)
-                        temp = symbolTable.get_symbol(varName)
+                        temp = symbolTable.get_symbol(varName, scope)
                         newArr = ["int", temp[1], temp[2]]
-                        symbolTable.symbol_tables[-1][varName] = newArr
+                        symbolTable.symbol_tables[scope][varName] = newArr
                     self.children.pop()
                     self.children.pop()
                     self.children[0].children.clear()
@@ -761,7 +761,7 @@ class AST:
                 possible = False
             elif value.node.getRuleName() == "nameIdentifier":
                 name = value.children[0].node.getRuleName()
-                value = symbolTable.get_symbol(name)[2]
+                value = symbolTable.get_symbol(name, scope)[2]
                 if value != 0 and value != 1:
                     possible = False
             else:

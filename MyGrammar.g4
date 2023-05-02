@@ -54,9 +54,9 @@ printFunction: 'printf' '(' printArg ')' ';';
 
 scanFunction: 'scanf' '(' scanArg ')' ';';
 
-scanArg: ((('"%d"' | '"%i"' | '"%s"' | '"%c"') ',') (nameIdentifier ',')*(nameIdentifier)) | string;
+scanArg: (string ',' (nameIdentifier ',')*(nameIdentifier)) | string;
 
-printArg: (('"%d"' | '"%i"' | '"%s"' | '"%c"') ',' dataTypes) | string;
+printArg: (string ',' opAnd) | string;
 
 ifStatement: 'if' '(' opAnd ')' '{' body '}';
 
