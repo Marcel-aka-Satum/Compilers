@@ -179,6 +179,15 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#string.
+    def enterString(self, ctx:MyGrammarParser.StringContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#string.
+    def exitString(self, ctx:MyGrammarParser.StringContext):
+        pass
+
+
     # Enter a parse tree produced by MyGrammarParser#referenceID.
     def enterReferenceID(self, ctx:MyGrammarParser.ReferenceIDContext):
         pass

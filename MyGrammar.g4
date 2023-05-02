@@ -42,6 +42,8 @@ float: FLOAT;
 
 char: CHAR;
 
+string: STRING;
+
 referenceID: '&'nameIdentifier | POINTER nameIdentifier | POINTERS nameIdentifier | nameIdentifier;
 
 nameIdentifier: ID;
@@ -52,9 +54,9 @@ printFunction: 'printf' '(' printArg ')' ';';
 
 scanFunction: 'scanf' '(' scanArg ')' ';';
 
-scanArg: ((('"%d"' | '"%i"' | '"%s"' | '"%c"') ',') (nameIdentifier ',')*(nameIdentifier));
+scanArg: ((('"%d"' | '"%i"' | '"%s"' | '"%c"') ',') (nameIdentifier ',')*(nameIdentifier)) | string;
 
-printArg: (('"%d"' | '"%i"' | '"%s"' | '"%c"') ',' dataTypes);
+printArg: (('"%d"' | '"%i"' | '"%s"' | '"%c"') ',' dataTypes) | string;
 
 ifStatement: 'if' '(' opAnd ')' '{' body '}';
 
@@ -103,6 +105,7 @@ BREAK: 'break';
 CONTINUE: 'continue';
 ID: [a-zA-Z]([a-zA-Z0-9_])*;
 CHAR: ['].[']|['][\\].['];
+STRING: '\'' (~'"' | '\'' )* '\'' | '"' (~'"' | '\'' )* '"' | CHAR;
 INT: [0-9]+;
 FLOAT: [0-9]*'.'[0-9]+ | [0-9]+'.'[0-9]*;
 COMMENT: '//' .*? '\r'? '\n';

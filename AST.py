@@ -48,6 +48,11 @@ class AST:
                     self.node.ruleName = "%s"
                 elif self.node.getRuleName()[2] == 'c':
                     self.node.ruleName = "%c"
+            elif self.parent is not None:
+                if self.parent.node.getRuleName() == "string":
+                    a = self.node.getRuleName()
+                    newStr = a[1:len(a)-1]
+                    self.node.ruleName = newStr
         string += '[label="{}"] \n'.format(self.node.getRuleName())
         for child in self.children:
             string += child.addNodes()

@@ -10,6 +10,5 @@ int main(){
     int a;
     int b;
     int c;
-    scanf("%i", a, b, c);
     return 0;
 }
