@@ -7,8 +7,9 @@ int mul(int x, int y){
 * My program
 */
 int main(){
-    int arr[2] = {1};
-    arr[2] = 3.2;
-    printf("%i", arr[1]);
+    int a;
+    int b;
+    int c;
+    scanf("%i", a, b, c);
     return 0;
 }

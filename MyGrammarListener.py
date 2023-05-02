@@ -224,6 +224,15 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#scanArg.
+    def enterScanArg(self, ctx:MyGrammarParser.ScanArgContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#scanArg.
+    def exitScanArg(self, ctx:MyGrammarParser.ScanArgContext):
+        pass
+
+
     # Enter a parse tree produced by MyGrammarParser#printArg.
     def enterPrintArg(self, ctx:MyGrammarParser.PrintArgContext):
         pass

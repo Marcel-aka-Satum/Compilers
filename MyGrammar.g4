@@ -50,7 +50,9 @@ conditionStatement: ifStatement (elifStatement)* (elseStatement)? | whileStateme
 
 printFunction: 'printf' '(' printArg ')' ';';
 
-scanFunction: 'scanf' '(' ')' ';';
+scanFunction: 'scanf' '(' scanArg ')' ';';
+
+scanArg: ((('"%d"' | '"%i"' | '"%s"' | '"%c"') ',') (nameIdentifier ',')*(nameIdentifier));
 
 printArg: (('"%d"' | '"%i"' | '"%s"' | '"%c"') ',' dataTypes);
 
