@@ -83,11 +83,11 @@ argumentCall: ((ID | opAnd) ',')*(ID | opAnd) |;
 
 functionCall: ID '(' argumentCall ')';
 
-arrDecl: constWord ID '[' (INT | nameIdentifier) ']' ';';
+arrDecl: constWord ID '[' (opAnd) ']' ';';
 
-arrDef: constWord ID '[' (INT | nameIdentifier) ']' '=' arrArg ';';
+arrDef: constWord ID '[' (opAnd) ']' '=' arrArg ';';
 
-arrCall: nameIdentifier '[' (INT | nameIdentifier) ']';
+arrCall: nameIdentifier '[' (opAnd) ']';
 
 arrArg: '{' (dataTypes ',')* (dataTypes)? '}' | '{' '}';
 

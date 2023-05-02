@@ -87,7 +87,10 @@ class SemanticAnalysisVisitor:
         const = False
         pointer = False
         size = None
-        sizeArr = int(node.children[3].node.getRuleName())
+        try:
+            sizeArr = int(node.children[3].node.getRuleName())
+        except:
+            sizeArr = node.children[3].node.getRuleName()
         if node.children[0].node.getRuleName() == "constWord":
             const = True
             if node.children[0].children[1].node.getRuleName() == "pointerWord":
