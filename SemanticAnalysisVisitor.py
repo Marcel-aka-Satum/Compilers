@@ -87,10 +87,13 @@ class SemanticAnalysisVisitor:
         const = False
         pointer = False
         size = None
+        if node.children[3].node.getRuleName() == "float" or node.children[3].node.getRuleName() == "char":
+            print(f"[ Error ] at line {self.line} at position {self.collom}: size of array {name} has to be an int")
+            self.error = True
         try:
-            sizeArr = int(node.children[3].node.getRuleName())
+            sizeArr = int(node.children[3].children[0].node.getRuleName())
         except:
-            sizeArr = node.children[3].node.getRuleName()
+            sizeArr = node.children[3].children[0].node.getRuleName()
         if node.children[0].node.getRuleName() == "constWord":
             const = True
             if node.children[0].children[1].node.getRuleName() == "pointerWord":
@@ -136,8 +139,7 @@ class SemanticAnalysisVisitor:
             varType = node.children[1].node.getRuleName()
             if varType == "int" or varType == "float" or varType == "char":
                 if type != varType:
-                    print(
-                        f"[ Error ] at line {self.line} at position {self.collom}: function {name} returned a {varType} but expected an {type}")
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} returned a {varType} but expected an {type}")
                     self.error = True
             elif varType == "nameIdentifier":
                 varName = node.children[1].children[0].node.getRuleName()
@@ -151,6 +153,15 @@ class SemanticAnalysisVisitor:
     def visitArrAssign(self, node):
         name = node.children[0].node.getRuleName()
         arr = self.symbol_table.get_symbol(name, self.currScope)
+        index = node.children[2].node.getRuleName()
+        if len(node.children[2].children) == 0:
+            try:
+                int(index)
+            except:
+                print(f"[ Error ] at line {self.line} at position {self.collom}: size of array {name} has to be an int")
+                self.error = True
+
+
         if arr == None:
             print(f"[ Error ] at line {self.line} at position {self.collom}: Array {name} has not been initialized or declared")
             self.error = True
@@ -207,7 +218,13 @@ class SemanticAnalysisVisitor:
         pointer = False
         size = None
         rightSide = node.children[6]
-        sizeArr = int(node.children[3].node.getRuleName())
+        if node.children[3].node.getRuleName() == "float" or node.children[3].node.getRuleName() == "char":
+            print(f"[ Error ] at line {self.line} at position {self.collom}: size of array {name} has to be an int")
+            self.error = True
+        try:
+            sizeArr = int(node.children[3].children[0].node.getRuleName())
+        except:
+            sizeArr = node.children[3].children[0].node.getRuleName()
         if node.children[0].node.getRuleName() == "constWord":
             const = True
             if node.children[0].children[1].node.getRuleName() == "pointerWord":

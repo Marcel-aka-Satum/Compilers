@@ -1,11 +1,5 @@
-#include <stdio.h>
-
-// Should print the numbers 1 - 5
 int main(){
-	int i = 0;
-	while (i < 5){
-		i++;
-		printf("%d;", i);
-	}
-	return 1;
+    int x[1];
+    x[0.5] = 3;
+	return 0;
 }
