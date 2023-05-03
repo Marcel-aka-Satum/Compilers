@@ -39,6 +39,25 @@ class SemanticAnalysisVisitor:
             self.visitArrCall(node)
         elif node.node.getRuleName() == "returnStatement":
             self.visitReturn(node)
+        elif node.node.getRuleName() == "opCompare":
+            left = node.children[0]
+            right = node.children[2]
+            temp = False
+            if left.node.getRuleName() == "nameIdentifier":
+                check = self.symbol_table.get_symbol(left.children[0].node.getRuleName(), self.currScope)
+                if check != None:
+                    if len(check) == 4:
+                        temp = True
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: cannot compare an array")
+                        self.error = True
+            if right.node.getRuleName() == "nameIdentifier":
+                check = self.symbol_table.get_symbol(right.children[0].node.getRuleName(), self.currScope)
+                if check != None:
+                    if len(check) == 4 and not temp:
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: cannot compare an array")
+                        self.error = True
+            for child in node.children:
+                self.visit(child)
         elif node.node.getRuleName() == "lib":
             self.lib = True
             for child in node.children:
@@ -58,7 +77,10 @@ class SemanticAnalysisVisitor:
             if self.currScope != None:
                 if self.currScope[:12] != "unNamedScope" and self.currScope[:11] != "ifStatement" and self.currScope[:13] != "elifStatement" and self.currScope[:13] != "elseStatement" and self.currScope[:14] != "whileStatement" and self.currScope[:7] != "forLoop":
                     name = self.funcScope
-                    type = self.symbol_table.funcDict[name][0]
+                    if len(self.symbol_table.funcDict[name]) == 2:
+                        type = self.symbol_table.funcDict[name][1][0]
+                    else:
+                        type = self.symbol_table.funcDict[name][0]
                     if type != "void":
                         if self.ret == None and self.currScope != "main":
                             print(f"[ Error ] at line {self.line} at position {self.collom}: non-void function {name} needs to return a {type}")
@@ -84,6 +106,11 @@ class SemanticAnalysisVisitor:
         if node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
             print(f"[ Error ] at line {self.line} at position {self.collom}: size of array {name} has to be an int")
             self.error = True
+        check = self.symbol_table.get_symbol(name, self.currScope)
+        if check != None:
+            if len(check) != 4:
+                print(f"[ Error ] at line {self.line} at position {self.collom}: {name} is not an array, can not acces the given index")
+                self.error = True
         for child in node.children:
             self.visit(child)
 
@@ -134,13 +161,26 @@ class SemanticAnalysisVisitor:
         if not self.lib:
             print(f"[ Error ] at line {self.line} at position {self.collom}: cannot use function without including stdio.h")
             self.error = True
+        arg = node.children[0].children[0].children[0].node.getRuleName()
+        count = arg.count("%")
+        tempCount = 0
+        for i in node.children[0].children:
+            if i.node.getRuleName() != "," and i.node.getRuleName() != "string":
+                tempCount += 1
+        if tempCount != count:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: function expected {count} arguments but {tempCount} were given")
+            self.error = True
+
         for child in node.children:
             self.visit(child)
 
     def visitReturn(self, node):
         self.ret = True
         name = self.funcScope
-        type = self.symbol_table.funcDict[name][0]
+        if len(self.symbol_table.funcDict[name]) == 2:
+            type = self.symbol_table.funcDict[name][1][0]
+        else:
+            type = self.symbol_table.funcDict[name][0]
         if type == "void":
             if len(node.children) != 1:
                 print(f"[ Error ] at line {self.line} at position {self.collom}: void function {name} cannot return a type")
@@ -304,9 +344,27 @@ class SemanticAnalysisVisitor:
 
     def visitFuncDef(self, node):
         name = node.children[1].node.getRuleName()
-        type = node.children[0].children[0].node.getRuleName()
+        check = False
+        temp = node
+        while not check:
+            if temp.parent.node.getRuleName() == "conditionStatement" or temp.parent.node.getRuleName() == "funcDefinition" or temp.parent.node.getRuleName()[:12] == "unNamedScope" or temp.parent.node.getRuleName()[:11] == "ifStatement" or temp.parent.node.getRuleName()[:13] == "elifStatement" or temp.parent.node.getRuleName()[:13] == "elseStatement" or temp.parent.node.getRuleName()[:14] == "whileStatement" or temp.parent.node.getRuleName()[:7] == "forLoop":
+                check = True
+            elif temp.parent.node.getRuleName() == "prog":
+                break
+            else:
+                 temp = temp.parent
+        if check:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} cannot be defined in a local scope")
+            self.error = True
+        if node.children[0].node.getRuleName() == "reservedWord":
+            type = node.children[0].children[0].node.getRuleName()
+            typeValue = [False, None]
+        elif node.children[0].node.getRuleName():
+            type = node.children[0].children[0].children[0].node.getRuleName()
+            size = len(node.children[0].children[1].node.getRuleName())
+            typeValue = [True, size]
         if name in self.symbol_table.funcDict:
-            if self.symbol_table.funcDict[name] != None:
+            if len(self.symbol_table.funcDict[name]) == 3:
                 print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has already been defined")
                 self.error = True
         self.currScope = name
@@ -348,15 +406,104 @@ class SemanticAnalysisVisitor:
                     input = [argType, ["pointer", size], None]
                     self.symbol_table.insert_symbol(argName, input, name)
                     count += 1
-        value = [type, arguments]
-        self.symbol_table.funcDict[name] = value
+        value = [type, arguments, typeValue]
+        if name in self.symbol_table.funcDict:
+            if len(self.symbol_table.funcDict[name]) == 2:
+                arr = self.symbol_table.funcDict[name][1]
+            else:
+                arr = self.symbol_table.funcDict[name]
+            if arr != value:
+                print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has not been declared correctly")
+                self.error = True
+        else:
+            self.symbol_table.funcDict[name] = value
 
         for child in node.children:
             self.visit(child)
 
     def visitFuncDecl(self, node):
         name = node.children[1].node.getRuleName()
-        self.symbol_table.funcDict[name] = None
+        if node.children[0].node.getRuleName() == "reservedWord":
+            type = node.children[0].children[0].node.getRuleName()
+            typeValue = [False, None]
+        elif node.children[0].node.getRuleName():
+            type = node.children[0].children[0].children[0].node.getRuleName()
+            size = len(node.children[0].children[1].node.getRuleName())
+            typeValue = [True, size]
+        if name in self.symbol_table.funcDict:
+            arguments = dict()
+            temp = node.children[2]
+            count = 0
+            if len(node.children) == 2:
+                arguments = None
+            else:
+                for i in range(len(temp.children)):
+                    if temp.children[i].node.getRuleName() == "reservedWord":
+                        argName = temp.children[i + 1].node.getRuleName()
+                        argType = temp.children[i].children[0].node.getRuleName()
+                        arguments[count] = [[False, None], argType]
+                        count += 1
+                    elif temp.children[i].node.getRuleName() == "constWord":
+                        argName = temp.children[i + 1].node.getRuleName()
+                        if temp.children[i].children[1].node.getRuleName() == "pointerWord":
+                            argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
+                            size = len(temp.children[i].children[1].children[1].node.getRuleName())
+                            arguments[count] = [[True, size], argType]
+                        else:
+                            argType = temp.children[i].children[1].children[0].node.getRuleName()
+                            arguments[count] = [[False, None], argType]
+                        count += 1
+                    elif temp.children[i].node.getRuleName() == "pointerWord":
+                        argName = temp.children[i + 1].node.getRuleName()
+                        argType = temp.children[i].children[0].children[0].node.getRuleName()
+                        size = len(temp.children[i].children[1].node.getRuleName())
+                        arguments[count] = [[True, size], argType]
+                        count += 1
+            if len(self.symbol_table.funcDict[name]) == 2:
+                arr1 = self.symbol_table.funcDict[name][1]
+                arr2 = [type, arguments, typeValue]
+                if arr1 != arr2:
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has not been declared correctly")
+                    self.error = True
+            else:
+                arr1 = self.symbol_table.funcDict[name]
+                arr2 = [type, arguments, typeValue]
+                if arr1 != arr2:
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has not been declared correctly")
+                    self.error = True
+
+
+        else:
+            arguments = dict()
+            temp = node.children[2]
+            count = 0
+            if len(node.children) == 2:
+                arguments = None
+            else:
+                for i in range(len(temp.children)):
+                    if temp.children[i].node.getRuleName() == "reservedWord":
+                        argName = temp.children[i + 1].node.getRuleName()
+                        argType = temp.children[i].children[0].node.getRuleName()
+                        arguments[count] = [[False, None], argType]
+                        count += 1
+                    elif temp.children[i].node.getRuleName() == "constWord":
+                        argName = temp.children[i + 1].node.getRuleName()
+                        if temp.children[i].children[1].node.getRuleName() == "pointerWord":
+                            argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
+                            size = len(temp.children[i].children[1].children[1].node.getRuleName())
+                            arguments[count] = [[True, size], argType]
+                        else:
+                            argType = temp.children[i].children[1].children[0].node.getRuleName()
+                            arguments[count] = [[False, None], argType]
+                        count += 1
+                    elif temp.children[i].node.getRuleName() == "pointerWord":
+                        argName = temp.children[i + 1].node.getRuleName()
+                        argType = temp.children[i].children[0].children[0].node.getRuleName()
+                        size = len(temp.children[i].children[1].node.getRuleName())
+                        arguments[count] = [[True, size], argType]
+                        count += 1
+            value = [type, arguments, typeValue]
+            self.symbol_table.funcDict[name] = [None, value]
 
     def visitFuncCall(self, node):
         name = node.children[0].node.getRuleName()
@@ -364,8 +511,12 @@ class SemanticAnalysisVisitor:
             print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has not been declared or defined")
             self.error = True
         else:
-            if self.symbol_table.funcDict[name][1] != None:
-                size = len(self.symbol_table.funcDict[name][1])
+            if len(self.symbol_table.funcDict[name]) == 2:
+                arr = self.symbol_table.funcDict[name][1]
+            else:
+                arr = self.symbol_table.funcDict[name]
+            if arr[1] != None:
+                size = len(arr[1])
                 count = 0
                 temp = False
                 for i in node.children[1].children:
@@ -429,7 +580,7 @@ class SemanticAnalysisVisitor:
                                     type = [[True, varSize], varType]
                                 else:
                                     type = [[False, None], varType]
-                        checkValue = self.symbol_table.funcDict[name][1][count]
+                        checkValue = arr[1][count]
                         if checkValue[1] != type[1]:
                             print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} argument {count} expects a {checkValue[1]} but got an {type[1]} instead")
                             self.error = True
