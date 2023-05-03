@@ -1,7 +1,7 @@
+int x = 5;
+// variable redefinition with different type
+float x = 5.0;
+
 int main(){
-    int x;
-    x = 5 + 'a';
-    x = 5 - 'a';
-    x = 5 * 'a';
-    x = 5 / 'a';
+    return 0;
 }

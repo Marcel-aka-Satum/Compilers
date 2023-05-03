@@ -17,6 +17,13 @@ class SemanticAnalysisVisitor:
         self.collom = node.node.getCollom()
         if node.node.getRuleName() == "variableDefinition":
             self.visit_variable_definition(node)
+        elif node.node.getRuleName() == "prog":
+            test = self.checkMain(node)
+            if test != True:
+                print(f"[ Error ] at line {self.line} at position {self.collom}: function main not found")
+                self.error = True
+            for child in node.children:
+                self.visit(child)
         elif node.node.getRuleName() == "variableDeclaration":
             self.visit_variable_declaration(node)
         elif node.node.getRuleName() == "nameIdentifier":
@@ -39,6 +46,36 @@ class SemanticAnalysisVisitor:
             self.visitArrCall(node)
         elif node.node.getRuleName() == "returnStatement":
             self.visitReturn(node)
+        elif node.node.getRuleName() == "break" or node.node.getRuleName() == "continue":
+            temp = node
+            check = False
+            while not check:
+                if temp.parent.node.getRuleName()[:14] == "whileStatement" or temp.parent.node.getRuleName()[:7] == "forLoop":
+                    check = True
+                elif temp.parent.node.getRuleName() == "prog":
+                    break
+                else:
+                    temp = temp.parent
+            if not check:
+                print(f"[ Error ] at line {self.line} at position {self.collom}: control statement is not in a loop")
+                self.error = True
+            for child in node.children:
+                self.visit(child)
+        elif node.node.getRuleName() == "opAddOrSub" or node.node.getRuleName() == "opMultOrDiv":
+            left = node.children[0]
+            right = node.children[2]
+            if left.node.getRuleName() == "referenceID" or right.node.getRuleName() == "referenceID":
+                if left.children[0].node.getRuleName() == "&" or right.children[0].node.getRuleName() == "&":
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: incompatible type, operation with adress")
+                    self.error = True
+            elif left.node.getRuleName() == "nameIdentifier" or right.node.getRuleName() == "nameIdentifier":
+                leftType = self.symbol_table.get_symbol(left.children[0].node.getRuleName(), self.currScope)[1][0]
+                rightType = self.symbol_table.get_symbol(right.children[0].node.getRuleName(), self.currScope)[1][0]
+                if rightType == "const pointer" or rightType == "pointer" or leftType == "const pointer" or leftType == "pointer":
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: incompatible type, operation with adress")
+                    self.error = True
+            for child in node.children:
+                self.visit(child)
         elif node.node.getRuleName() == "opCompare":
             left = node.children[0]
             right = node.children[2]
@@ -101,6 +138,21 @@ class SemanticAnalysisVisitor:
             for child in node.children:
                 self.visit(child)
 
+    def checkMain(self, node):
+        if node.node.getRuleName() == "funcDefinition":
+            if node.children[1].node.getRuleName() == "main":
+                return True
+            else:
+                a = False
+                for i in node.children:
+                    a = self.checkMain(i)
+                return a
+        else:
+            a = False
+            for i in node.children:
+                a = self.checkMain(i)
+            return a
+
     def visitArrCall(self, node):
         name = node.children[0].children[0].node.getRuleName()
         if node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
@@ -118,7 +170,7 @@ class SemanticAnalysisVisitor:
         name = node.children[1].node.getRuleName()
         check = self.symbol_table.get_symbol(name, self.currScope)
         if check is not None:
-            print(f"[ Error ] at line {self.line} at position {self.collom}: array {name} has already been defined or declared")
+            print(f"[ Error ] at line {self.line} at position {self.collom}: variable {name} has already been defined or declared")
             self.error = True
         type = None
         const = False
@@ -161,12 +213,16 @@ class SemanticAnalysisVisitor:
         if not self.lib:
             print(f"[ Error ] at line {self.line} at position {self.collom}: cannot use function without including stdio.h")
             self.error = True
-        arg = node.children[0].children[0].children[0].node.getRuleName()
+        try:
+            arg = node.children[0].children[0].children[0].node.getRuleName()
+        except:
+            arg = node.children[0].children[0].node.getRuleName()
         count = arg.count("%")
         tempCount = 0
-        for i in node.children[0].children:
-            if i.node.getRuleName() != "," and i.node.getRuleName() != "string":
-                tempCount += 1
+        if node.children[0].node.getRuleName() == "printArg" or node.children[0].node.getRuleName() == "scanArg":
+            for i in node.children[0].children:
+                if i.node.getRuleName() != "," and i.node.getRuleName() != "string":
+                    tempCount += 1
         if tempCount != count:
             print(f"[ Error ] at line {self.line} at position {self.collom}: function expected {count} arguments but {tempCount} were given")
             self.error = True
@@ -177,6 +233,9 @@ class SemanticAnalysisVisitor:
     def visitReturn(self, node):
         self.ret = True
         name = self.funcScope
+        if name == None:
+            print(f"[ Error ] at line {self.line} at position {self.collom}: return outside function")
+            self.error = True
         if len(self.symbol_table.funcDict[name]) == 2:
             type = self.symbol_table.funcDict[name][1][0]
         else:
@@ -255,7 +314,7 @@ class SemanticAnalysisVisitor:
         name = node.children[1].node.getRuleName()
         check = self.symbol_table.get_symbol(name, self.currScope)
         if check is not None:
-            print(f"[ Error ] at line {self.line} at position {self.collom}: array {name} has already been defined or declared")
+            print(f"[ Error ] at line {self.line} at position {self.collom}: variable {name} has already been defined or declared")
             self.error = True
         type = None
         const = False
@@ -373,39 +432,55 @@ class SemanticAnalysisVisitor:
         arguments = dict()
         temp = node.children[2]
         count = 0
+        checkName = []
         if temp.node.getRuleName() == "{":
             arguments = None
         else:
             for i in range(len(temp.children)):
                 if temp.children[i].node.getRuleName() == "reservedWord":
                     argName = temp.children[i + 1].node.getRuleName()
-                    argType = temp.children[i].children[0].node.getRuleName()
-                    arguments[count] = [[False, None], argType]
-                    input = [argType, [None, None], None]
-                    self.symbol_table.insert_symbol(argName, input, name)
-                    count += 1
+                    if argName in checkName:
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: parameter {argName} has already been defined")
+                        self.error = True
+                    else:
+                        checkName.append(argName)
+                        argType = temp.children[i].children[0].node.getRuleName()
+                        arguments[count] = [[False, None], argType]
+                        input = [argType, [None, None], None]
+                        self.symbol_table.insert_symbol(argName, input, name)
+                        count += 1
                 elif temp.children[i].node.getRuleName() == "constWord":
                     argName = temp.children[i + 1].node.getRuleName()
-                    if temp.children[i].children[1].node.getRuleName() == "pointerWord":
-                        argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
-                        size = len(temp.children[i].children[1].children[1].node.getRuleName())
-                        arguments[count] = [[True, size], argType]
-                        input = [argType, ["const pointer", size], None]
-                        self.symbol_table.insert_symbol(argName, input, name)
+                    if argName in checkName:
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: parameter {argName} has already been defined")
+                        self.error = True
                     else:
-                        argType = temp.children[i].children[1].children[0].node.getRuleName()
-                        arguments[count] = [[False, None], argType]
-                        input = [argType, ["const", None], None]
-                        self.symbol_table.insert_symbol(argName, input, name)
-                    count += 1
+                        checkName.append(argName)
+                        if temp.children[i].children[1].node.getRuleName() == "pointerWord":
+                            argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
+                            size = len(temp.children[i].children[1].children[1].node.getRuleName())
+                            arguments[count] = [[True, size], argType]
+                            input = [argType, ["const pointer", size], None]
+                            self.symbol_table.insert_symbol(argName, input, name)
+                        else:
+                            argType = temp.children[i].children[1].children[0].node.getRuleName()
+                            arguments[count] = [[False, None], argType]
+                            input = [argType, ["const", None], None]
+                            self.symbol_table.insert_symbol(argName, input, name)
+                        count += 1
                 elif temp.children[i].node.getRuleName() == "pointerWord":
                     argName = temp.children[i + 1].node.getRuleName()
-                    argType = temp.children[i].children[0].children[0].node.getRuleName()
-                    size = len(temp.children[i].children[1].node.getRuleName())
-                    arguments[count] = [[True, size], argType]
-                    input = [argType, ["pointer", size], None]
-                    self.symbol_table.insert_symbol(argName, input, name)
-                    count += 1
+                    if argName in checkName:
+                        print(f"[ Error ] at line {self.line} at position {self.collom}: parameter {argName} has already been defined")
+                        self.error = True
+                    else:
+                        checkName.append(argName)
+                        argType = temp.children[i].children[0].children[0].node.getRuleName()
+                        size = len(temp.children[i].children[1].node.getRuleName())
+                        arguments[count] = [[True, size], argType]
+                        input = [argType, ["pointer", size], None]
+                        self.symbol_table.insert_symbol(argName, input, name)
+                        count += 1
         value = [type, arguments, typeValue]
         if name in self.symbol_table.funcDict:
             if len(self.symbol_table.funcDict[name]) == 2:
@@ -471,37 +546,51 @@ class SemanticAnalysisVisitor:
                 if arr1 != arr2:
                     print(f"[ Error ] at line {self.line} at position {self.collom}: function {name} has not been declared correctly")
                     self.error = True
-
-
         else:
             arguments = dict()
-            temp = node.children[2]
             count = 0
+            checkName = []
             if len(node.children) == 2:
                 arguments = None
             else:
+                temp = node.children[2]
                 for i in range(len(temp.children)):
                     if temp.children[i].node.getRuleName() == "reservedWord":
                         argName = temp.children[i + 1].node.getRuleName()
-                        argType = temp.children[i].children[0].node.getRuleName()
-                        arguments[count] = [[False, None], argType]
-                        count += 1
+                        if argName in checkName:
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: parameter {argName} has already been defined")
+                            self.error = True
+                        else:
+                            checkName.append(argName)
+                            argType = temp.children[i].children[0].node.getRuleName()
+                            arguments[count] = [[False, None], argType]
+                            count += 1
                     elif temp.children[i].node.getRuleName() == "constWord":
                         argName = temp.children[i + 1].node.getRuleName()
-                        if temp.children[i].children[1].node.getRuleName() == "pointerWord":
-                            argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
-                            size = len(temp.children[i].children[1].children[1].node.getRuleName())
-                            arguments[count] = [[True, size], argType]
+                        if argName in checkName:
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: parameter {argName} has already been defined")
+                            self.error = True
                         else:
-                            argType = temp.children[i].children[1].children[0].node.getRuleName()
-                            arguments[count] = [[False, None], argType]
-                        count += 1
+                            checkName.append(argName)
+                            if temp.children[i].children[1].node.getRuleName() == "pointerWord":
+                                argType = temp.children[i].children[1].children[0].children[0].node.getRuleName()
+                                size = len(temp.children[i].children[1].children[1].node.getRuleName())
+                                arguments[count] = [[True, size], argType]
+                            else:
+                                argType = temp.children[i].children[1].children[0].node.getRuleName()
+                                arguments[count] = [[False, None], argType]
+                            count += 1
                     elif temp.children[i].node.getRuleName() == "pointerWord":
                         argName = temp.children[i + 1].node.getRuleName()
-                        argType = temp.children[i].children[0].children[0].node.getRuleName()
-                        size = len(temp.children[i].children[1].node.getRuleName())
-                        arguments[count] = [[True, size], argType]
-                        count += 1
+                        if argName in checkName:
+                            print(f"[ Error ] at line {self.line} at position {self.collom}: parameter {argName} has already been defined")
+                            self.error = True
+                        else:
+                            checkName.append(argName)
+                            argType = temp.children[i].children[0].children[0].node.getRuleName()
+                            size = len(temp.children[i].children[1].node.getRuleName())
+                            arguments[count] = [[True, size], argType]
+                            count += 1
             value = [type, arguments, typeValue]
             self.symbol_table.funcDict[name] = [None, value]
 
@@ -515,6 +604,11 @@ class SemanticAnalysisVisitor:
                 arr = self.symbol_table.funcDict[name][1]
             else:
                 arr = self.symbol_table.funcDict[name]
+            tempType = arr[0]
+            if tempType == "void":
+                if node.parent.node.getRuleName() != "expr":
+                    print(f"[ Error ] at line {self.line} at position {self.collom}: incompatible type, function {name} is a void")
+                    self.error = True
             if arr[1] != None:
                 size = len(arr[1])
                 count = 0
