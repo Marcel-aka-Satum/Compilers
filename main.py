@@ -34,6 +34,8 @@ def main(argv):
         else:
             print("ERROR")
             exit()
+    if symbolTable.error:
+        exit()
     # Constant propagation and constant folding
     ast.constantPropagation(dict(), [], symbolTable.symbol_table, None)
     ast.constantFolding(symbolTable.symbol_table, None)

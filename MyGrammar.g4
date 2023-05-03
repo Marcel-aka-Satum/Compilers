@@ -2,10 +2,11 @@ grammar MyGrammar;
 
 prog: expr;
 
-expr: opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr | funcDeclaration expr | functionCall ';' expr
-    | variableDefinition expr | variableDeclaration ';' expr | arrAssign expr | assignmentStatement ';' expr | printFunction expr
-    | unNamedScope expr | conditionStatement expr | BREAK ';' expr | CONTINUE ';' expr | returnStatement expr
-    | arrDecl expr | arrDef expr | lib expr | scanFunction expr |;
+expr: increment ';' expr | decrement ';' expr | opAnd ';' | opAnd ';' expr | comment expr | funcDefinition expr
+    | funcDeclaration expr | functionCall ';' expr | variableDefinition expr | variableDeclaration ';' expr
+    | arrAssign expr | assignmentStatement ';' expr | printFunction expr | unNamedScope expr | conditionStatement expr
+    | BREAK ';' expr | CONTINUE ';' expr | returnStatement expr | arrDecl expr | arrDef expr | lib expr
+    | scanFunction expr |;
 
 opAnd: opAnd '&&' opOr | opOr;
 
@@ -34,7 +35,7 @@ pointerWord: reservedWord POINTER | reservedWord POINTERS | reservedWord;
 
 reservedWord: 'int' | 'float' | 'char' | 'void';
 
-dataTypes: int | float | char |referenceID | functionCall | arrCall;
+dataTypes: int | float | char |referenceID | functionCall | arrCall | increment | decrement;
 
 int: INT;
 
@@ -66,7 +67,7 @@ elseStatement: 'else' '{' body '}';
 
 whileStatement: 'while' '(' opAnd ')' '{' body '}';
 
-forLoop: 'for' '(' ((variableDeclaration ';' | variableDefinition | assignmentStatement ';') opAnd ';' assignmentStatement
+forLoop: 'for' '(' ((variableDeclaration ';' | variableDefinition | assignmentStatement ';') opAnd ';' (assignmentStatement | increment | decrement)
 | ';' ';') ')' '{' body '}';
 
 unNamedScope: '{' body '}';
@@ -98,6 +99,10 @@ lib: '#include' '<stdio.h>';
 body: expr;
 
 returnStatement: 'return' (opAnd|) ';';
+
+increment: referenceID'++' | '++'referenceID | '(' referenceID ')' '++' | '++' '(' referenceID ')';
+
+decrement: referenceID'--' | '--'referenceID | '(' referenceID ')' '--' | '--' '(' referenceID ')';
 
 POINTER: '*';
 POINTERS: ('*')+;

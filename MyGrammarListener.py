@@ -431,5 +431,23 @@ class MyGrammarListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by MyGrammarParser#increment.
+    def enterIncrement(self, ctx:MyGrammarParser.IncrementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#increment.
+    def exitIncrement(self, ctx:MyGrammarParser.IncrementContext):
+        pass
+
+
+    # Enter a parse tree produced by MyGrammarParser#decrement.
+    def enterDecrement(self, ctx:MyGrammarParser.DecrementContext):
+        pass
+
+    # Exit a parse tree produced by MyGrammarParser#decrement.
+    def exitDecrement(self, ctx:MyGrammarParser.DecrementContext):
+        pass
+
+
 
 del MyGrammarParser
