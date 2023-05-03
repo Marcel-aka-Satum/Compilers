@@ -2,7 +2,10 @@
 
 // Should print the numbers 1 - 5
 int main(){
-	int a = 5;
-	int* b = &a;
-	(*b)++;
+	int i = 0;
+	while (i < 5){
+		i++;
+		printf("%d;", i);
+	}
+	return 1;
 }

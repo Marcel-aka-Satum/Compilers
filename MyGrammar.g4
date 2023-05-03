@@ -100,9 +100,9 @@ body: expr;
 
 returnStatement: 'return' (opAnd|) ';';
 
-increment: referenceID'++' | '++'referenceID | '(' referenceID ')' '++' | '++' '(' referenceID ')';
+increment: (referenceID | arrCall)'++' | '++'(referenceID | arrCall) | '(' (referenceID | arrCall) ')' '++' | '++' '(' (referenceID | arrCall) ')';
 
-decrement: referenceID'--' | '--'referenceID | '(' referenceID ')' '--' | '--' '(' referenceID ')';
+decrement: (referenceID | arrCall)'--' | '--'(referenceID | arrCall) | '(' (referenceID | arrCall) ')' '--' | '--' '(' (referenceID | arrCall) ')';
 
 POINTER: '*';
 POINTERS: ('*')+;
