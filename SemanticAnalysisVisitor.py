@@ -35,6 +35,8 @@ class SemanticAnalysisVisitor:
             self.visitArrDecl(node)
         elif node.node.getRuleName() == "arrAssign":
             self.visitArrAssign(node)
+        elif node.node.getRuleName() == "arrCall":
+            self.visitArrCall(node)
         elif node.node.getRuleName() == "returnStatement":
             self.visitReturn(node)
         elif node.node.getRuleName() == "lib":
@@ -76,6 +78,14 @@ class SemanticAnalysisVisitor:
         else:
             for child in node.children:
                 self.visit(child)
+
+    def visitArrCall(self, node):
+        name = node.children[0].children[0].node.getRuleName()
+        if node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
+            print(f"[ Error ] at line {self.line} at position {self.collom}: size of array {name} has to be an int")
+            self.error = True
+        for child in node.children:
+            self.visit(child)
 
     def visitArrDecl(self, node):
         name = node.children[1].node.getRuleName()
