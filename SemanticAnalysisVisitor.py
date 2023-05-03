@@ -153,15 +153,9 @@ class SemanticAnalysisVisitor:
     def visitArrAssign(self, node):
         name = node.children[0].node.getRuleName()
         arr = self.symbol_table.get_symbol(name, self.currScope)
-        index = node.children[2].node.getRuleName()
-        if len(node.children[2].children) == 0:
-            try:
-                int(index)
-            except:
-                print(f"[ Error ] at line {self.line} at position {self.collom}: size of array {name} has to be an int")
-                self.error = True
-
-
+        if node.children[2].node.getRuleName() == "float" or node.children[2].node.getRuleName() == "char":
+            print(f"[ Error ] at line {self.line} at position {self.collom}: size of array {name} has to be an int")
+            self.error = True
         if arr == None:
             print(f"[ Error ] at line {self.line} at position {self.collom}: Array {name} has not been initialized or declared")
             self.error = True

@@ -92,7 +92,7 @@ arrCall: nameIdentifier '[' (opAnd) ']';
 
 arrArg: '{' (dataTypes ',')* (dataTypes)? '}' | '{' '}';
 
-arrAssign: ID '[' (INT | nameIdentifier) ']' '=' dataTypes ';';
+arrAssign: ID '[' (opAnd) ']' '=' dataTypes ';';
 
 lib: '#include' '<stdio.h>';
 
