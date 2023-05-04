@@ -79,7 +79,7 @@ class AST:
                 i.removeDeadCode()
     def optimize(self, dict):
         if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "argumentCall" or self.node.getRuleName() == "arrArg":
-            if self.node.getRuleName() == "printFunction" and len(self.children) == 2:
+            if (self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "scanFunction") and len(self.children) == 2:
                 self.children.pop(0)
             for i in self.children:
                 i.optimize(dict)
@@ -115,7 +115,7 @@ class AST:
                 if dict["whileStatement"] != 1:
                     self.node.ruleName = "whileStatement" + str(dict["whileStatement"])
 
-            elif self.node.getRuleName() == "printFunction" and len(self.children) == 2:
+            elif (self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "scanFunction") and len(self.children) == 2:
                 self.children.pop(0)
             elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement":
                 if self.node.getRuleName()[:13] == "elifStatement":

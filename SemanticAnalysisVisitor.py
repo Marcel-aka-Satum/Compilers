@@ -69,8 +69,12 @@ class SemanticAnalysisVisitor:
                     print(f"[ Error ] at line {self.line} at position {self.collom}: incompatible type, operation with adress")
                     self.error = True
             elif left.node.getRuleName() == "nameIdentifier" or right.node.getRuleName() == "nameIdentifier":
-                leftType = self.symbol_table.get_symbol(left.children[0].node.getRuleName(), self.currScope)[1][0]
-                rightType = self.symbol_table.get_symbol(right.children[0].node.getRuleName(), self.currScope)[1][0]
+                leftType = None
+                rightType = None
+                if left.node.getRuleName() == "nameIdentifier":
+                    leftType = self.symbol_table.get_symbol(left.children[0].node.getRuleName(), self.currScope)[1][0]
+                if right.node.getRuleName() == "nameIdentifier":
+                    rightType = self.symbol_table.get_symbol(right.children[0].node.getRuleName(), self.currScope)[1][0]
                 if rightType == "const pointer" or rightType == "pointer" or leftType == "const pointer" or leftType == "pointer":
                     print(f"[ Error ] at line {self.line} at position {self.collom}: incompatible type, operation with adress")
                     self.error = True
@@ -213,16 +217,18 @@ class SemanticAnalysisVisitor:
         if not self.lib:
             print(f"[ Error ] at line {self.line} at position {self.collom}: cannot use function without including stdio.h")
             self.error = True
-        try:
+        if node.children[0].node.getRuleName() == "printArg" or node.children[0].node.getRuleName() == "scanArg":
             arg = node.children[0].children[0].children[0].node.getRuleName()
-        except:
+        else:
             arg = node.children[0].children[0].node.getRuleName()
         count = arg.count("%")
         tempCount = 0
         if node.children[0].node.getRuleName() == "printArg" or node.children[0].node.getRuleName() == "scanArg":
             for i in node.children[0].children:
-                if i.node.getRuleName() != "," and i.node.getRuleName() != "string":
+                if i.node.getRuleName() != ",":
                     tempCount += 1
+        if tempCount != 0:
+            tempCount -= 1
         if tempCount != count:
             print(f"[ Error ] at line {self.line} at position {self.collom}: function expected {count} arguments but {tempCount} were given")
             self.error = True
