@@ -10,7 +10,7 @@ def main(argv):
     lexer = MyGrammarLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = MyGrammarParser(stream)
-    # remove the default error listenner and add the custom one
+    # remove the default error listener and add the custom one
     parser.removeErrorListeners()
     parser.addErrorListener(errorAnalysis())
     # Create syntax tree
@@ -22,6 +22,8 @@ def main(argv):
     ast = AST(syntaxTree)
     # Optimize the AST
     countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
+    ast.printInDot(argv)
+
     ast.optimize(countScopes)
     # Create the symbol table
     symbolTable = SemanticAnalysisVisitor()
@@ -43,7 +45,6 @@ def main(argv):
     # Initialise the symbol table after the constant folding
     ast.initialiseSymbolTable(symbolTable.symbol_table, None)
     # Print the AST in dot
-    ast.printInDot(argv)
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
 if __name__ == '__main__':

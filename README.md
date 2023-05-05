@@ -92,20 +92,24 @@ Example:
     Our symbol table dictionary will look like that:
     [{'a': [int, [None, None], 5]}] (1 dict because only 1 scope)
     Where 'a' (key) is the name of the variable. Our value of the key (array) will store the 
-    [datatype, [const/ptr, amount ptrs], value] so in this example
+    [datatype, [const/ptr, amount ptrs], value, arraySize] so in this example
     we have [int, [none, none], 5] because int is the datatype of a and it's not a const or a ptr so the list [None, None] will remain the same and 5 is the value of the variable
 
 Here is more complex example:
-    int a = 10;
-    float b = 20.0;
-    char c = 'c';
-    const float tempVar = 33.4;
-    [
+    int main(){
+        int a = 10;
+        const int* b = &a;
+        char c = 'c';
+        const float tempVar = 33.4;
+        int arr[2] = {1,2};
+    }
+    [main: [
     {'a': ['int', [None, None], 10], 
-    'b': ['float', [None, None], 20.0], 
+    'b': ['int', [const pointer, 1], &a], 
     'c': ['char', [None, None], 'c'], 
-    'tempVar': ['float', ['const', None], 33.4]}
-    ]
+    'tempVar': ['float', ['const', None], 33.4],
+    'arr': ['int', [None, None], {1,2}, 2]}
+    ]]
 ```
 ## Project1
 ----------
@@ -114,16 +118,20 @@ Here is more complex example:
 Construct a grammar for simple mathematical expressions, operating only on int literals.
 Every expression should end with a semicolon. Input files can contain multiple expressions.
 The following operators must be supported:
+### Implemented Functionality
 ```
 • (mandatory) Binary operations +, -, *, and /.
 • (mandatory) Binary operations >, <, and ==.
 • (mandatory) Unary operators + and -.
 • (mandatory) Brackets to overwrite the order of operations.
 • (mandatory) Logical operators &&, ||, and !.
-• (optional) Binary operator %.
+• (mandatory) Ignore whitespace in code.
+• (mandatory) Constant folding.
+• (mandatory) Construction and using the ast.
+• (optional) Modulo operator %.
 • (optional) Comparison operators >=, <=, and !=.
 ```
-All of the above are implementend in our grammar.
+All of the above are implementend in our compiler   .
 
 #### 2.2 Abstract Syntax Tree
 You should construct an explicit AST from the Concrete Syntax Tree (CST) generated
@@ -144,16 +152,25 @@ See our constanFolding function of our AST
 ```
 ---------
 ## Project2
-
-## 1 Variables
-### 1.1 Grammar
-Extend your grammar to support the following features.
+### Implemented Functionality
 ```
 • (mandatory) Types. (char, float, int)
 • (mandatory) The const keyword must be supported, next to the types char, int, and float.
 • (mandatory) Variables.There should be support for variables. This includes variable declarations, variable definitions, assignment statements, and identifiers appearing in expressions. You
 must also provide support for const variables.
 • (mandatory) Pointer Operations. Support for the unary operators * and &.
+• (mandatory) Basic pointer operations: address (&var), dereference (*var).
+• (mandatory) Constant propagation
+• (mandatory) Construction and usage of the symbol table
+• (mandatory) Syntax errors + error message
+• (mandatory) Semantic errors + error message:
+    ∗ Usage of uninitialised and undeclared variables
+    ∗ Redeclarations and redefinitions of existing variables
+    ∗ Operations and assignments with incompatible types
+    ∗ Assignment to an rvalue expression
+    ∗ Re-assignment of const variables
+
+
 ```
 All of the above are implementend in our grammar.
 
@@ -189,10 +206,8 @@ Our program should detec those semantic errors:
 We created a file that tests all of this types "runTest.py" look more in Documentation.
 
 ## Project3
-
-### 1 Output and comments
-#### 1.1 Grammar
-Our grammar is extended for the following.
+### Implemented Functionality
+Extended functionality
 ```
 • (mandatory) Comments.
     - (optional) Instead of simply ignoring comments, you can increase the readability
@@ -202,6 +217,47 @@ Our grammar is extended for the following.
 • (mandatory) Support for single line comments and multi line comments.
 • (mandatory) Outputting to the standard output using printf.
 ```
+## Project4
+### Implemented Functionality
+```
+• (mandatory): 
+    – if and else statements
+    – while loops
+    – for loops
+    – break statements
+    – continue statements
+    – Anonymous scopes
+    – Symbol table for anonymous scopes
+```
+## Project5
+### Implemented Functionality
+```
+• (mandatory): 
+    – Function scopes
+    – Symbol table for function scopes
+    – Local and global variables
+    – Functions:
+        ∗ Definition and declaration
+        ∗ Calling
+        ∗ Parameters (primitives and pointers, pass-by-value, pass-by-reference)
+        ∗ Return values
+        ∗ Functions with void return
+    – Type checking for return statements
+    – Type checking for forward declarations
+    – No dead code after return, break, and continue
+• (optional): 
+    – No code is generated for if-clauses that are never true
+```
+## Project6
+### Implemented Functionality
+```
+• (mandatory): 
+    – One-dimensional static arrays
+    – printf
+    – scanf
+    – #include <stdio.h> statement (only for printf and scanf)
+```
+
 Example inputfile:
 ```
 /*
@@ -224,9 +280,6 @@ Our printDot function produces new AST tree
 ```
 ### 2 Code Generation: LLVM
 ```
-NOTE !!! OUR LLVM IS WITHOUT MAIN FUNCTION BECAUSE WE THOUGHT WE DIDN'T HAVE TO DO IT RIGHT NOW 
-(FUNCTIONS ARE PROJECT 5)
-
 Our LLVM class in LLVM.py produces LLVM code from our C test file in a .ll format
 see example in main.py how to use it.
 >main.py
