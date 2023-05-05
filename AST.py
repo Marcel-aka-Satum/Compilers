@@ -2,6 +2,7 @@ from antlr4 import *
 from MyGrammarParser import MyGrammarParser
 import copy
 
+
 class Node:
     def __init__(self, syntaxTree):
         try:
@@ -15,20 +16,42 @@ class Node:
 
         if syntaxTree.getChildCount() > 0:
             self.ruleName = MyGrammarParser.ruleNames[syntaxTree.getRuleIndex()]
-        else: self.ruleName = syntaxTree.getText()
+        else:
+            self.ruleName = syntaxTree.getText()
 
-    def getRuleName(self): return str(self.ruleName)
+    def getRuleName(self):
+        return str(self.ruleName)
 
-    def getLine(self): return self.line
+    def getLine(self):
+        return self.line
 
-    def getCollom(self): return self.collom
+    def getCollom(self):
+        return self.collom
+
+
 class AST:
     def __init__(self, syntaxTree):
         self.parent = None
         self.children = list()
         self.node = Node(syntaxTree)
+        self.LLVM = ""
+        self.register = ""  # every function in llvm has a register with data in it
+        self.varNumbers = 1  # used for %1, %2, %... in llvm
+        self.store = ""  # store for every variable for llvm
+        self.smallTable = dict()  # {'%1': int, '%2' :i8*, '%3' :char} ...
+        self.returnStatement = ""  # example (ret i32, 1)
+        self.printFunction = ""  # @.str = private unnamed_addr constant [5 x i8] c"%d; \00"
+        self.varNumbersPrint = 0  # used for .str.1, .str.2
+        self.doneFormats = []  # used to store done formats ['%d', '%f']
+        self.strDict = {}  # {'%d; ': '@.str', '%f; ': '@.str.2'}
+        self.declareFunctions = ""
+        self.initialised = False  # initialise registers from above first time in generate_LLVM
+        self.registerDone = False
+        self.isReturn = False
+        self.table = None
+        self.loaded = {}
 
-        if syntaxTree.getChildCount() == 0 : return
+        if syntaxTree.getChildCount() == 0: return
         newChild = ParserRuleContext()
         for newChild in syntaxTree.getChildren():
             temp = AST(newChild)
@@ -36,17 +59,359 @@ class AST:
             if temp.node.getRuleName() != "(" and temp.node.getRuleName() != ")" and temp.node.getRuleName() != ";" and temp.node.getRuleName() != "":
                 self.children.append(temp)
 
+    def set_table(self, tab):
+        self.table = tab
+
+    def generate_LLVM(self, ast):
+        if not self.initialised:
+            self.get_unnamed(ast)
+            self.initialised = True
+            self.LLVM += self.printFunction + '\n'
+        for child in ast.children:
+            # if child.node.getRuleName() == "comment":
+            #     trimmedComment = child.children[0].node.getRuleName()[2:]
+            #     trimmedComment = f";{trimmedComment}" + '\n'
+            #     self.LLVM += trimmedComment
+            if child.node.getRuleName() == "funcDefinition":
+                ###clear registers with every functionDefinition
+                self.register = ""  # clear register
+                self.varNumbers = 0  # clear var numbers
+                self.store = ""  # clear store vars
+                self.printFunction = ""  # clear printFunctions
+                self.declareFunctions = ""  # clear declareFunctions
+                #################################
+                if child.children[0].children[0].node.getRuleName() == "int":
+                    self.LLVM += f"define dso_local i32 @{child.children[1].node.getRuleName()}() {child.children[2].node.getRuleName()}" + '\n'
+                elif child.children[0].children[0].node.getRuleName() == "float":
+                    self.LLVM += f"define dso_local @{child.children[1].node.getRuleName()}() {child.children[2].node.getRuleName()}" + '\n'
+                self.parse_expr(child.children[3])  # add to register
+                if self.registerDone is False:
+                    self.LLVM += self.register
+                if self.isReturn is False:
+                    self.returnStatement = f"ret i32 0"
+                self.LLVM += self.returnStatement + '\n' + "}" + '\n'
+                self.LLVM += self.declareFunctions
+
+            self.generate_LLVM(child)
+
+    # helper function to parse expr in AST in order to produce LLVM
+    def parse_expr(self, expr):
+        for child in expr.children:
+            if child.node.getRuleName() == "expr" and child.children[
+                0].node.getRuleName() != "variableDefinition":  # store all register variables after ur done with variableDeclarations
+                if child.parent.children[0].node.getRuleName() == "variableDefinition":
+                    self.LLVM += self.register
+                    self.LLVM += self.store
+                    self.register = ""
+                    self.store = ""
+                    self.registerDone = True
+            if child.node.getRuleName() == "expr" and child.children[0].node.getRuleName() == "returnStatement" and \
+                    child.parent.children[0].node.getRuleName() == "printFunction":
+                self.LLVM += self.register
+                self.registerDone = True
+            if child.node.getRuleName() == "expr" and child.children[0].node.getRuleName() == "returnStatement" and \
+                    child.parent.children[0].node.getRuleName() == "conditionStatement":
+                self.LLVM += self.register
+                self.registerDone = True
+
+            if child.node.getRuleName() == "comment":
+                trimmedComment = child.children[0].node.getRuleName()[2:]
+                trimmedComment = f";{trimmedComment}" + '\n'
+                self.LLVM += trimmedComment
+
+            if child.node.getRuleName() == "variableDeclaration":
+                rightMostNode = get_rightmost_node(child.parent)
+                self.varNumbers += 1
+                if child.children[0].children[0].node.getRuleName() == "int":
+                    self.register += f"%{self.varNumbers} = alloca i32, align 4" + '\n'
+                    self.store += f"store i32 {rightMostNode.node.getRuleName()}, i32* %{self.varNumbers}, align 4" + '\n'
+                elif child.children[0].children[0].node.getRuleName() == "float":
+                    self.register += f"%{self.varNumbers} = alloca float, align 4" + '\n'
+                    self.store += f"store float {rightMostNode.node.getRuleName()}, float* %{self.varNumbers}, align 4" + '\n'
+                elif child.children[0].children[0].node.getRuleName() == "char":
+                    self.register += f"%{self.varNumbers} = alloca i8, align 1" + '\n'
+                    if (len(rightMostNode.node.getRuleName()) > 1):
+                        self.store += f"store i8 {ord(rightMostNode.node.getRuleName()[1])}, i8* %{self.varNumbers}, align 1" + '\n'
+                    else:
+                        self.store += f"store i8 {ord(rightMostNode.node.getRuleName())}, i8* %{self.varNumbers}, align 1" + '\n'
+                elif child.children[0].children[0].node.getRuleName() == "const":  # if var is const
+                    if child.children[0].children[1].children[0].node.getRuleName() == "int":
+                        self.register += f"%{self.varNumbers} = alloca i32, align 4" + '\n'
+                        self.store += f"store i32 {rightMostNode.node.getRuleName()}, i8* %{self.varNumbers}, align 4" + '\n'
+                    elif child.children[0].children[1].children[0].node.getRuleName() == "float":
+                        self.register += f"%{self.varNumbers} = alloca float, align 4" + '\n'
+                        self.store += f"store float {rightMostNode.node.getRuleName()}, i8* %{self.varNumbers}, align 4" + '\n'
+                    elif child.children[0].children[1].children[0].node.getRuleName() == "char":
+                        self.register += f"%{self.varNumbers} = alloca i8, align 1" + '\n'
+                    if (len(rightMostNode.node.getRuleName()) > 1):
+                        self.store += f"store i8 {ord(rightMostNode.node.getRuleName()[1])}, i8* %{self.varNumbers}, align 1" + '\n'
+                    else:
+                        self.store += f"store i8 {ord(rightMostNode.node.getRuleName())}, i8* %{self.varNumbers}, align 1" + '\n'
+                elif child.children[0].node.getRuleName() == "pointerWord":  # if var is pointer
+                    self.register += f"%{self.varNumbers} = alloca i8*, align 8" + '\n'
+                    self.smallTable[f"%{self.varNumbers}"] = "i8*"
+                    # nameIdentifier = get_rightmost_node(child.parent)
+                    # valueOtherPointer = self.findValue(nameIdentifier.node.getRuleName(), self)
+                    # if valueOtherPointer in self.store:
+                    #     print("ye boi")
+                    # self.store += f"store i8* %3, i8* %{self.varNumbers}, align 8" + '\n'
+            elif child.node.getRuleName() == "returnStatement":
+                self.isReturn = True
+                if child.children[1].node.getRuleName() == "int":
+                    self.returnStatement = f"ret i32 {child.children[1].children[0].node.getRuleName()}"
+                elif child.children[1].node.getRuleName() == "float":
+                    self.returnStatement = f"ret float {child.children[1].children[0].node.getRuleName()}"
+                elif child.children[1].node.getRuleName() == "char":
+                    self.returnStatement = f"ret i8 {child.children[1].children[0].node.getRuleName()}"
+            elif child.node.getRuleName() == "scanFunction":
+                self.varNumbers += 1
+                self.declareFunctions += f"declare i32 @__isoc99_scanf(i8*, ...)" + '\n'
+                strVar = ""
+                scanArgs = ""
+                tempLoads = ""
+                usedRegister = 0
+                for arguments in child.children[0].children:
+                    if arguments.node.getRuleName() == "string":
+                        strVar = arguments.children[0].node.getRuleName()
+                        getString = self.strDict[strVar][0]
+                        getBound = self.strDict[strVar][1]
+                        scanArgs += f"i8* getelementptr inbounds({getBound}, {getBound}* {getString}, i64 0, i64 0), "
+                    elif arguments.node.getRuleName() == "referenceID":
+                        usedRegister += 1
+                        scanArgs += f"i32* %{usedRegister}, "
+                        tempLoads += f"%{self.varNumbers + usedRegister} = load i32, i32* %{usedRegister}, align 4" + '\n'
+                        self.loaded[f"%{self.varNumbers + usedRegister}"] = ["i32", f"%{usedRegister}"]
+                scanArgs = scanArgs[:-2]
+                self.register += f"%{self.varNumbers} = call i32(i8*, ...) @__isoc99_scanf({scanArgs})" + '\n'
+                self.register += tempLoads
+                self.varNumbers += usedRegister
+
+            elif child.node.getRuleName() == "printFunction":
+                ofcDone = False
+                if self.declareFunctions == "":
+                    self.declareFunctions += f"declare i32 @printf(i8*, ...)" + '\n'
+                if child.children[0].node.getRuleName() == "printArg":  # printFunction has arguments
+                    printArgumenten = ""
+                    notstr = False
+                    for argument in child.children[0].children:
+                        if argument.node.getRuleName() == "string":  # IS A STRING
+                            getString = self.strDict[argument.children[0].node.getRuleName()][0]
+                            getBound = self.strDict[argument.children[0].node.getRuleName()][1]
+                            printArgumenten += f"i8* getelementptr inbounds({getBound}, {getBound}* {getString}, i64 0, i64 0), "
+                        elif argument.node.getRuleName() == "opAddOrSub" or argument.node.getRuleName() == "opMultOrDiv":  # IS NOT A STRING
+                            notstr = True
+                            typeTEMP = argument.parent.children[0].children[0].node.getRuleName()  # %d or %f
+                            value = argument.children[0].node.getRuleName()
+                            valueString = ""
+                            self.varNumbers += 1
+                            if typeTEMP == "%d; ":
+                                value = int(value[:2])
+                            elif typeTEMP == "%f; ":
+                                value = float(value)
+                            if isinstance(value, int):
+                                valueString = f"i32 {value}"
+                            elif isinstance(value, float):
+                                valueString = f"double {value}"
+                            self.register += f"%{self.varNumbers} = call i32(i8*, ...) @printf(i8* getelementptr inbounds ({getBound}, {getBound}* {getString}, i64 0, i64 0), {valueString})" + '\n'
+                        elif argument.node.getRuleName() == "int":
+                            printArgumenten += f"i32 {argument.children[0].node.getRuleName()}, "
+                        elif argument.node.getRuleName() == "float":
+                            printArgumenten += f"double {argument.children[0].node.getRuleName()}, "
+                        elif argument.node.getRuleName() == "char":
+                            printArgumenten += f"i32 {ord(argument.children[0].node.getRuleName()[1])}, "
+                        elif argument.node.getRuleName() == "nameIdentifier":  # NAMEIDENTIFIER
+                            if (len(argument.children) > 1):
+                                if argument.children[1].node.getRuleName() == "nameIdentifier":
+                                    if argument.children[1].children[1].node.getRuleName() == "int":
+                                        printArgumenten += f"i32 {argument.children[1].children[1].children[0].node.getRuleName()}, "
+                                    elif argument.children[1].children[1].node.getRuleName() == "float":
+                                        printArgumenten += f"double {argument.children[1].children[1].children[0].node.getRuleName()}, "
+                                    elif argument.children[1].children[1].node.getRuleName() == "char":
+                                        printArgumenten += f"i32 {ord(argument.children[1].children[1].children[0].node.getRuleName()[1])}, "
+                                else:
+                                    if (argument.children[1].node.getRuleName() == "int"):
+                                        printArgumenten += f"i32 {argument.children[1].children[0].node.getRuleName()}, "
+                                    elif (argument.children[1].node.getRuleName() == "float"):
+                                        printArgumenten += f"double {argument.children[1].children[0].node.getRuleName()}, "
+                                    elif (argument.children[1].node.getRuleName() == "char"):
+                                        printArgumenten += f"i32 {ord(argument.children[1].children[0].node.getRuleName()[1])}, "
+                                    elif (argument.children[1].node.getRuleName() == "opMultOrDiv"):
+                                        printArgumenten += f"i32 {argument.children[1].children[0].node.getRuleName()}, "
+                            else:
+                                tempvalue = argument.children[0].node.getRuleName()
+                                newValue = None
+                                found33 = False
+                                for i in self.table.values():
+                                    for j in i.keys():
+                                        if j == tempvalue:
+                                            newValue = i[j][2]
+                                if isinstance(newValue, int):
+                                    printArgumenten += f"i32 {newValue}, "
+                                    found33 = True
+                                elif isinstance(newValue, float):
+                                    printArgumenten += f"double {newValue}, "
+                                    found33 = True
+                                elif isinstance(newValue, str):
+                                    printArgumenten += f"i32 {ord(newValue)}, "
+                                    found33 = True
+                                if found33 is False and ofcDone is False:
+                                    ofcDone = True
+                                    for i in self.loaded.keys():
+                                        printArgumenten += f"i32 {i}, "
+
+                        elif argument.node.getRuleName() == "arrCall":
+                            arrName = argument.children[0].children[0].node.getRuleName()
+                            arrPos = argument.children[2].children[0].node.getRuleName()
+
+                            def findValue(ast, aName, aPos):
+                                for child in ast.children:
+                                    if child.node.getRuleName() == "arrAssign":
+                                        if child.children[0].node.getRuleName() == aName and child.children[2].children[
+                                            0].node.getRuleName() == aPos:
+                                            return child.children[5].children[0].node.getRuleName()
+                                    found = findValue(child, aName, aPos)
+                                    if found is not None:
+                                        return found
+                                return None
+
+                            newValue = findValue(self, arrName, arrPos)
+                            if isinstance(newValue, int):
+                                printArgumenten += f"i32 {newValue}, "
+                            elif isinstance(newValue, float):
+                                printArgumenten += f"double {newValue}, "
+                            elif isinstance(newValue, str):
+                                try:
+                                    newValue = int(newValue)
+                                    printArgumenten += f"i32 {newValue}, "
+                                except ValueError:
+                                    print("it's not an int dummy")
+                        elif argument.node.getRuleName() == "referenceID":  ##fix pointers in print
+                            namePtr = argument.children[1].children[0].node.getRuleName()
+                            for i in self.table.values():
+                                for j in i.keys():
+                                    if j == namePtr:
+                                        newValue = i[j][2]
+                                        while isinstance(newValue, str):
+                                            for k in i.keys():
+                                                if k == newValue:
+                                                    newValue = i[k][2]
+                            if isinstance(newValue, int):
+                                printArgumenten += f"i32 {newValue}, "
+                            elif isinstance(newValue, float):
+                                printArgumenten += f"double {newValue}, "
+                            elif isinstance(newValue, str):
+                                try:
+                                    newValue = int(newValue)
+                                    printArgumenten += f"i32 {newValue}, "
+                                except ValueError:
+                                    print("it's not an int dummy")
+
+                        elif argument.node.getRuleName() == "opOr" or argument.node.getRuleName() == "opAnd" or argument.node.getRuleName() == "opUnary" or argument.node.getRuleName() == "opCompare":
+                            printArgumenten += f"i32 {argument.children[0].node.getRuleName()}, "
+
+                    printArgumenten = printArgumenten[:-2]  # remove last 2 chars
+                    if notstr is False:
+                        self.varNumbers += 1
+                        self.registerDone = False
+                        self.register += f"%{self.varNumbers} = call i32(i8*, ...) @printf({printArgumenten})" + '\n'
+                else:  # if printFunction has NO arguments
+                    getString = self.strDict[child.children[0].children[0].node.getRuleName()][0]
+                    getBound = self.strDict[child.children[0].children[0].node.getRuleName()][1]
+                    self.varNumbers += 1
+                    if child.children[0].node.getRuleName() == "string":
+                        self.register += f"%{self.varNumbers} = call i32(i8*, ...) @printf(i8* getelementptr inbounds ({getBound}, {getBound}* {getString}, i64 0, i64 0))" + '\n'
+            # elif child.node.getRuleName() == "conditionStatement":
+            #     if len(child.children) > 0:#not dead if
+            #         self.varNumbers += 1
+
+            elif child.node.getRuleName() == "whileStatement":
+                self.varNumbers += 1
+                self.register += f"br{self.varNumbers} label %{self.varNumbers}" + '\n'
+                self.register += f"{self.varNumbers}:" + "\n"
+
+                # self.parse_while(child)
+            self.parse_expr(child)
+
+    # def parse_while(self, ast):
+    #     for child in ast.children:
+    #         self.parse_while(child)
+
+    def get_unnamed(self, ast):
+        for child in ast.children:
+            if child.node.getRuleName() == "printFunction" or child.node.getRuleName() == "scanFunction":
+                if len(child.children[0].children[0].children) > 0:
+                    for argument in child.children[0].children:
+                        if argument.node.getRuleName() == "string":
+                            if argument.children[0].node.getRuleName() not in self.doneFormats:
+                                self.varNumbersPrint += 1
+                                tempLength = len(argument.children[0].node.getRuleName())
+                                if (argument.children[0].node.getRuleName() == "%s %s!\\n"):
+                                    tempLength = len(argument.children[0].node.getRuleName())
+                                elif argument.children[0].node.getRuleName() == "Enter two numbers:":
+                                    tempLength = 19
+                                elif (argument.children[0].node.getRuleName() == "%d\\n"):
+                                    tempLength = 4
+                                else:
+                                    tempLength += 1
+
+                                my_string = argument.children[0].node.getRuleName()
+
+                                if "\\n" in my_string:
+                                    my_string = my_string.replace("\\n", "\\0A")
+                                if self.varNumbersPrint == 1:
+                                    self.printFunction += f"@.str = private unnamed_addr constant [{tempLength} x i8] c\"{my_string}\\00\", align 1" + '\n'
+                                elif self.varNumbersPrint > 1:
+                                    self.printFunction += f"@.str.{self.varNumbersPrint} = private unnamed_addr constant [{tempLength} x i8] c\"{my_string}\\00\", align 1" + '\n'
+                                if self.varNumbersPrint == 1:
+                                    self.strDict[argument.children[0].node.getRuleName()] = [f"@.str",
+                                                                                             f"[{tempLength} x i8]"]
+                                else:
+                                    self.strDict[argument.children[0].node.getRuleName()] = [
+                                        f"@.str.{self.varNumbersPrint}", f"[{tempLength} x i8]"]
+                                self.doneFormats.append(argument.children[0].node.getRuleName())
+                else:
+                    if child.children[0].children[0].node.getRuleName() not in self.doneFormats:
+                        self.varNumbersPrint += 1
+                        tempLength = len(child.children[0].children[0].node.getRuleName())
+                        my_string = child.children[0].children[0].node.getRuleName()
+                        if (my_string == "Enter two numbers:"):
+                            tempLength += 1
+                        elif (my_string == "Enter a 5-character string:"):
+                            tempLength = 28
+                        elif (my_string == "Something went wrong"):
+                            tempLength = 21
+                        if "\\n" in my_string:
+
+                            my_string = my_string.replace("\\n", "\\0A")
+                        if self.varNumbersPrint == 1:
+                            self.printFunction += f"@.str = private unnamed_addr constant [{tempLength} x i8] c\"{my_string}\\00\", align 1" + '\n'
+                        elif self.varNumbersPrint > 1:
+                            self.printFunction += f"@.str.{self.varNumbersPrint} = private unnamed_addr constant [{tempLength} x i8] c\"{child.children[0].children[0].node.getRuleName()}\\00\", align 1" + '\n'
+                        if self.varNumbersPrint == 1:
+                            self.strDict[child.children[0].children[0].node.getRuleName()] = [f"@.str",
+                                                                                              f"[{tempLength} x i8]"]
+                        else:
+                            self.strDict[child.children[0].children[0].node.getRuleName()] = [
+                                f"@.str.{self.varNumbersPrint}", f"[{tempLength} x i8]"]
+                        self.doneFormats.append(child.children[0].children[0].node.getRuleName())
+            self.get_unnamed(child)
+
+    def print_ll(self, argv):
+        argv += ".ll"
+        file = open(argv, "w")
+        file.write(self.LLVM)
+
     def addNodes(self):
         string = str(self)
         if len(self.node.getRuleName()) > 1:
             if self.parent is not None:
                 if self.parent.node.getRuleName() == "string":
                     a = self.node.getRuleName()
-                    newStr = a[1:len(a)-1]
+                    newStr = a[1:len(a) - 1]
                     self.node.ruleName = newStr
                 elif self.parent.node.getRuleName() == "comment":
                     a = self.node.getRuleName()
-                    b = a.translate({ord("\"") : None})
+                    b = a.translate({ord("\""): None})
                     self.node.ruleName = b
         string += '[label="{}"] \n'.format(self.node.getRuleName())
         for child in self.children:
@@ -70,16 +435,20 @@ class AST:
             for i in self.parent.children:
                 if i != self:
                     self.parent.children.remove(i)
-        elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:14] == "whileStatement":
+        elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[
+                                                              :13] == "elifStatement" or self.node.getRuleName()[
+                                                                                         :14] == "whileStatement":
             if len(self.children[0].children) == 1:
                 if self.children[0].children[0].node.getRuleName() == "0":
                     self.parent.children.remove(self)
         else:
             for i in self.children:
                 i.removeDeadCode()
+
     def optimize(self, dict):
         if self.node.getRuleName() == "prog" or self.node.getRuleName() == "expr" or self.node.getRuleName() == "conditionStatement" or self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "argumentCall" or self.node.getRuleName() == "arrArg":
-            if (self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "scanFunction") and len(self.children) == 2:
+            if (self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "scanFunction") and len(
+                    self.children) == 2:
                 self.children.pop(0)
             for i in self.children:
                 i.optimize(dict)
@@ -115,9 +484,12 @@ class AST:
                 if dict["whileStatement"] != 1:
                     self.node.ruleName = "whileStatement" + str(dict["whileStatement"])
 
-            elif (self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "scanFunction") and len(self.children) == 2:
+            elif (self.node.getRuleName() == "printFunction" or self.node.getRuleName() == "scanFunction") and len(
+                    self.children) == 2:
                 self.children.pop(0)
-            elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement":
+            elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[
+                                                                  :13] == "elifStatement" or self.node.getRuleName()[
+                                                                                             :13] == "elseStatement":
                 if self.node.getRuleName()[:13] == "elifStatement":
                     self.children.pop(0)
                     self.children.pop(0)
@@ -216,7 +588,6 @@ class AST:
             for i in self.children:
                 i.convertToWhile()
 
-
     def initialiseSymbolTable(self, symbolTable, scope):
         if self.node.getRuleName() == "variableDefinition":
             if self.children[0].children[0].node.getRuleName() == "pointerWord":
@@ -227,7 +598,8 @@ class AST:
                 varType = self.children[0].children[0].children[0].node.getRuleName()
                 name = self.children[0].children[1].children[0].node.getRuleName()
                 tableType = symbolTable.get_symbol(name, scope)[0]
-            if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv":
+            if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[
+                2].node.getRuleName() == "opMultOrDiv":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
                 if len(self.children[2].children) == 1:
                     value = None
@@ -247,7 +619,8 @@ class AST:
                     symbolTable.insert_value(varName, value, scope)
                 else:
                     symbolTable.insert_symbol(varName, self.children[2], scope)
-            elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or self.children[2].node.getRuleName() == "char":
+            elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or \
+                    self.children[2].node.getRuleName() == "char":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
                 type = symbolTable.get_symbol(varName, scope)[0]
                 if self.children[2].node.getRuleName() == "char" and (type == "int" or type == "float"):
@@ -289,7 +662,10 @@ class AST:
 
 
         elif self.node.getRuleName() == "assignmentStatement":
-            if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[2].node.getRuleName() == "opMultOrDiv" or self.children[2].node.getRuleName() == "opUnary" or self.children[2].node.getRuleName() == "opCompare" or self.children[2].node.getRuleName() == "opOr" or self.children[2].node.getRuleName() == "opAnd":
+            if self.children[2].node.getRuleName() == "opAddOrSub" or self.children[
+                2].node.getRuleName() == "opMultOrDiv" or self.children[2].node.getRuleName() == "opUnary" or \
+                    self.children[2].node.getRuleName() == "opCompare" or self.children[
+                2].node.getRuleName() == "opOr" or self.children[2].node.getRuleName() == "opAnd":
                 varName = self.children[0].children[0].node.getRuleName()
                 if self.children[2].node.getRuleName() == "opUnary":
                     type = symbolTable.get_symbol(varName)[0]
@@ -311,7 +687,8 @@ class AST:
                     symbolTable.insert_value(varName, value, scope)
                 else:
                     symbolTable.insert_symbol(varName, self.children[2], scope)
-            elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or self.children[2].node.getRuleName() == "char":
+            elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or \
+                    self.children[2].node.getRuleName() == "char":
                 possible = True
                 if self.children[0].node.getRuleName() == "referenceID":
                     possible = False
@@ -333,7 +710,12 @@ class AST:
                     value = self.children[2].children[0].node.getRuleName()[1]
                 if possible:
                     symbolTable.insert_value(varName, value, scope)
-        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement" or self.node.getRuleName()[:14] == "whileStatement" or self.node.getRuleName()[:7] == "forLoop":
+        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[
+                                                               :11] == "ifStatement" or self.node.getRuleName()[
+                                                                                        :13] == "elifStatement" or self.node.getRuleName()[
+                                                                                                                   :13] == "elseStatement" or self.node.getRuleName()[
+                                                                                                                                              :14] == "whileStatement" or self.node.getRuleName()[
+                                                                                                                                                                          :7] == "forLoop":
             scope = self.node.getRuleName()
             for i in self.children:
                 i.initialiseSymbolTable(symbolTable, scope)
@@ -355,16 +737,14 @@ class AST:
             for i in self.children:
                 i.initialiseSymbolTable(symbolTable, scope)
 
-
-
-    def constantPropagation(self, dict, arr,  symbolTable, scope):
+    def constantPropagation(self, dict, arr, symbolTable, scope):
         if self.node.getRuleName() == "expr":
             for i in arr:
                 if i in dict:
                     dict.pop(i)
             arr.clear()
             for i in self.children:
-                i.constantPropagation(dict,arr, symbolTable, scope)
+                i.constantPropagation(dict, arr, symbolTable, scope)
         elif self.node.getRuleName() == "assignmentStatement":
             if self.children[0].node.getRuleName() == "nameIdentifier":
                 varName = self.children[0].children[0].node.getRuleName()
@@ -373,7 +753,7 @@ class AST:
             if varName in dict:
                 arr.append(varName)
             rightSide = self.children[2]
-            rightSide.constantPropagation(dict, arr,  symbolTable, scope)
+            rightSide.constantPropagation(dict, arr, symbolTable, scope)
 
         elif self.node.getRuleName() == "variableDefinition":
             rightSide = self.children[2]
@@ -403,9 +783,15 @@ class AST:
                     if not test:
                         if dict[tempName].node.getRuleName() != "referenceID":
                             self.children.append(copy.deepcopy(dict[tempName]))
-                elif tempName in dict and (self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
+                elif tempName in dict and (
+                        self.parent.node.getRuleName() == "assignmentStatement" or self.parent.node.getRuleName() == "variableDefinition"):
                     self.children.append(copy.deepcopy(dict[tempName]))
-        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement" or self.node.getRuleName()[:14] == "whileStatement" or self.node.getRuleName()[:7] == "forLoop":
+        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[
+                                                               :11] == "ifStatement" or self.node.getRuleName()[
+                                                                                        :13] == "elifStatement" or self.node.getRuleName()[
+                                                                                                                   :13] == "elseStatement" or self.node.getRuleName()[
+                                                                                                                                              :14] == "whileStatement" or self.node.getRuleName()[
+                                                                                                                                                                          :7] == "forLoop":
             scope = self.node.getRuleName()
             for i in self.children:
                 i.constantPropagation(dict, arr, symbolTable, scope)
@@ -426,7 +812,6 @@ class AST:
         else:
             for i in self.children:
                 i.constantPropagation(dict, arr, symbolTable, scope)
-
 
     def constantFolding(self, symbolTable, scope):
         if self.node.getRuleName() == "opAddOrSub" or self.node.getRuleName() == "opMultOrDiv" or self.node.getRuleName() == "opCompare" or self.node.getRuleName() == "opAnd" or self.node.getRuleName() == "opOr":
@@ -464,7 +849,7 @@ class AST:
                     possible = False
 
             else:
-                leftValue.constantFolding(symbolTable,scope)
+                leftValue.constantFolding(symbolTable, scope)
                 if len(leftValue.children) == 1:
                     try:
                         leftValue = int(leftValue.children[0].node.getRuleName())
@@ -481,12 +866,12 @@ class AST:
             elif rightValue.node.getRuleName() == "float":
                 rightValue = float(rightValue.children[0].node.getRuleName())
             elif rightValue.node.getRuleName() == "char":
-                 rightValue = ord(rightValue.children[0].node.getRuleName()[1])
+                rightValue = ord(rightValue.children[0].node.getRuleName()[1])
             elif rightValue.node.getRuleName() == "nameIdentifier" and len(rightValue.children) == 1:
                 possible = False
             elif rightValue.node.getRuleName() == "nameIdentifier" and len(rightValue.children) == 2:
                 rightValue = rightValue.children[1]
-                rightValue.constantFolding(symbolTable,scope)
+                rightValue.constantFolding(symbolTable, scope)
                 if len(rightValue.children) == 1:
                     try:
                         rightValue = int(rightValue.children[0].node.getRuleName())
@@ -498,7 +883,7 @@ class AST:
                 else:
                     possible = False
             else:
-                rightValue.constantFolding(symbolTable,scope)
+                rightValue.constantFolding(symbolTable, scope)
                 if len(rightValue.children) == 1:
                     try:
                         rightValue = int(rightValue.children[0].node.getRuleName())
@@ -783,7 +1168,7 @@ class AST:
                 if value != 0 and value != 1:
                     possible = False
             else:
-                value.constantFolding(symbolTable,scope)
+                value.constantFolding(symbolTable, scope)
                 if len(value.children) == 1:
                     try:
                         value = int(value.children[0].node.getRuleName())
@@ -809,7 +1194,12 @@ class AST:
                         self.children[0].node.ruleName = 0
                     self.children.pop()
                     self.children[0].children.clear()
-        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:13] == "elseStatement" or self.node.getRuleName()[:14] == "whileStatement" or self.node.getRuleName()[:7] == "forLoop":
+        elif self.node.getRuleName()[:12] == "unNamedScope" or self.node.getRuleName()[
+                                                               :11] == "ifStatement" or self.node.getRuleName()[
+                                                                                        :13] == "elifStatement" or self.node.getRuleName()[
+                                                                                                                   :13] == "elseStatement" or self.node.getRuleName()[
+                                                                                                                                              :14] == "whileStatement" or self.node.getRuleName()[
+                                                                                                                                                                          :7] == "forLoop":
             scope = self.node.getRuleName()
             for i in self.children:
                 i.constantFolding(symbolTable, scope)
@@ -830,3 +1220,19 @@ class AST:
         else:
             for i in self.children:
                 i.constantFolding(symbolTable, scope)
+
+
+def get_leftmost_node(node):
+    if not node:  # base case for empty tree or leaf node
+        return None
+    if not node.children:  # base case for node without children
+        return node
+    return get_leftmost_node(node.children[0])  # recursive call to leftmost child
+
+
+def get_rightmost_node(node):
+    if not node:  # base case for empty tree or leaf node
+        return None
+    if not node.children:  # base case for node without children
+        return node
+    return get_rightmost_node(node.children[-1])  # recursive call to rightmost child
