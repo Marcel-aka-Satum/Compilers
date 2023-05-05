@@ -7,9 +7,11 @@ int main(){
 		printf("%d\n",i);
 		if (i == 5){
 			break;
+			int d = 10;
 		} else {
 			i++;
 			continue;
+			printf("test");
 		}
 		i = 10;
 	}
