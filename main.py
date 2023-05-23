@@ -3,6 +3,7 @@ from AST import *
 from SemanticAnalysisVisitor import *
 from LLVM import *
 from ErrorListener import *
+from mips import *
 
 
 def main(argv):
@@ -44,13 +45,9 @@ def main(argv):
     ast.initialiseSymbolTable(symbolTable.symbol_table, None)
     # Print the AST in dot
     ast.printInDot(argv)
-
-    #generate LLVM from c and then print it
-    ast.set_table(symbolTable.symbol_table.symbol_tables)
-    ast.generate_LLVM(ast)
-    ast.print_ll(argv)
-
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
+    # Generate mips and print it
+    mips = Mips(ast, symbolTable, argv)
 if __name__ == '__main__':
     main("test.c")

@@ -656,8 +656,10 @@ class AST:
                 if const != "pointer" and const != "const pointer":
                     if type == "int":
                         value = int(self.children[2].children[1].children[0].node.getRuleName())
-                    else:
+                    elif type == "float":
                         value = float(self.children[2].children[1].children[0].node.getRuleName())
+                    else:
+                        value = self.children[2].children[1].children[0].node.getRuleName()[1]
                     symbolTable.insert_value(name, value, scope)
 
 
