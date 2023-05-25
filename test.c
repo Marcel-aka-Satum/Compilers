@@ -1,6 +1,6 @@
-// This should print the number 10 for each basic operation (int and float)
-int d = 50;
+int test(int a, int b, char c){
+    return a;
+}
 int main(){
-    char a = 'a';
-    int b = a;
+    return 0;
 }

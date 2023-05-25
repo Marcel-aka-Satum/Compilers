@@ -36,7 +36,7 @@ class Mips:
         if name in self.table.symbol_table.symbol_tables:
             count = len(self.table.symbol_table.symbol_tables[name]) * 4 + 12
         else:
-            count = 0
+            count = 12
         self.output += f"{name}:\n"
         self.output += f"\taddiu   $sp, $sp, -{count}\n"
         self.output += f"\tsw   $ra, {count-4}($sp)\n"
@@ -46,6 +46,22 @@ class Mips:
         if ast.children[3].node.getRuleName() == "expr":
             self.visitFunc(ast.children[3], name)
         else:
+            size = len(self.table.symbol_table.funcDict[name][1])
+            register = 4
+            names = []
+            for i in ast.children[2].children:
+                if i.node.getRuleName() != "reservedWord" and i.node.getRuleName() != "," and i.node.getRuleName() != "pointerWord":
+                    names.append(i.node.getRuleName())
+            for i in range(size):
+                adress = self.functions[name][1]
+                tempType = self.table.symbol_table.get_symbol(names[i], name)[0]
+                if tempType == "char":
+                    self.output += f"\tsb   ${register}, {adress}($sp)\n"
+                else:
+                    self.output += f"\tsw   ${register}, {adress}($sp)\n"
+                self.functions[name][0][names[i]] = adress
+                self.functions[name][1] -= 4
+                register += 1
             self.visitFunc(ast.children[4], name)
         self.output += f"\tmove  $sp, $fp\n"
         self.output += f"\tlw   $fp, {count - 8}($sp)\n"
@@ -59,9 +75,27 @@ class Mips:
             self.functions[funcName][1] -= 4
         elif ast.node.getRuleName() == "assignmentStatement":
             self.variableAssign(ast, funcName)
+        elif ast.node.getRuleName() == "returnStatement":
+            self.returnStatement(ast, funcName)
         else:
             for i in ast.children:
                 self.visitFunc(i, funcName)
+    def returnStatement(self, ast, funcName):
+        type = ast.children[1].node.getRuleName()
+        value = ast.children[1].children[0].node.getRuleName()
+        if type == "char":
+            self.output += f"\taddiu    $2, $zero, {ord(value[1])}\n"
+        elif type == "float":
+            self.output += f"\taddiu    $2, $zero, {float.hex(float(value))}\n"
+        elif type == "nameIdentifier":
+            newAdress = self.functions[funcName][0][value]
+            if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
+                self.output += f"\tlb   $2, {newAdress}($fp)\n"
+            else:
+                self.output += f"\tlw   $2, {newAdress}($fp)\n"
+
+        else:
+            self.output += f"\taddiu    $2, $zero, {value}\n"
     def variableAssign(self, ast, funcName):
         name = ast.children[0].children[0].node.getRuleName()
         type = self.table.symbol_table.get_symbol(name, funcName)[0]
