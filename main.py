@@ -49,5 +49,8 @@ def main(argv):
     print(symbolTable.symbol_table.symbol_tables)
     # Generate mips and print it
     mips = Mips(ast, symbolTable, argv)
+
+import struct
 if __name__ == '__main__':
+
     main("test.c")
