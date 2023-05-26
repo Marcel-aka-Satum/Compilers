@@ -1,6 +1,4 @@
-char a = 'a';
-
+int result = 5;
 int main(){
-    int result = 3;
-    return 0;
+    int x = result;
 }

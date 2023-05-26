@@ -1,6 +1,7 @@
 import struct
 def float_to_hex(f):
     return hex(struct.unpack('<I', struct.pack('<f', f))[0])
+import struct
 class Mips:
     def __init__(self, AST, symbolTable, argv):
         self.output = ".data \n"
@@ -95,7 +96,7 @@ class Mips:
         if type == "char":
             self.output += f"\taddiu    $2, $zero, {ord(value[1])}\n"
         elif type == "float":
-            self.output += f"\taddiu    $2, $zero, {float.hex(float(value))}\n"
+            self.output += f"\taddiu    $2, $zero, {float_to_hex(float(value))}\n"
         elif type == "nameIdentifier":
             newAdress = self.functions[funcName][0][value]
             if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
@@ -136,7 +137,7 @@ class Mips:
                     self.output += f"\tsw   $1, {adress}($fp)\n"
             elif type == "float":
                 if valueType == "char":
-                    self.output += f"\taddiu    $1, $zero, {float.hex(float(ord(value[1])))}\n"
+                    self.output += f"\taddiu    $1, $zero, {float_to_hex(float(ord(value[1])))}\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
                 elif valueType == "nameIdentifier":
                     newAdress = self.functions[funcName][0][value]
@@ -146,7 +147,7 @@ class Mips:
                         self.output += f"\tlw   $1, {newAdress}($fp)\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
                 else:
-                    self.output += f"\taddiu    $1, $zero, {float.hex(float(value))}\n"
+                    self.output += f"\taddiu    $1, $zero, {float_to_hex(float(value))}\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
             else:
                 if valueType == "int":
@@ -206,18 +207,25 @@ class Mips:
                     self.output += f"\taddiu    $1, $zero, {ord(value[1])}\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
                 elif valueType == "nameIdentifier":
-                    newAdress = self.functions[funcName][0][value]
-                    if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
-                        self.output += f"\tlb   $1, {newAdress}($fp)\n"
+                    if value in self.functions[funcName][0]:
+                        newAdress = self.functions[funcName][0][value]
+                        if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
+                            self.output += f"\tlb   $1, {newAdress}($fp)\n"
+                        else:
+                            self.output += f"\tlw   $1, {newAdress}($fp)\n"
                     else:
-                        self.output += f"\tlw   $1, {newAdress}($fp)\n"
+                        if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
+                            self.output += f"\tlb   $1, {value}\n"
+                        else:
+                            self.output += f"\tlw   $1, {value}\n"
+
                     self.output += f"\tsw   $1, {adress}($fp)\n"
                 else:
                     self.output += f"\taddiu    $1, $zero, {value}\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
             elif type == "float":
                 if valueType == "char":
-                    self.output += f"\taddiu    $1, $zero, {float.hex(float(ord(value[1])))}\n"
+                    self.output += f"\taddiu    $1, $zero, {float_to_hex(float(ord(value[1])))}\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
                 elif valueType == "nameIdentifier":
                     newAdress = self.functions[funcName][0][value]
@@ -227,7 +235,7 @@ class Mips:
                         self.output += f"\tlw   $1, {newAdress}($fp)\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
                 else:
-                    self.output += f"\taddiu    $1, $zero, {float.hex(float(value))}\n"
+                    self.output += f"\taddiu    $1, $zero, {float_to_hex(float(value))}\n"
                     self.output += f"\tsw   $1, {adress}($fp)\n"
             else:
                 if valueType == "int":
@@ -288,9 +296,9 @@ class Mips:
                     self.output += f"\t{name}:\t.4byte {value}\n"
             elif type == "float":
                 if valueType == "char":
-                    self.output += f"\t{name}:\t.4byte {float.hex(float(ord(value[1])))}\n"
+                    self.output += f"\t{name}:\t.4byte {float_to_hex(float(ord(value[1])))}\n"
                 else:
-                    self.output += f"\t{name}:\t.4byte {float.hex(float(value))}\n"
+                    self.output += f"\t{name}:\t.4byte {float_to_hex(float(value))}\n"
             else:
                 if valueType == "int":
                     self.output += f"\t{name}:\t.byte {value}\n"
