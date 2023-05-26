@@ -3,13 +3,16 @@ def float_to_hex(f):
     return hex(struct.unpack('<I', struct.pack('<f', f))[0])
 class Mips:
     def __init__(self, AST, symbolTable, argv):
-        self.output = ""
+        self.output = ".data \n"
         self.table = symbolTable
         self.functions = dict()
+        self.functionFound = False
         # generate mips
         self.visitAst(AST)
         self.output += f"exit:\n \t li $v0, 10 \n \t syscall"
         self.printMips(argv)
+
+
 
     def visitAst(self, ast):
         if ast.node.getRuleName() == "variableDefinition":
@@ -30,6 +33,9 @@ class Mips:
                 self.globalVariableDef(ast)
             self.globalVariableDecl(ast)
         elif ast.node.getRuleName() == "funcDefinition":
+            if not self.functionFound:
+                self.output += ".text \n"
+                self.functionFound = True
             self.funcDef(ast)
         else:
             for i in ast.children:
@@ -277,28 +283,28 @@ class Mips:
         if not isPointer:
             if type == "int":
                 if valueType == "char":
-                    self.output += f"{name}:\n\t.4byte {ord(value[1])}\n"
+                    self.output += f"\t{name}:\t.4byte {ord(value[1])}\n"
                 else:
-                    self.output += f"{name}:\n\t.4byte {value}\n"
+                    self.output += f"\t{name}:\t.4byte {value}\n"
             elif type == "float":
                 if valueType == "char":
-                    self.output += f"{name}:\n\t.4byte {float.hex(float(ord(value[1])))}\n"
+                    self.output += f"\t{name}:\t.4byte {float.hex(float(ord(value[1])))}\n"
                 else:
-                    self.output += f"{name}:\n\t.4byte {float.hex(float(value))}\n"
+                    self.output += f"\t{name}:\t.4byte {float.hex(float(value))}\n"
             else:
                 if valueType == "int":
-                    self.output += f"{name}:\n\t.byte {value}\n"
+                    self.output += f"\t{name}:\t.byte {value}\n"
                 elif valueType == "float":
-                    self.output += f"{name}:\n\t.byte {int(float(value))}\n"
+                    self.output += f"\t{name}:\t.byte {int(float(value))}\n"
                 else:
-                    self.output += f"{name}:\n\t.byte {ord(value[1])}\n"
+                    self.output += f"\t{name}:\t.byte {ord(value[1])}\n"
         else:
             if type == "int":
-                self.output += f"{name}:\n\t.4byte {value}\n"
+                self.output += f"\t{name}:\t.4byte {value}\n"
             elif type == "float":
-                self.output += f"{name}:\n\t.4byte {value}\n"
+                self.output += f"\t{name}:\t.4byte {value}\n"
             else:
-                self.output += f"{name}:\n\t.byte {value}\n"
+                self.output += f"\t{name}:\t.byte {value}\n"
 
 
     def globalVariableDecl(self, ast):
@@ -313,11 +319,11 @@ class Mips:
         elif ast.children[0].node.getRuleName() == "reservedWord":
             type = ast.children[0].children[0].node.getRuleName()
         if type == "int":
-            self.output += f"{name}:\n\t.4byte {0}\n"
+            self.output += f"\t{name}:\t.4byte {0}\n"
         elif type == "float":
-            self.output += f"{name}:\n\t.4byte {0x00000000}\n"
+            self.output += f"\t{name}:\t.4byte {0x00000000}\n"
         else:
-            self.output += f"{name}:\n\t.byte {0}\n"
+            self.output += f"\t{name}:\t.byte {0}\n"
 
     def printMips(self, fileName):
         fileName += ".asm"
