@@ -1,6 +1,6 @@
-int test(int a, int b, char c){
-    return a;
-}
 int main(){
+    int a = 4;
+    char b = 'b';
+
     return 0;
 }

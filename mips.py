@@ -5,7 +5,7 @@ class Mips:
         self.functions = dict()
         # generate mips
         self.visitAst(AST)
-        self.output += f"exit:\n"
+        self.output += f"exit:\n \t li $v0, 10 \n \t syscall"
         self.printMips(argv)
 
     def visitAst(self, ast):
@@ -68,7 +68,7 @@ class Mips:
         self.output += f"\tlw   $ra, {count - 4}($sp)\n"
         self.output += f"\taddiu   $sp, $sp, {count}\n"
         if name == "main":
-            self.output += f"\tj    exit\n"
+            self.output += f"\tjal    exit\n"
     def visitFunc(self, ast, funcName):
         if ast.node.getRuleName() == "variableDefinition":
             self.variableDef(ast, funcName)
