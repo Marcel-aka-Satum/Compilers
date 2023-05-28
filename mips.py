@@ -4,12 +4,15 @@ def float_to_hex(f):
 import struct
 class Mips:
     def __init__(self, AST, symbolTable, argv):
-        self.output = ".data \n"
+        self.output = ""
         self.table = symbolTable
         self.functions = dict()
         self.functionFound = False
+        self.dataLabelString = ".data \n"
+        self.countVars = 0
         # generate mips
         self.visitAst(AST)
+        self.output = self.dataLabelString + self.output
         self.output += f"exit:\n \t li $v0, 10 \n \t syscall"
         self.printMips(argv)
 
@@ -87,6 +90,27 @@ class Mips:
             self.variableAssign(ast, funcName)
         elif ast.node.getRuleName() == "returnStatement":
             self.returnStatement(ast, funcName)
+        elif ast.node.getRuleName() == "printFunction": 
+            if ast.children[0].node.getRuleName() == "string":#if u want to print string WITHOUT printARGS
+                self.dataLabelString += f"\ttext{self.countVars}: .asciiz \"{ast.children[0].children[0].node.getRuleName()}\" \n"
+                self.output += "\tli $v0, 4 \n"
+                self.output += f"\tla $a0, text{self.countVars}\n \tsyscall \n"
+                self.countVars += 1
+            elif ast.children[0].node.getRuleName() == "printArg":#if u want to print other then string (string with args)
+                if ast.children[0].children[0].children[0].node.getRuleName() == "%d; ":
+                    if ast.children[0].children[2].children[0].node.getRuleName()[-2] == ".":
+                        ast.children[0].children[2].children[0].node.ruleName = ast.children[0].children[2].children[0].node.getRuleName()[:-2]
+                    self.dataLabelString += f"\ttext{self.countVars}: .word {ast.children[0].children[2].children[0].node.getRuleName()}\n"
+                    self.output += "\tli $v0, 1 \n" #1 for integer
+                    self.output += f"\tlw $a0, text{self.countVars}\n \tsyscall \n"
+                    self.countVars += 1
+                elif ast.children[0].children[0].children[0].node.getRuleName() == "%f; ":
+                    self.dataLabelString += f"\ttext{self.countVars}: .float {ast.children[0].children[2].children[0].node.getRuleName()}\n"
+                    self.output += "\tli $v0, 2 \n" #2 for float
+                    self.output += f"\tlwc1 $f12, text{self.countVars}\n \tsyscall \n"#lwc1 $f12 for FLOATS always!
+                    self.countVars += 1
+        elif ast.node.getRuleName() == "scanFunction": #scanfunction
+            pass
         else:
             for i in ast.children:
                 self.visitFunc(i, funcName)
