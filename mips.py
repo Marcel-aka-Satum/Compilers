@@ -87,6 +87,19 @@ class Mips:
         if ast.node.getRuleName() == "variableDefinition":
             self.variableDef(ast, funcName)
             self.functions[funcName][1] -= 4
+        elif ast.node.getRuleName() == "comment":
+            if ast.children[0].node.getRuleName()[0:2] == "//":#single comments
+                self.output += f"\t#{ast.children[0].node.getRuleName()[2:]}"
+            elif ast.children[0].node.getRuleName()[0:2] == "/*":#multiple comments
+                print(ast.children[0].node.getRuleName()[2:-2])
+                currentWord = ""
+                for i in ast.children[0].node.getRuleName()[2:-2]:
+                    if(i == "\n"):
+                        self.output += f"\t#{currentWord}\n"
+                        currentWord = ""
+                    else:
+                        currentWord += i
+
         elif ast.node.getRuleName() == "assignmentStatement":
             self.variableAssign(ast, funcName)
         elif ast.node.getRuleName() == "returnStatement":
