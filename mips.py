@@ -10,6 +10,7 @@ class Mips:
         self.functionFound = False
         self.dataLabelString = ".data \n"
         self.countVars = 0
+        self.scanInputs = list() #[($t0, n)]
         # generate mips
         self.visitAst(AST)
         self.output = self.dataLabelString + self.output
@@ -98,8 +99,9 @@ class Mips:
                 self.countVars += 1
             elif ast.children[0].node.getRuleName() == "printArg":#if u want to print other then string (string with args)
                 if ast.children[0].children[0].children[0].node.getRuleName() == "%d; ":
-                    if ast.children[0].children[2].children[0].node.getRuleName()[-2] == ".":
-                        ast.children[0].children[2].children[0].node.ruleName = ast.children[0].children[2].children[0].node.getRuleName()[:-2]
+                    if len(ast.children[0].children[2].children[0].node.getRuleName()) > 2:
+                        if ast.children[0].children[2].children[0].node.getRuleName()[-2] == ".":
+                            ast.children[0].children[2].children[0].node.ruleName = ast.children[0].children[2].children[0].node.getRuleName()[:-2]
                     self.dataLabelString += f"\ttext{self.countVars}: .word {ast.children[0].children[2].children[0].node.getRuleName()}\n"
                     self.output += "\tli $v0, 1 \n" #1 for integer
                     self.output += f"\tlw $a0, text{self.countVars}\n \tsyscall \n"
@@ -110,7 +112,31 @@ class Mips:
                     self.output += f"\tlwc1 $f12, text{self.countVars}\n \tsyscall \n"#lwc1 $f12 for FLOATS always!
                     self.countVars += 1
         elif ast.node.getRuleName() == "scanFunction": #scanfunction
-            pass
+            if len(ast.children[0].children) == 3: # 1 input
+                self.output += f"\tli $v0, 5\n"
+                self.output += f"\tsyscall\n"
+                self.output += f"\tmove $t0, $v0\n"
+                #print it 
+                self.output += f"\tli $v0, 1\n"
+                self.output += f"\tmove $a0, $t0\n"
+                self.output += f"\tsyscall\n"
+            else: # 2 inputs
+                self.output += f"\tli $v0, 5\n"
+                self.output += f"\tsyscall\n"
+                self.output += f"\tmove $t0, $v0\n"
+                
+                self.output += f"\tli $v0, 5\n"
+                self.output += f"\tsyscall\n"
+                self.output += f"\tmove $t1, $v0\n"
+
+                #print first
+                self.output += f"\tli $v0, 1\n"
+                self.output += f"\tmove $a0, $t0\n"
+                self.output += f"\tsyscall\n"
+                #print second
+                self.output += f"\tli $v0, 1\n"
+                self.output += f"\tmove $a0, $t1\n"
+                self.output += f"\tsyscall\n"
         else:
             for i in ast.children:
                 self.visitFunc(i, funcName)
