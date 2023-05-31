@@ -42,6 +42,18 @@ class Mips:
                 self.output += ".text \n"
                 self.functionFound = True
             self.funcDef(ast)
+        elif ast.node.getRuleName() == "comment":
+            if ast.children[0].node.getRuleName()[0:2] == "//":#single comments
+                self.output += f"\t#{ast.children[0].node.getRuleName()[2:]}"
+            elif ast.children[0].node.getRuleName()[0:2] == "/*":#multiple comments
+                print(ast.children[0].node.getRuleName()[2:-2])
+                currentWord = ""
+                for i in ast.children[0].node.getRuleName()[2:-2]:
+                    if(i == "\n"):
+                        self.output += f"\t#{currentWord}\n"
+                        currentWord = ""
+                    else:
+                        currentWord += i
         else:
             for i in ast.children:
                 self.visitAst(i)
