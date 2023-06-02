@@ -435,12 +435,26 @@ class AST:
             for i in self.parent.children:
                 if i != self:
                     self.parent.children.remove(i)
-        elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[
-                                                              :13] == "elifStatement" or self.node.getRuleName()[
-                                                                                         :14] == "whileStatement":
+        elif self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement" or self.node.getRuleName()[:14] == "whileStatement":
             if len(self.children[0].children) == 1:
-                if self.children[0].children[0].node.getRuleName() == "0":
-                    self.parent.children.remove(self)
+                if self.node.getRuleName()[:11] == "ifStatement" or self.node.getRuleName()[:13] == "elifStatement":
+                    if len(self.children[0].children) == 1:
+                        if self.children[0].children[0].node.getRuleName() == "1":
+                            temp = self
+                            arr = []
+                            for i in self.parent.children:
+                                if i != temp:
+                                    arr.append(i)
+                            for i in arr:
+                                self.parent.children.remove(i)
+        elif self.node.getRuleName()[:13] == "elseStatement":
+            temp = self
+            arr = []
+            for i in self.parent.children:
+                if i != temp:
+                    arr.append(i)
+            for i in arr:
+                self.parent.children.remove(i)
         else:
             for i in self.children:
                 i.removeDeadCode()

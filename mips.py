@@ -162,6 +162,12 @@ class Mips:
                 self.output += f"\tli $v0, 1\n"
                 self.output += f"\tmove $a0, $t1\n"
                 self.output += f"\tsyscall\n"
+        elif ast.node.getRuleName()[:11] == "ifStatement" or ast.node.getRuleName()[:13] == "elifStatement" or ast.node.getRuleName()[:13] == "elseStatement":
+            if ast.node.getRuleName()[:13] == "elseStatement":
+                body = ast.children[1]
+            else:
+                body = ast.children[2]
+            self.visitFunc(body, funcName)
         else:
             for i in ast.children:
                 self.visitFunc(i, funcName)
