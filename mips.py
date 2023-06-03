@@ -6,6 +6,9 @@ class Mips:
     def __init__(self, AST, symbolTable, argv):
         self.output = ""
         self.table = symbolTable
+        self.loopCount = 0
+        self.forLoops = []
+        self.whileLoops = []
         self.functions = dict()
         self.functionFound = False
         self.dataLabelString = ".data \n"
@@ -42,6 +45,8 @@ class Mips:
                 self.output += ".text \n"
                 self.functionFound = True
             self.funcDef(ast)
+            for i in ast.children[3].children:
+                self.visitAst(i)
         elif ast.node.getRuleName() == "comment":
             if ast.children[0].node.getRuleName()[0:2] == "//":#single comments
                 self.output += f"\t#{ast.children[0].node.getRuleName()[2:]}"
@@ -95,6 +100,13 @@ class Mips:
         self.output += f"\taddiu   $sp, $sp, {count}\n"
         if name == "main":
             self.output += f"\tjal    exit\n"
+        else:
+            self.output += f"\tjr $ra\n"
+        for i in self.forLoops:
+            name = i[1]
+            body = i[0]
+            self.forLoop(body, name)
+
     def visitFunc(self, ast, funcName):
         if ast.node.getRuleName() == "variableDefinition":
             self.variableDef(ast, funcName)
@@ -116,6 +128,18 @@ class Mips:
             self.variableAssign(ast, funcName)
         elif ast.node.getRuleName() == "returnStatement":
             self.returnStatement(ast, funcName)
+        elif ast.node.getRuleName() == "increment":
+            name = ast.children[0].children[0].node.getRuleName()
+            newAdress = self.functions[funcName][0][name]
+            self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+            self.output += f"\taddiu  $t0, $t0, 1\n"
+            self.output += f"\tsw $t0, {newAdress}($fp)\n"
+        elif ast.node.getRuleName() == "decrement":
+            name = ast.children[0].children[0].node.getRuleName()
+            newAdress = self.functions[funcName][0][name]
+            self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+            self.output += f"\tsub  $t0, $t0, 1\n"
+            self.output += f"\tsw $t0, {newAdress}($fp)\n"
         elif ast.node.getRuleName() == "printFunction": 
             if ast.children[0].node.getRuleName() == "string":#if u want to print string WITHOUT printARGS
                 self.dataLabelString += f"\ttext{self.countVars}: .asciiz \"{ast.children[0].children[0].node.getRuleName()}\" \n"
@@ -168,9 +192,60 @@ class Mips:
             else:
                 body = ast.children[2]
             self.visitFunc(body, funcName)
+        elif ast.node.getRuleName() == "forLoop":
+            name = f"loop{self.loopCount}"
+            variableName = ast.children[0].children[0].children[1].children[0].node.getRuleName()
+            variableValue = ast.children[0].children[2].children[0].node.ruleName
+            if variableName in self.functions[funcName][0]:
+                adress = self.functions[funcName][0][variableName]
+            else:
+                adress = self.functions[funcName][1]
+                self.functions[funcName][1] -= 4
+                self.functions[funcName][0][variableName] = adress
+            self.output += f"\taddiu $t0, $zero, {variableValue}\n"
+            self.output += f"\tsw $t0, {adress}($fp)\n"
+            self.output += f"\tjal {name}\n"
+            self.forLoops.append([ast, [name, funcName]])
+            self.loopCount += 1
         else:
             for i in ast.children:
                 self.visitFunc(i, funcName)
+    def forLoop(self, ast, name):
+        bodyName = name[0]
+        funcName = name[1]
+        increment = False
+        incrementName = ast.children[0].children[0].children[1].children[0].node.getRuleName()
+        condition = ast.children[1].children[2].children[0].node.ruleName
+        if ast.children[2].children[1].node.getRuleName() == "++":
+            increment = True
+        self.output += f"{bodyName}:\n"
+        body = ast.children[4]
+        self.visitFunc(body, funcName)
+        if increment:
+            newAdress = self.functions[funcName][0][incrementName]
+            self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+            self.output += f"\taddiu  $t0, $t0, 1\n"
+            self.output += f"\tsw $t0, {newAdress}($fp)\n"
+        else:
+            newAdress = self.functions[funcName][0][incrementName]
+            self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+            self.output += f"\tsub  $t0, $t0, 1\n"
+        if ast.children[1].children[1].node.getRuleName() == "<":
+            self.output += f"\tblt  $t0,{condition}, {bodyName}\n"
+        elif ast.children[1].children[1].node.getRuleName() == ">":
+            self.output += f"\tbgt  $t0, {condition}, {bodyName}\n"
+        elif ast.children[1].children[1].node.getRuleName() == "<=":
+            self.output += f"\tble  $t0, {condition}, {bodyName}\n"
+        elif ast.children[1].children[1].node.getRuleName() == ">=":
+            self.output += f"\tbge  $t0, {condition}, {bodyName}\n"
+        elif ast.children[1].children[1].node.getRuleName() == "==":
+            self.output += f"\tbeq  $t0, {condition}, {bodyName}\n"
+        elif ast.children[1].children[1].node.getRuleName() == "!=":
+            self.output += f"\tbne  $t0, {condition}, {bodyName}\n"
+        self.output += f"\tjr   $ra\n"
+
+
+
     def returnStatement(self, ast, funcName):
         type = ast.children[1].node.getRuleName()
         value = ast.children[1].children[0].node.getRuleName()
@@ -186,71 +261,90 @@ class Mips:
                 self.output += f"\tlw   $v0, {newAdress}($fp)\n"
         else:
             self.output += f"\taddiu    $v0, $zero, {value}\n"
+    def operation(self, ast, funcName):
+        nameLeft = ast.children[0].children[0].node.getRuleName()
+        adressLeft = self.functions[funcName][0][nameLeft]
+        nameRight = ast.children[2].children[0].node.getRuleName()
+        adressRight = self.functions[funcName][0][nameRight]
+        self.output += f"\tlw   $t0, {adressLeft}($fp)\n"
+        self.output += f"\tlw   $t1, {adressRight}($fp)\n"
+        self.output += f"\tadd   $t0, $t0, $t1\n"
+
+
     def variableAssign(self, ast, funcName):
         name = ast.children[0].children[0].node.getRuleName()
         type = self.table.symbol_table.get_symbol(name, funcName)[0]
         isPointer = False
+        test = False
         if self.table.symbol_table.get_symbol(name, funcName)[1][0] == "pointer" or  self.table.symbol_table.get_symbol(name, funcName)[1][0] == "const pointer":
             isPointer = True
-        value = ast.children[2].children[0].node.ruleName
+        if len(ast.children[2].children) == 1:
+            value = ast.children[2].children[0].node.ruleName
+        else:
+            test = True
+            self.operation(ast.children[2], funcName)
         if name in self.functions[funcName][0]:
             adress = self.functions[funcName][0][name]
         else:
             adress = self.functions[funcName][1]
             self.functions[funcName][1] -= 4
             self.functions[funcName][0][name] = adress
+
         if not isPointer:
-            valueType = ast.children[2].node.getRuleName()
-            if type == "int":
-                if valueType == "char":
-                    self.output += f"\taddiu    $t0, $zero, {ord(value[1])}\n"
-                    self.output += f"\tsw   $t0, {adress}($fp)\n"
-                elif valueType == "nameIdentifier":
-                    if value in self.functions[funcName][0]:
+            if not test:
+                valueType = ast.children[2].node.getRuleName()
+                if type == "int":
+                    if valueType == "char":
+                        self.output += f"\taddiu    $t0, $zero, {ord(value[1])}\n"
+                        self.output += f"\tsw   $t0, {adress}($fp)\n"
+                    elif valueType == "nameIdentifier":
+                        if value in self.functions[funcName][0]:
+                            newAdress = self.functions[funcName][0][value]
+                            if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
+                                self.output += f"\tlb   $t0, {newAdress}($fp)\n"
+                            else:
+                                self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+                        else:
+                            if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
+                                self.output += f"\tlb   $t0, {value}\n"
+                            else:
+                                self.output += f"\tlw   $t0, {value}\n"
+                    else:
+                        self.output += f"\taddiu    $t0, $zero, {value}\n"
+                        self.output += f"\tsw   $t0, {adress}($fp)\n"
+                elif type == "float":
+                    if valueType == "char":
+                        self.output += f"\taddiu    $t0, $zero, {float_to_hex(float(ord(value[1])))}\n"
+                        self.output += f"\tsw   $t0, {adress}($fp)\n"
+                    elif valueType == "nameIdentifier":
                         newAdress = self.functions[funcName][0][value]
                         if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
                             self.output += f"\tlb   $t0, {newAdress}($fp)\n"
                         else:
                             self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+                        self.output += f"\tsw   $t0, {adress}($fp)\n"
                     else:
+                        self.output += f"\taddiu    $t0, $zero, {float_to_hex(float(value))}\n"
+                        self.output += f"\tsw   $t0, {adress}($fp)\n"
+                else:
+                    if valueType == "int":
+                        self.output += f"\taddiu    $t0, $zero, {value}\n"
+                        self.output += f"\tsb   $t0, {adress}($fp)\n"
+                    elif valueType == "float":
+                        self.output += f"\taddiu    $t0, $zero, {int(float(value))}\n"
+                        self.output += f"\tsb   $t0, {adress}($fp)\n"
+                    elif valueType == "nameIdentifier":
+                        newAdress = self.functions[funcName][0][value]
                         if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
-                            self.output += f"\tlb   $t0, {value}\n"
+                            self.output += f"\tlbu   $t0, {newAdress}($fp)\n"
                         else:
-                            self.output += f"\tlw   $t0, {value}\n"
-                else:
-                    self.output += f"\taddiu    $t0, $zero, {value}\n"
-                    self.output += f"\tsw   $t0, {adress}($fp)\n"
-            elif type == "float":
-                if valueType == "char":
-                    self.output += f"\taddiu    $t0, $zero, {float_to_hex(float(ord(value[1])))}\n"
-                    self.output += f"\tsw   $t0, {adress}($fp)\n"
-                elif valueType == "nameIdentifier":
-                    newAdress = self.functions[funcName][0][value]
-                    if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
-                        self.output += f"\tlb   $t0, {newAdress}($fp)\n"
+                            self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+                        self.output += f"\tsb   $t0, {adress}($fp)\n"
                     else:
-                        self.output += f"\tlw   $t0, {newAdress}($fp)\n"
-                    self.output += f"\tsw   $t0, {adress}($fp)\n"
-                else:
-                    self.output += f"\taddiu    $t0, $zero, {float_to_hex(float(value))}\n"
-                    self.output += f"\tsw   $t0, {adress}($fp)\n"
+                        self.output += f"\taddiu    $t0, $zero, {ord(value[1])}\n"
+                        self.output += f"\tsb   $t0, {adress}($fp)\n"
             else:
-                if valueType == "int":
-                    self.output += f"\taddiu    $t0, $zero, {value}\n"
-                    self.output += f"\tsb   $t0, {adress}($fp)\n"
-                elif valueType == "float":
-                    self.output += f"\taddiu    $t0, $zero, {int(float(value))}\n"
-                    self.output += f"\tsb   $t0, {adress}($fp)\n"
-                elif valueType == "nameIdentifier":
-                    newAdress = self.functions[funcName][0][value]
-                    if self.table.symbol_table.get_symbol(value, funcName)[0] == "char":
-                        self.output += f"\tlbu   $t0, {newAdress}($fp)\n"
-                    else:
-                        self.output += f"\tlw   $t0, {newAdress}($fp)\n"
-                    self.output += f"\tsb   $t0, {adress}($fp)\n"
-                else:
-                    self.output += f"\taddiu    $t0, $zero, {ord(value[1])}\n"
-                    self.output += f"\tsb   $t0, {adress}($fp)\n"
+                self.output += f"\tsw   $t0, {adress}($fp)\n"
         else:
             reference = ast.children[2].children[1].children[0].node.getRuleName()
             newAdress = self.functions[funcName][0][reference]

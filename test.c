@@ -1,9 +1,8 @@
+#include <stdio.h>
 int main(){
-    int result = 5;
-    if (result == 5){
-        int a = 10;
+    int sum = 0;
+    for(int i = 0; i < 10; i++){
+        sum = sum + i;
     }
-    else{
-        int a = 20;
-    }
+    printf("%i", sum);
 }
