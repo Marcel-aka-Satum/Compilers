@@ -138,15 +138,20 @@ class Mips:
         elif ast.node.getRuleName() == "assignmentStatement":
             self.variableAssign(ast, funcName)
         elif ast.node.getRuleName() == "returnStatement":
-            self.returnStatement(ast, funcName)
+            if len(ast.children) != 1:
+                self.returnStatement(ast, funcName)
         elif ast.node.getRuleName() == "increment":
             name = ast.children[0].children[0].node.getRuleName()
+            if name == "*":
+                name = ast.children[0].children[1].children[0].node.getRuleName()
             newAdress = self.functions[funcName][0][name]
             self.output += f"\tlw   $t0, {newAdress}($fp)\n"
             self.output += f"\taddiu  $t0, $t0, 1\n"
             self.output += f"\tsw $t0, {newAdress}($fp)\n"
         elif ast.node.getRuleName() == "decrement":
             name = ast.children[0].children[0].node.getRuleName()
+            if name == "*":
+                name = ast.children[0].children[1].children[0].node.getRuleName()
             newAdress = self.functions[funcName][0][name]
             self.output += f"\tlw   $t0, {newAdress}($fp)\n"
             self.output += f"\tsub  $t0, $t0, 1\n"
@@ -224,11 +229,11 @@ class Mips:
             self.whileLoops.append([ast, [name, funcName]])
             self.loopCount += 1
         elif ast.node.getRuleName() == "functionCall":
-            self.functionCall(ast)
+            self.functionCall(ast, funcName)
         else:
             for i in ast.children:
                 self.visitFunc(i, funcName)
-    def functionCall(self, ast):
+    def functionCall(self, ast, funcName):
         name = ast.children[0].node.getRuleName()
         if len(ast.children) == 1:
             self.output += f"\tjal    {name}\n"
@@ -236,8 +241,17 @@ class Mips:
             count = 0
             for i in ast.children[1].children:
                 if i.node.getRuleName() != ",":
-                    value = i.children[0].node.ruleName
-                    self.output += f"\tli     $a{count}, {value}\n"
+                    if i.node.getRuleName() == "int" or i.node.getRuleName() == "float" or i.node.getRuleName() == "char":
+                        value = i.children[0].node.ruleName
+                        self.output += f"\tli     $a{count}, {value}\n"
+                    else:
+                        if i.node.getRuleName() == "referenceID":
+                            name = i.children[1].children[0].node.getRuleName()
+                        else:
+                            name = i.node.getRuleName()
+                        newAdress = self.functions[funcName][0][name]
+                        self.output += f"\tlw   $t0, {newAdress}($fp)\n"
+                        self.output += f"\tlw     $a{count}, t0\n"
                     count += 1
             self.output += f"\tjal    {name}\n"
     def whileLoop(self, ast, name):
@@ -341,11 +355,16 @@ class Mips:
 
     def variableAssign(self, ast, funcName):
         name = ast.children[0].children[0].node.getRuleName()
+        control = False
+        if name == "*":
+            control = True
+            name = ast.children[0].children[1].children[0].node.getRuleName()
         type = self.table.symbol_table.get_symbol(name, funcName)[0]
         isPointer = False
         test = False
         if self.table.symbol_table.get_symbol(name, funcName)[1][0] == "pointer" or  self.table.symbol_table.get_symbol(name, funcName)[1][0] == "const pointer":
-            isPointer = True
+            if not control:
+                isPointer = True
         if ast.children[2].node.getRuleName() == "functionCall":
             self.functionCall(ast.children[2])
             test = True
@@ -464,7 +483,7 @@ class Mips:
                 extra = True
             else:
                 extra = False
-                if len(ast.children[2].children) == 1:
+                if len(ast.children[2].children) == 1 or ast.children[2].node.getRuleName() == "nameIdentifier":
                     test = False
                     value = ast.children[2].children[0].node.ruleName
                 else:

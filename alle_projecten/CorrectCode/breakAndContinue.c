@@ -16,4 +16,5 @@ int main(){
 		i = 10;
 	}
 	return 0;
+	int dead = 50;
 }

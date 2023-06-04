@@ -447,6 +447,9 @@ class AST:
                                     arr.append(i)
                             for i in arr:
                                 self.parent.children.remove(i)
+            for i in self.children:
+                i.removeDeadCode()
+
         elif self.node.getRuleName()[:13] == "elseStatement":
             temp = self
             arr = []
@@ -454,7 +457,10 @@ class AST:
                 if i != temp:
                     arr.append(i)
             for i in arr:
-                self.parent.children.remove(i)
+                if len(i.children[0].children) == 1:
+                    self.parent.children.remove(i)
+            for i in self.children:
+                i.removeDeadCode()
         else:
             for i in self.children:
                 i.removeDeadCode()

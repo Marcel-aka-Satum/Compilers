@@ -1,8 +1,8 @@
-#include <stdio.h>
-int mult(int a, int b){
-    int result = a * b;
-    return result;
-}
+
+// Should generate warning
 int main(){
-    int a = mult(10, 5);
+    float x = 0.5;
+    int y = x;
+    int z = 0.5;
+    return 1;
 }

@@ -10,5 +10,6 @@ int main(){
 	(*xp)++;
 	printf("%d; ", x);
 	printf("%d\n", *xp);
+	(*xp)--;
 	return 1;
 }
