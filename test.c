@@ -1,8 +1,8 @@
 #include <stdio.h>
+int mult(int a, int b){
+    int result = a * b;
+    return result;
+}
 int main(){
-    int sum = 0;
-    for(int i = 0; i < 10; i++){
-        sum = sum + i;
-    }
-    printf("%i", sum);
+    int a = mult(10, 5);
 }
