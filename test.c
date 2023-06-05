@@ -1,8 +1,12 @@
+#include <stdio.h>
 
-// Should generate warning
+/*
+This should print the numbers: 9,-9,9,-9
+*/
 int main(){
-    float x = 0.5;
-    int y = x;
-    int z = 0.5;
+	printf("%d; ", -(-9));
+	printf("%d; ", -(+9));
+	printf("%d; ", +9);
+	printf("%d; ", -9);
     return 1;
 }

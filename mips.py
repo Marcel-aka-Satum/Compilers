@@ -57,7 +57,7 @@ class Mips:
             if ast.children[0].node.getRuleName()[0:2] == "//":#single comments
                 self.output += f"\t#{ast.children[0].node.getRuleName()[2:]}"
             elif ast.children[0].node.getRuleName()[0:2] == "/*":#multiple comments
-                print(ast.children[0].node.getRuleName()[2:-2])
+                #print(ast.children[0].node.getRuleName()[2:-2])
                 currentWord = ""
                 for i in ast.children[0].node.getRuleName()[2:-2]:
                     if(i == "\n"):
@@ -126,7 +126,7 @@ class Mips:
             if ast.children[0].node.getRuleName()[0:2] == "//":#single comments
                 self.output += f"\t#{ast.children[0].node.getRuleName()[2:]}"
             elif ast.children[0].node.getRuleName()[0:2] == "/*":#multiple comments
-                print(ast.children[0].node.getRuleName()[2:-2])
+                #print(ast.children[0].node.getRuleName()[2:-2])
                 currentWord = ""
                 for i in ast.children[0].node.getRuleName()[2:-2]:
                     if(i == "\n"):
