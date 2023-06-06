@@ -21,6 +21,7 @@ Done by Marceli Wilczynski && Elias El Bouzidi <br>
 3. [Project 1](#Project1)
 4. [Project 2](#Project2)
 5. [Project 3](#Project3)
+6. [Mips](#Mips)
 
 ## Installation
 > git clone https://github.com/Marcel-aka-Satum/Compilers.git
@@ -286,3 +287,14 @@ see example in main.py how to use it.
     llvm = LLVM(argv, symbolTable) //make llvm object that will store llvm data
     llvm.look_for_value(ast) // check for needed values in symboltable
     llvm.generate_LLVM() // generate llvm files
+----------
+```
+## MIPS
+```
+Every single mandatory and optional functionality we implemented in LLVM we also implemented in MIPS.
+
+U can see our code for Mips in Mips.py.
+
+To run our MIPS see MIPS object in main.py
+
+```
