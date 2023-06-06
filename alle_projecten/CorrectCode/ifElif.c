@@ -6,7 +6,7 @@ int main(){
 	if (x < 5){
 		printf("Something went wrong"); // Should not print
 	}
-	if (x >= 5){
+	else if (x >= 5){
 		printf("Hello world!\n"); // Should print
 	}
 	if (x == 5 && 1){

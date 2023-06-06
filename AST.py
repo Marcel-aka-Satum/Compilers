@@ -632,7 +632,7 @@ class AST:
                             value = float(self.children[2].children[0].node.getRuleName())
                     symbolTable.insert_value(varName, value, scope)
                 else:
-                    symbolTable.insert_symbol(varName, self.children[2], scope)
+                    pass
             elif self.children[2].node.getRuleName() == "int" or self.children[2].node.getRuleName() == "float" or \
                     self.children[2].node.getRuleName() == "char":
                 varName = self.children[0].children[1].children[0].node.getRuleName()
