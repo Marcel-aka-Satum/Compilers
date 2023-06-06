@@ -20,7 +20,7 @@ def main(argv):
     if parser.getNumberOfSyntaxErrors() >= 1:
         exit()
     # Create AST
-    ast = AST(syntaxTree)
+    ast = AST(syntaxTree)   
     # Optimize the AST
     countScopes = {"unNamedScope": 0, "ifStatement": 0, "elifStatement": 0, "elseStatement": 0, "whileStatement": 0, "forLoop": 0}
     ast.optimize(countScopes)
@@ -45,6 +45,7 @@ def main(argv):
     ast.initialiseSymbolTable(symbolTable.symbol_table, None)
     # Print the AST in dot
     ast.printInDot(argv)
+    
     # print symbol table
     print(symbolTable.symbol_table.symbol_tables)
     # Generate mips and print it
