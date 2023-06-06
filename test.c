@@ -1,14 +1,7 @@
-#include <stdio.h>
-
-int x = 10;
-
 int main(){
-    printf("%d", x);
-    int x = 20;
-    printf("%d", x);
-    if (x == 20){
-        int x = 30;
-        printf("%d", x);
-    }
-    return 1;
+    int c = 5;
+    int* b = &c;
+    int** x = &b;
+    int*** a = &x;
+    int d = **a;
 }
