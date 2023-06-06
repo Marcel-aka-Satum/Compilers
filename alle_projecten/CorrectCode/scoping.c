@@ -8,7 +8,7 @@ int main(){
     printf("%d", x);
     if (x == 20){
         int x = 30;
-        printf("d", x);
+        printf("%d", x);
     }
     return 1;
 }
